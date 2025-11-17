@@ -3,23 +3,24 @@ Description=FARMAVET Web Gunicorn daemon
 After=network.target
 
 [Service]
-# Cambiar 'tu-usuario' por tu usuario real del VPS
-User=tu-usuario
+User=web
 Group=www-data
-WorkingDirectory=/home/tu-usuario/farmavet-web
-Environment="PATH=/home/tu-usuario/farmavet-web/venv/bin"
+WorkingDirectory=/home/web/farmavet-web
+Environment="PATH=/home/web/farmavet-web/venv/bin"
 Environment="FLASK_ENV=production"
-Environment="SECRET_KEY=REEMPLAZAR_CON_TU_SECRET_KEY"
+Environment="SECRET_KEY=REEMPLAZAR_CON_TU_SECRET_KEY_AQUI"
 
-# Comando para iniciar
-ExecStart=/home/tu-usuario/farmavet-web/venv/bin/gunicorn \
-          --config /home/tu-usuario/farmavet-web/gunicorn_config.py \
+# Comando para iniciar Gunicorn en puerto 5001 (diferente a farmavet-bodega)
+ExecStart=/home/web/farmavet-web/venv/bin/gunicorn \
+          --config /home/web/farmavet-web/gunicorn_config.py \
           app:app
 
 # Reiniciar automáticamente si falla
 Restart=always
 RestartSec=3
 
+# Límites de recursos (opcional, ajustar según necesidad)
+LimitNOFILE=65535
+
 [Install]
 WantedBy=multi-user.target
-
