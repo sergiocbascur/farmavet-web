@@ -19,7 +19,7 @@ def create_admin():
     cursor = conn.cursor()
     
     # Verificar si ya existe un admin
-    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE es_admin = 1")
+    cursor.execute("SELECT COUNT(*) FROM admins")
     admin_count = cursor.fetchone()[0]
     
     if admin_count > 0:
@@ -40,7 +40,7 @@ def create_admin():
         return
     
     # Verificar si el usuario ya existe
-    cursor.execute("SELECT id FROM usuarios WHERE username = ?", (username,))
+    cursor.execute("SELECT id FROM admins WHERE username = ?", (username,))
     if cursor.fetchone():
         print(f"❌ El usuario '{username}' ya existe.")
         conn.close()
@@ -65,8 +65,8 @@ def create_admin():
     
     try:
         cursor.execute('''
-            INSERT INTO usuarios (username, password_hash, es_admin, activo)
-            VALUES (?, ?, 1, 1)
+            INSERT INTO admins (username, password_hash)
+            VALUES (?, ?)
         ''', (username, password_hash))
         
         conn.commit()
@@ -74,8 +74,8 @@ def create_admin():
         print("\nAhora puedes iniciar sesión en: https://tu-dominio.com/login")
         
     except sqlite3.OperationalError as e:
-        if "no such table: usuarios" in str(e):
-            print("\n❌ Error: La tabla 'usuarios' no existe.")
+        if "no such table: admins" in str(e):
+            print("\n❌ Error: La tabla 'admins' no existe.")
             print("   Asegúrate de que la aplicación se haya ejecutado al menos una vez")
             print("   para crear las tablas de la base de datos.")
         else:
