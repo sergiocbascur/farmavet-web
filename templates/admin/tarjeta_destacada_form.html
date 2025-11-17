@@ -1,0 +1,107 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if tarjeta %}Editar{% else %}Nueva{% endif %} Tarjeta Destacada{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{% if tarjeta %}Editar{% else %}Nueva{% endif %} Tarjeta Destacada</h1>
+    <a href="{{ url_for('admin_tarjetas_destacadas') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="pagina" class="form-label">Página <span class="text-danger">*</span></label>
+                    <select class="form-select" id="pagina" name="pagina" required>
+                        <option value="">Selecciona una página</option>
+                        <option value="index" {% if tarjeta and tarjeta.pagina == 'index' %}selected{% endif %}>Inicio</option>
+                        <option value="quienes-somos" {% if tarjeta and tarjeta.pagina == 'quienes-somos' %}selected{% endif %}>Quiénes Somos</option>
+                        <option value="servicios" {% if tarjeta and tarjeta.pagina == 'servicios' %}selected{% endif %}>Servicios</option>
+                        <option value="contacto" {% if tarjeta and tarjeta.pagina == 'contacto' %}selected{% endif %}>Contacto</option>
+                        <option value="equipo" {% if tarjeta and tarjeta.pagina == 'equipo' %}selected{% endif %}>Equipo</option>
+                        <option value="docencia" {% if tarjeta and tarjeta.pagina == 'docencia' %}selected{% endif %}>Docencia</option>
+                        <option value="noticias" {% if tarjeta and tarjeta.pagina == 'noticias' %}selected{% endif %}>Noticias</option>
+                        <option value="investigacion" {% if tarjeta and tarjeta.pagina == 'investigacion' %}selected{% endif %}>Investigación</option>
+                        <option value="casa-omsa" {% if tarjeta and tarjeta.pagina == 'casa-omsa' %}selected{% endif %}>Casa OMSA</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" value="{{ tarjeta.orden if tarjeta else 0 }}" min="0">
+                    <small class="text-muted">Si hay múltiples tarjetas en la misma página, se ordenan por este valor</small>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <h5>Contenido en Español</h5>
+            <div class="mb-3">
+                <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="titulo" name="titulo" value="{{ tarjeta.titulo if tarjeta else '' }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="contenido" class="form-label">Contenido <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="contenido" name="contenido" rows="6" required>{{ tarjeta.contenido if tarjeta else '' }}</textarea>
+                <small class="text-muted">Puedes escribir texto simple o una lista (cada línea será un elemento de lista)</small>
+            </div>
+            
+            <hr>
+            
+            <h5>Contenido en Inglés (Opcional)</h5>
+            <div class="mb-3">
+                <label for="titulo_en" class="form-label">Título (English)</label>
+                <input type="text" class="form-control" id="titulo_en" name="titulo_en" value="{{ tarjeta.titulo_en if tarjeta else '' }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="contenido_en" class="form-label">Contenido (English)</label>
+                <textarea class="form-control" id="contenido_en" name="contenido_en" rows="6">{{ tarjeta.contenido_en if tarjeta else '' }}</textarea>
+                <small class="text-muted">Puedes escribir texto simple o una lista (cada línea será un elemento de lista)</small>
+            </div>
+            
+            <hr>
+            
+            <h5>Enlace (Opcional)</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="enlace" class="form-label">URL del enlace</label>
+                    <input type="url" class="form-control" id="enlace" name="enlace" value="{{ tarjeta.enlace if tarjeta else '' }}" placeholder="https://ejemplo.com">
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <label for="texto_enlace" class="form-label">Texto del enlace (Español)</label>
+                    <input type="text" class="form-control" id="texto_enlace" name="texto_enlace" value="{{ tarjeta.texto_enlace if tarjeta else '' }}" placeholder="Ver más">
+                </div>
+                
+                <div class="col-md-3 mb-3">
+                    <label for="texto_enlace_en" class="form-label">Texto del enlace (English)</label>
+                    <input type="text" class="form-control" id="texto_enlace_en" name="texto_enlace_en" value="{{ tarjeta.texto_enlace_en if tarjeta else '' }}" placeholder="Learn more">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="activo" name="activo" {% if not tarjeta or tarjeta.activo %}checked{% endif %}>
+                    <label class="form-check-label" for="activo">
+                        Tarjeta activa
+                    </label>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-2"></i>Guardar
+                </button>
+                <a href="{{ url_for('admin_tarjetas_destacadas') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,561 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if noticia %}Editar{% else %}Nueva{% endif %} Noticia{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if noticia else 'plus-circle' }} me-2"></i>
+        {% if noticia %}Editar{% else %}Nueva{% endif %} Noticia
+    </h2>
+    <a href="{{ url_for('admin_noticias') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <!-- Campos ocultos para guardar posición y zoom de la imagen -->
+            <input type="hidden" id="imagen_zoom" name="imagen_zoom" value="{{ noticia.imagen_zoom if noticia and noticia.imagen_zoom else 1.0 }}">
+            <input type="hidden" id="imagen_x" name="imagen_x" value="{{ noticia.imagen_x if noticia and noticia.imagen_x else 0.0 }}">
+            <input type="hidden" id="imagen_y" name="imagen_y" value="{{ noticia.imagen_y if noticia and noticia.imagen_y else 0.0 }}">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ noticia.titulo if noticia else '' }}" required
+                           oninput="updatePreview()">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" name="categoria" onchange="updatePreview()">
+                        <option value="">Seleccionar...</option>
+                        <option value="investigacion" {% if noticia and noticia.categoria == 'investigacion' %}selected{% endif %}>Investigación</option>
+                        <option value="servicios" {% if noticia and noticia.categoria == 'servicios' %}selected{% endif %}>Servicios</option>
+                        <option value="docencia" {% if noticia and noticia.categoria == 'docencia' %}selected{% endif %}>Docencia</option>
+                        <option value="eventos" {% if noticia and noticia.categoria == 'eventos' %}selected{% endif %}>Eventos</option>
+                        <option value="vinculacion" {% if noticia and noticia.categoria == 'vinculacion' %}selected{% endif %}>Vinculación</option>
+                        <option value="publicacion-cientifica" {% if noticia and noticia.categoria == 'publicacion-cientifica' %}selected{% endif %}>Publicación científica</option>
+                        <option value="educacion-continua" {% if noticia and noticia.categoria == 'educacion-continua' %}selected{% endif %}>Educación continua</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="fecha" class="form-label">Fecha</label>
+                    <input type="text" class="form-control" id="fecha" name="fecha" 
+                           value="{{ noticia.fecha if noticia else '' }}" 
+                           placeholder="Ej: FEB 2025, ABR 2025"
+                           oninput="updatePreview()">
+                </div>
+                
+                <div class="col-12">
+                    <label for="resumen" class="form-label">Resumen</label>
+                    <textarea class="form-control" id="resumen" name="resumen" rows="3" oninput="updatePreview()">{{ noticia.resumen if noticia else '' }}</textarea>
+                    <small class="text-muted">Texto corto que aparece en las tarjetas de noticias</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="contenido" class="form-label">Contenido completo (opcional - para uso futuro)</label>
+                    <textarea class="form-control" id="contenido" name="contenido" rows="4" oninput="updatePreview()">{{ noticia.contenido if noticia else '' }}</textarea>
+                    <small class="text-muted">Este campo no se muestra actualmente en el sitio. Se usa como fallback si no hay resumen.</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, la noticia se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ noticia.titulo_en if noticia and noticia.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="resumen_en" class="form-label">Resumen (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="resumen_en" name="resumen_en" rows="3" 
+                              placeholder="Summary in English">{{ noticia.resumen_en if noticia and noticia.resumen_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <label for="contenido_en" class="form-label">Contenido completo (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="contenido_en" name="contenido_en" rows="4" 
+                              placeholder="Full content in English">{{ noticia.contenido_en if noticia and noticia.contenido_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria_en" class="form-label">Categoría (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="categoria_en" name="categoria_en" 
+                           value="{{ noticia.categoria_en if noticia and noticia.categoria_en else '' }}" 
+                           placeholder="Category in English (e.g., Research, Services, Education)">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <label for="imagen" class="form-label">URL de Imagen (opcional)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="imagen" name="imagen" 
+                               value="{{ noticia.imagen if noticia else '' }}" 
+                               placeholder="/static/uploads/noticias/imagen.jpg o assets/images/noticias/..."
+                               oninput="updatePreview(); saveImageTransform();">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-upload me-1"></i>Subir
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="uploadImage(event)">
+                    </div>
+                    <small class="text-muted">Pega la URL de la imagen o sube una nueva. Formatos: JPG, PNG, WEBP, SVG</small>
+                    {% if noticia and noticia.imagen %}
+                    <div class="mt-2">
+                        <small>Imagen actual:</small><br>
+                        <img id="currentImage" src="{{ noticia.imagen }}" alt="Vista previa" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 0.5rem; object-fit: cover;" onerror="this.style.display='none';">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Previsualización de la noticia -->
+                    <div class="col-12 mt-4">
+                        <hr>
+                        <h5 class="mb-3"><i class="bi bi-eye me-2"></i>Vista Previa <small class="text-muted">(Tamaño real: 420px × 200px)</small></h5>
+                        <div class="card" style="max-width: 420px; margin: 0 auto;">
+                            <div class="card-body p-0">
+                                <div class="news-preview" style="display: flex; flex-direction: column; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                    <div id="previewImage" style="width: 100%; height: 200px; overflow: hidden; position: relative; background: #f0f0f0; cursor: move; user-select: none; display: flex; align-items: center; justify-content: center;">
+                                    {% if noticia and noticia.imagen %}
+                                    <img src="{{ noticia.imagen }}" alt="Preview" id="previewImg" style="width: 100%; height: 100%; object-fit: contain; transform-origin: center center; transition: transform 0.1s; user-select: none; pointer-events: none;{% if noticia.imagen_zoom or noticia.imagen_x or noticia.imagen_y %} transform: scale({{ noticia.imagen_zoom or 1.0 }}) translate({{ noticia.imagen_x or 0.0 }}px, {{ noticia.imagen_y or 0.0 }}px);{% endif %}">
+                                    {% else %}
+                                    <div style="text-align: center; color: #999;">
+                                        <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                        <p style="margin-top: 0.5rem;">Sin imagen</p>
+                                    </div>
+                                    {% endif %}
+                                    <div id="imageControls" style="position: absolute; bottom: 10px; right: 10px; display: none; background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10;">
+                                        <div class="btn-group-vertical" role="group">
+                                            <button type="button" class="btn btn-sm btn-light" onclick="resetImageTransform()" title="Resetear">
+                                                <i class="bi bi-arrow-clockwise"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light" onclick="zoomImage(0.1)" title="Acercar">
+                                                <i class="bi bi-zoom-in"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light" onclick="zoomImage(-0.1)" title="Alejar">
+                                                <i class="bi bi-zoom-out"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="imageHint" style="position: absolute; top: 10px; left: 10px; background: rgba(0,61,122,0.8); color: white; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.875rem; display: none; z-index: 10;">
+                                        <i class="bi bi-hand-index me-1"></i>Arrastra para mover · Rueda del mouse para zoom
+                                    </div>
+                                </div>
+                                <div style="padding: 1.5rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                                        <span id="previewMeta" style="font-size: 0.875rem; color: #666;">
+                                            {% if noticia %}{{ noticia.fecha or '' }}{% if noticia.fecha and noticia.categoria %} · {% endif %}{{ noticia.categoria|title if noticia.categoria else '' }}{% else %}FEB 2025 · Categoría{% endif %}
+                                        </span>
+                                    </div>
+                                    <h3 id="previewTitle" style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: #003D7A;">
+                                        {% if noticia %}{{ noticia.titulo or 'Título de la noticia' }}{% else %}Título de la noticia{% endif %}
+                                    </h3>
+                                    <p id="previewContent" style="color: #555; line-height: 1.6; margin-bottom: 1rem;">
+                                        {% if noticia %}{{ noticia.resumen or noticia.contenido or 'Resumen o contenido de la noticia aparecerá aquí...' }}{% else %}Resumen o contenido de la noticia aparecerá aquí...{% endif %}
+                                    </p>
+                                    <a id="previewLink" href="#" style="color: #003D7A; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                                        Ver más →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="enlace_externo" class="form-label">Enlace Externo (opcional)</label>
+                    <input type="url" class="form-control" id="enlace_externo" name="enlace_externo" 
+                           value="{{ noticia.enlace_externo if noticia else '' }}" 
+                           placeholder="https://..."
+                           oninput="updatePreview()">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ noticia.orden if noticia else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="destacada" name="destacada" 
+                               {% if noticia and noticia.destacada %}checked{% endif %}>
+                        <label class="form-check-label" for="destacada">
+                            ⭐ Noticia destacada (aparece primero)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activa" name="activa" 
+                               {% if not noticia or noticia.activa %}checked{% endif %}>
+                        <label class="form-check-label" for="activa">
+                            Noticia activa (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Noticia
+                        </button>
+                        <a href="{{ url_for('admin_noticias') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let imageScale = 1;
+    let imageX = 0;
+    let imageY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let imageStartX = 0;
+    let imageStartY = 0;
+    
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'noticias');
+        
+        const btn = event.target.previousElementSibling;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Subiendo...';
+        
+        fetch('{{ url_for("upload_file") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) {
+                document.getElementById('imagen').value = data.url;
+                updatePreview();
+                btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Subido';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert('Error al subir imagen: ' + (data.error || 'Error desconocido'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al subir la imagen');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+    
+    function updatePreview() {
+        const titulo = document.getElementById('titulo').value || 'Título de la noticia';
+        const resumen = document.getElementById('resumen').value || document.getElementById('contenido').value || 'Resumen o contenido de la noticia aparecerá aquí...';
+        const fecha = document.getElementById('fecha').value || '';
+        const categoria = document.getElementById('categoria').value || '';
+        const imagen = document.getElementById('imagen').value || '';
+        const enlace = document.getElementById('enlace_externo').value || '';
+        
+        // Actualizar título
+        document.getElementById('previewTitle').textContent = titulo;
+        
+        // Actualizar contenido
+        document.getElementById('previewContent').textContent = resumen.length > 150 ? resumen.substring(0, 150) + '...' : resumen;
+        
+        // Actualizar meta
+        let metaText = '';
+        if (fecha) metaText += fecha;
+        if (fecha && categoria) metaText += ' · ';
+        if (categoria) metaText += categoria.charAt(0).toUpperCase() + categoria.slice(1).replace('-', ' ');
+        document.getElementById('previewMeta').textContent = metaText || 'FEB 2025 · Categoría';
+        
+        // Actualizar imagen
+        const previewImageDiv = document.getElementById('previewImage');
+        const previewImg = document.getElementById('previewImg');
+        const imageControls = document.getElementById('imageControls');
+        const imageHint = document.getElementById('imageHint');
+        
+        // Cargar valores guardados si existen
+        const zoomField = document.getElementById('imagen_zoom');
+        const xField = document.getElementById('imagen_x');
+        const yField = document.getElementById('imagen_y');
+        
+        if (zoomField && zoomField.value && imagen) {
+            imageScale = parseFloat(zoomField.value) || 1.0;
+        }
+        if (xField && xField.value && imagen) {
+            imageX = parseFloat(xField.value) || 0.0;
+        }
+        if (yField && yField.value && imagen) {
+            imageY = parseFloat(yField.value) || 0.0;
+        }
+        
+        if (imagen) {
+            if (!previewImg) {
+                const img = document.createElement('img');
+                img.id = 'previewImg';
+                img.src = imagen;
+                img.alt = 'Preview';
+                img.style.cssText = 'width: 100%; height: 100%; object-fit: contain; transform: scale(' + imageScale + ') translate(' + imageX + 'px, ' + imageY + 'px); transform-origin: center center; transition: transform 0.1s; user-select: none; pointer-events: none;';
+                previewImageDiv.innerHTML = '';
+                previewImageDiv.appendChild(img);
+                previewImageDiv.appendChild(imageControls);
+                previewImageDiv.appendChild(imageHint);
+                setupImageEditor(img, previewImageDiv);
+            } else {
+                previewImg.src = imagen;
+                // No resetear valores, mantener los guardados
+                applyImageTransform();
+            }
+            imageControls.style.display = 'block';
+            imageHint.style.display = 'block';
+            setTimeout(() => {
+                if (imageHint) imageHint.style.display = 'none';
+            }, 3000);
+        } else {
+            previewImageDiv.innerHTML = `
+                <div style="text-align: center; color: #999;">
+                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    <p style="margin-top: 0.5rem;">Sin imagen</p>
+                </div>
+            `;
+            imageControls.style.display = 'none';
+            imageHint.style.display = 'none';
+            imageScale = 1;
+            imageX = 0;
+            imageY = 0;
+        }
+        
+        // Actualizar enlace
+        if (enlace) {
+            document.getElementById('previewLink').href = enlace;
+            document.getElementById('previewLink').textContent = 'Ver más →';
+        } else if (categoria === 'docencia' || categoria === 'educacion-continua') {
+            document.getElementById('previewLink').href = '#';
+            document.getElementById('previewLink').textContent = 'Ver programas →';
+        } else {
+            document.getElementById('previewLink').href = '#';
+            document.getElementById('previewLink').textContent = 'Ver más →';
+        }
+    }
+    
+    function setupImageEditor(img, container) {
+        // Arrastrar imagen
+        container.addEventListener('mousedown', function(e) {
+            if (!img || img.style.display === 'none') return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            imageStartX = imageX;
+            imageStartY = imageY;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging || !img) return;
+            const deltaX = e.clientX - dragStartX;
+            const deltaY = e.clientY - dragStartY;
+            // Movimiento más directo y proporcional al zoom
+            imageX = imageStartX + deltaX / imageScale;
+            imageY = imageStartY + deltaY / imageScale;
+            applyImageTransform();
+            saveImageTransform();
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                container.style.cursor = 'move';
+            }
+        });
+        
+        // Zoom con rueda del mouse
+        container.addEventListener('wheel', function(e) {
+            if (!img || img.style.display === 'none') return;
+            e.preventDefault();
+            // Zoom más suave y controlado
+            const zoomSpeed = 0.05; // Reducido de 0.1 a 0.05
+            const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+            zoomImage(delta);
+            saveImageTransform();
+        });
+        
+        // Touch events para móviles
+        let touchStartDistance = 0;
+        let touchStartScale = 1;
+        
+        container.addEventListener('touchstart', function(e) {
+            if (!img || img.style.display === 'none') return;
+            if (e.touches.length === 2) {
+                touchStartDistance = getTouchDistance(e.touches[0], e.touches[1]);
+                touchStartScale = imageScale;
+            } else if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                imageStartX = imageX;
+                imageStartY = imageY;
+            }
+            e.preventDefault();
+        });
+        
+        container.addEventListener('touchmove', function(e) {
+            if (!img || img.style.display === 'none') return;
+            if (e.touches.length === 2) {
+                const distance = getTouchDistance(e.touches[0], e.touches[1]);
+                const scaleChange = distance / touchStartDistance;
+                imageScale = Math.max(0.5, Math.min(5, touchStartScale * scaleChange)); // Aumentado de 3 a 5
+                applyImageTransform();
+            } else if (e.touches.length === 1 && isDragging) {
+                const deltaX = e.touches[0].clientX - dragStartX;
+                const deltaY = e.touches[0].clientY - dragStartY;
+                // Movimiento más directo y proporcional al zoom
+                imageX = imageStartX + deltaX / imageScale;
+                imageY = imageStartY + deltaY / imageScale;
+                applyImageTransform();
+                saveImageTransform();
+            }
+            e.preventDefault();
+        });
+        
+        container.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+    }
+    
+    function getTouchDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    function zoomImage(delta) {
+        const newScale = imageScale + delta;
+        imageScale = Math.max(0.5, Math.min(5, newScale)); // Aumentado de 3 a 5
+        // Ajustar posición para mantener el punto de zoom centrado
+        applyImageTransform();
+        saveImageTransform();
+    }
+    
+    function resetImageTransform() {
+        imageScale = 1;
+        imageX = 0;
+        imageY = 0;
+        applyImageTransform();
+        saveImageTransform();
+    }
+    
+    function saveImageTransform() {
+        // Guardar valores en campos ocultos del formulario
+        let zoomField = document.getElementById('imagen_zoom');
+        let xField = document.getElementById('imagen_x');
+        let yField = document.getElementById('imagen_y');
+        
+        if (!zoomField) {
+            zoomField = document.createElement('input');
+            zoomField.type = 'hidden';
+            zoomField.id = 'imagen_zoom';
+            zoomField.name = 'imagen_zoom';
+            document.querySelector('form').appendChild(zoomField);
+        }
+        
+        if (!xField) {
+            xField = document.createElement('input');
+            xField.type = 'hidden';
+            xField.id = 'imagen_x';
+            xField.name = 'imagen_x';
+            document.querySelector('form').appendChild(xField);
+        }
+        
+        if (!yField) {
+            yField = document.createElement('input');
+            yField.type = 'hidden';
+            yField.id = 'imagen_y';
+            yField.name = 'imagen_y';
+            document.querySelector('form').appendChild(yField);
+        }
+        
+        zoomField.value = imageScale;
+        xField.value = imageX;
+        yField.value = imageY;
+    }
+    
+    function applyImageTransform() {
+        const previewImg = document.getElementById('previewImg');
+        if (previewImg) {
+            // Mantener los mismos estilos que el sitio real
+            previewImg.style.objectFit = 'contain';
+            previewImg.style.width = '100%';
+            previewImg.style.height = '100%';
+            
+            // Aplicar transformación con zoom y posición libre
+            previewImg.style.transform = `scale(${imageScale}) translate(${imageX}px, ${imageY}px)`;
+            previewImg.style.transformOrigin = 'center center';
+        }
+    }
+    
+    // Inicializar preview al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar valores guardados si existen
+        const zoomField = document.getElementById('imagen_zoom');
+        const xField = document.getElementById('imagen_x');
+        const yField = document.getElementById('imagen_y');
+        
+        if (zoomField && zoomField.value) {
+            imageScale = parseFloat(zoomField.value) || 1.0;
+        }
+        if (xField && xField.value) {
+            imageX = parseFloat(xField.value) || 0.0;
+        }
+        if (yField && yField.value) {
+            imageY = parseFloat(yField.value) || 0.0;
+        }
+        
+        updatePreview();
+        const previewImg = document.getElementById('previewImg');
+        const previewImageDiv = document.getElementById('previewImage');
+        if (previewImg && previewImageDiv) {
+            setupImageEditor(previewImg, previewImageDiv);
+            // Aplicar transformación guardada después de cargar la imagen
+            setTimeout(() => {
+                applyImageTransform();
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}

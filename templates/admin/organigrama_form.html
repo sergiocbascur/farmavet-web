@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Editar Cargo' if cargo else 'Nuevo Cargo' }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-diagram-3 me-2"></i>{{ 'Editar Cargo' if cargo else 'Nuevo Cargo' }} del Organigrama
+    </h2>
+    <a href="{{ url_for('admin_organigrama') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="seccion" class="form-label">Sección <span class="text-danger">*</span></label>
+                    <select class="form-select" id="seccion" name="seccion" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="direccion" {% if cargo and cargo.seccion == 'direccion' %}selected{% endif %}>Dirección</option>
+                        <option value="tecnico" {% if cargo and cargo.seccion == 'tecnico' %}selected{% endif %}>Área Técnica</option>
+                        <option value="calidad" {% if cargo and cargo.seccion == 'calidad' %}selected{% endif %}>Área de Calidad</option>
+                        <option value="administracion" {% if cargo and cargo.seccion == 'administracion' %}selected{% endif %}>Área de Administración</option>
+                        <option value="investigacion" {% if cargo and cargo.seccion == 'investigacion' %}selected{% endif %}>Área de Investigación y Desarrollo</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="subseccion" class="form-label">Subsección</label>
+                    <input type="text" class="form-control" id="subseccion" name="subseccion" 
+                           value="{{ cargo.subseccion if cargo else '' }}" 
+                           placeholder="Ej: Jefe Técnico, Operaciones de Laboratorio">
+                    <small class="text-muted">Subdivisión dentro de la sección (opcional)</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="cargo" class="form-label">Nombre del Cargo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="cargo" name="cargo" 
+                           value="{{ cargo.cargo if cargo else '' }}" 
+                           placeholder="Ej: Director, Jefe Técnico, Encargado de Recepción" required>
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción del Cargo</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3">{{ cargo.descripcion if cargo else '' }}</textarea>
+                    <small class="text-muted">Descripción breve de las responsabilidades (opcional)</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el cargo se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="subseccion_en" class="form-label">Subsección (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="subseccion_en" name="subseccion_en" 
+                           value="{{ cargo.subseccion_en if cargo and cargo.subseccion_en else '' }}" 
+                           placeholder="Subsection in English">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="cargo_en" class="form-label">Nombre del Cargo (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="cargo_en" name="cargo_en" 
+                           value="{{ cargo.cargo_en if cargo and cargo.cargo_en else '' }}" 
+                           placeholder="Job title in English (e.g., Director, Technical Manager)">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion_en" class="form-label">Descripción del Cargo (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="descripcion_en" name="descripcion_en" rows="3" 
+                              placeholder="Job description in English">{{ cargo.descripcion_en if cargo and cargo.descripcion_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ cargo.orden if cargo else 0 }}" min="0">
+                    <small class="text-muted">Menor número = aparece primero dentro de la sección</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if cargo and cargo.activo == 1 %}checked{% elif not cargo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Cargo activo (disponible para asignar miembros)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>{{ 'Actualizar' if cargo else 'Crear' }} Cargo
+                    </button>
+                    <a href="{{ url_for('admin_organigrama') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

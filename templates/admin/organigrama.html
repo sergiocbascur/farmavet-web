@@ -1,0 +1,80 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Organigrama{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Gestión de Organigrama</h2>
+    <a href="{{ url_for('admin_organigrama_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Cargo
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p class="text-muted mb-4">
+            Define la estructura del organigrama creando cargos en diferentes secciones. 
+            Luego, asigna miembros del equipo a estos cargos desde "Miembros del Equipo".
+        </p>
+        
+        {% if organigrama %}
+            {% set secciones_unicas = organigrama|map(attribute='seccion')|unique|list %}
+            {% for seccion_nombre in secciones_unicas %}
+            <div class="mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="bi bi-folder me-2"></i>{{ seccion_nombre|title }}
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Subsección</th>
+                                <th>Descripción</th>
+                                <th>Orden</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cargo in organigrama %}
+                                {% if cargo.seccion == seccion_nombre %}
+                                <tr>
+                                    <td><strong>{{ cargo.cargo }}</strong></td>
+                                    <td>{{ cargo.subseccion or '—' }}</td>
+                                    <td>{{ cargo.descripcion or '—' }}</td>
+                                    <td>{{ cargo.orden }}</td>
+                                    <td>
+                                        {% if cargo.activo == 1 or cargo.activo == True %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin_organigrama_editar', cargo_id=cargo.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form method="POST" action="{{ url_for('admin_organigrama_eliminar', cargo_id=cargo.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este cargo?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="text-center text-muted py-4">
+            No hay cargos registrados. <a href="{{ url_for('admin_organigrama_nuevo') }}">Crear el primero</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

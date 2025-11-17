@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Laboratorio científico ilustrado</title>
+  <desc id="desc">Ilustración abstracta de laboratorio con gradientes azules y verdes</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#003d7a" />
+      <stop offset="100%" stop-color="#0066cc" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffc107" />
+      <stop offset="100%" stop-color="#ffda49" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)" opacity="0.92" />
+  <circle cx="120" cy="120" r="70" fill="rgba(255,255,255,0.12)" />
+  <circle cx="700" cy="160" r="110" fill="rgba(255,255,255,0.08)" />
+  <path d="M180 420 l80 -260 40 140 70 -220 120 340 50 -160 80 240" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.45" />
+  <path d="M140 500 h520 v40 q0 20 -20 20 h-480 q-20 0 -20 -20z" fill="rgba(0,0,0,0.15)" opacity="0.35" />
+  <rect x="180" y="300" width="120" height="180" rx="16" fill="rgba(255,255,255,0.18)" />
+  <rect x="180" y="360" width="120" height="60" fill="rgba(2, 136, 209, 0.5)" />
+  <rect x="360" y="220" width="120" height="260" rx="24" fill="rgba(255,255,255,0.2)" />
+  <rect x="360" y="280" width="120" height="60" fill="rgba(48, 63, 159, 0.45)" />
+  <rect x="540" y="260" width="120" height="220" rx="20" fill="rgba(255,255,255,0.22)" />
+  <circle cx="420" cy="180" r="40" fill="url(#accent)" opacity="0.65" />
+  <circle cx="620" cy="220" r="26" fill="#2e7d32" opacity="0.65" />
+  <circle cx="250" cy="220" r="32" fill="#2e7d32" opacity="0.65" />
+  <path d="M220 270 q30 -40 60 0" fill="none" stroke="#ffffff" stroke-width="6" opacity="0.6" />
+  <path d="M580 330 l40 -80 40 80" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.4" />
+</svg>
+

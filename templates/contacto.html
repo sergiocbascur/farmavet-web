@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ _('Contacto') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="Contacta al laboratorio FARMAVET para solicitar análisis, asesorías, capacitación o colaboraciones científicas. Formulario de contacto y información de ubicación."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/contacto.html" />
+    <meta property="og:title" content="Contacto | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Contacta al laboratorio FARMAVET para solicitar análisis, asesorías, capacitación o colaboraciones científicas." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/contacto.html" />
+    <meta name="twitter:title" content="Contacto | FARMAVET" />
+    <meta name="twitter:description" content="Contacta al laboratorio FARMAVET para solicitar análisis, asesorías, capacitación o colaboraciones científicas." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="contacto">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            {{ _('Menú') }}
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Contacto directo') }}</p>
+            <h1 class="hero-title">{{ _('Conversemos sobre tus necesidades analíticas') }}</h1>
+            <p class="hero-description">
+              {{ _('Estamos disponibles para asesorarte en servicios acreditados, proyectos de investigación, programas de capacitación y colaboraciones estratégicas. Completa el formulario o utiliza los canales oficiales.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Atención sector público') }}</span>
+              <span class="pill">{{ _('Industria exportadora') }}</span>
+              <span class="pill">{{ _('Universidades y centros de investigación') }}</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              {{ _('Horario de atención') }}
+            </h2>
+            <p>
+              {{ _('Lunes a viernes, 09:00 a 17:30 hrs.') }}<br />
+              {{ _('Atención presencial con agendamiento previo.') }}
+            </p>
+            <ul class="footer-links">
+              <li>{{ _('Teléfono') }} {{ _('central') }}: +56 2 2978 XXXX</li>
+              <li>{{ _('Email') }} {{ _('general') }}: farmavet@uchile.cl</li>
+              <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="formulario">
+        <div class="container contact-grid">
+          <article class="contact-card">
+            <h2 class="section-title" style="text-align:left">{{ _('Formulario de contacto') }}</h2>
+            <form class="contact-form" data-toast-success="{{ _('Gracias por tu mensaje. Nos pondremos en contacto a la brevedad.') }}" data-toast-form>
+              <div class="form-group">
+                <label for="contacto-nombre">{{ _('Nombre completo') }}</label>
+                <input id="contacto-nombre" name="nombre" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="contacto-institucion">{{ _('Institución / Empresa') }}</label>
+                <input id="contacto-institucion" name="institucion" type="text" required />
+              </div>
+              <div class="form-group">
+                <label for="contacto-email">{{ _('Correo electrónico') }}</label>
+                <input id="contacto-email" name="email" type="email" required />
+              </div>
+              <div class="form-group">
+                <label for="contacto-telefono">{{ _('Teléfono') }}</label>
+                <input id="contacto-telefono" name="telefono" type="tel" />
+              </div>
+              <div class="form-group">
+                <label for="contacto-tipo">{{ _('Tipo de consulta') }}</label>
+                <select id="contacto-tipo" name="tipo" required>
+                  <option value="">{{ _('Selecciona una opción') }}</option>
+                  <option value="analisis">{{ _('Solicitud de análisis') }}</option>
+                  <option value="servicios">{{ _('Consulta sobre servicios') }}</option>
+                  <option value="capacitacion">{{ _('Capacitación y docencia') }}</option>
+                  <option value="investigacion">{{ _('Investigación y colaboración') }}</option>
+                  <option value="otra">{{ _('Otra consulta') }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="contacto-mensaje">{{ _('Mensaje') }}</label>
+                <textarea id="contacto-mensaje" name="mensaje" rows="4" required></textarea>
+              </div>
+              <button class="cta-button" type="submit">{{ _('Enviar consulta') }}</button>
+            </form>
+          </article>
+          <aside class="contact-card">
+            <h2 class="section-title" style="text-align:left">{{ _('Información de contacto') }}</h2>
+            <ul class="footer-links">
+              <li><strong>{{ _('Dirección') }}</strong><br />{{ _('Av. Santa Rosa 11735, La Pintana, Santiago, Chile.') }}</li>
+              <li><strong>{{ _('Teléfono') }}</strong><br />+56 2 2978 XXXX</li>
+              <li><strong>{{ _('Email principal') }}</strong><br />farmavet@uchile.cl</li>
+              <li><strong>{{ _('Programas académicos') }}</strong><br />postitulo@veterinaria.uchile.cl</li>
+            </ul>
+            <div class="map-wrapper" style="margin-top:1.5rem">
+              <iframe
+                title="Mapa de ubicación FARMAVET"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3326.7805896801475!2d-70.63416122380707!3d-33.541778372054245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662d88e6808119d%3A0xf6fd20593d3536c9!2sAv.%20Sta.%20Rosa%2011735%2C%20La%20Pintana%2C%20Regi%C3%B3n%20Metropolitana%2C%20Chile!5e0!3m2!1ses!2scl!4v1700000000000!5m2!1ses!2scl"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section light" id="faq">
+        <div class="container">
+          <h2 class="section-title">{{ _('Preguntas frecuentes') }}</h2>
+          <div class="accordion" data-accordion>
+            <div class="accordion-item" data-accordion-item>
+              <button class="accordion-toggle" type="button" data-accordion-toggle>
+                {{ _('¿Cuál es el tiempo de respuesta para una cotización?') }}
+              </button>
+              <div class="accordion-content" data-accordion-content>
+                <div class="accordion-content-inner">
+                  {{ _('El tiempo estándar es de 48 horas hábiles desde la recepción de la consulta. Para proyectos complejos, coordinamos una reunión técnica dentro de los cinco días hábiles siguientes.') }}
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item" data-accordion-item>
+              <button class="accordion-toggle" type="button" data-accordion-toggle>
+                {{ _('¿Qué información debo incluir en la solicitud de análisis?') }}
+              </button>
+              <div class="accordion-content" data-accordion-content>
+                <div class="accordion-content-inner">
+                  {{ _('Indica la matriz a analizar, tipo de contaminante o fármaco, número de muestras y normativa objetivo. Nuestro equipo te orientará sobre volúmenes, embalaje y requisitos logísticos.') }}
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item" data-accordion-item>
+              <button class="accordion-toggle" type="button" data-accordion-toggle>
+                {{ _('¿FARMAVET ofrece servicios en regiones?') }}
+              </button>
+              <div class="accordion-content" data-accordion-content>
+                <div class="accordion-content-inner">
+                  {{ _('Sí. Contamos con logística para recepción de muestras desde todo Chile y alianzas con laboratorios asociados para asegurar la cadena de custodia.') }}
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item" data-accordion-item>
+              <button class="accordion-toggle" type="button" data-accordion-toggle>
+                {{ _('¿Puedo solicitar informes en inglés?') }}
+              </button>
+              <div class="accordion-content" data-accordion-content>
+                <div class="accordion-content-inner">
+                  {{ _('Todos los informes técnicos pueden emitirse en español o inglés según lo requiera la autoridad o el mercado de destino.') }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="cta-contacto">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿Listo para trabajar con FARMAVET?') }}</h3>
+            <p>
+              {{ _('Agendemos una reunión técnica para revisar tus requerimientos y definir el plan de análisis o colaboración más adecuado.') }}
+            </p>
+            <a class="cta-button" href="mailto:farmavet@uchile.cl">{{ _('Agendar reunión') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Acompañamos al sector público y privado con servicios analíticos acreditados y asesoría técnica.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Secciones') }}</h3>
+          <ul class="footer-links">
+            <li><a href="#formulario">{{ _('Formulario de contacto') }}</a></li>
+            <li><a href="#faq">{{ _('Preguntas frecuentes') }}</a></li>
+            <li><a href="#cta-contacto">{{ _('Reuniones técnicas') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>{{ _('Email') }}: farmavet@uchile.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
+

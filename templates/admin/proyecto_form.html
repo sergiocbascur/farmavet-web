@@ -1,0 +1,112 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if proyecto %}Editar{% else %}Nuevo{% endif %} Proyecto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if proyecto else 'plus-circle' }} me-2"></i>
+        {% if proyecto %}Editar{% else %}Nuevo{% endif %} Proyecto Destacado
+    </h2>
+    <a href="{{ url_for('admin_proyectos') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título del Proyecto <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ proyecto.titulo if proyecto else '' }}" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tipo" class="form-label">Tipo de Proyecto</label>
+                    <input type="text" class="form-control" id="tipo" name="tipo" 
+                           value="{{ proyecto.tipo if proyecto else '' }}" 
+                           placeholder="Ej: FONDECYT Regular, FONDEF, Cooperación internacional">
+                    <small class="text-muted">Este texto aparecerá como badge en la tarjeta</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ proyecto.orden if proyecto else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4">{{ proyecto.descripcion if proyecto else '' }}</textarea>
+                    <small class="text-muted">Descripción del proyecto que aparecerá en la tarjeta</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="enlace" class="form-label">Enlace (URL opcional)</label>
+                    <input type="url" class="form-control" id="enlace" name="enlace" 
+                           value="{{ proyecto.enlace if proyecto else '' }}" 
+                           placeholder="https://...">
+                    <small class="text-muted">Enlace a más información sobre el proyecto (opcional)</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el proyecto se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ proyecto.titulo_en if proyecto and proyecto.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion_en" class="form-label">Descripción (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="descripcion_en" name="descripcion_en" rows="4" 
+                              placeholder="Description in English">{{ proyecto.descripcion_en if proyecto and proyecto.descripcion_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tipo_en" class="form-label">Tipo (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="tipo_en" name="tipo_en" 
+                           value="{{ proyecto.tipo_en if proyecto and proyecto.tipo_en else '' }}" 
+                           placeholder="Project type in English">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not proyecto or proyecto.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Proyecto activo (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Proyecto
+                        </button>
+                        <a href="{{ url_for('admin_proyectos') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

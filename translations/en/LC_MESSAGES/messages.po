@@ -1,0 +1,1557 @@
+# English translations for FARMAVET Web
+# Copyright (C) 2025 FARMAVET
+# This file is distributed under the same license as the FARMAVET Web project.
+msgid ""
+msgstr ""
+"Project-Id-Version: FARMAVET Web 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-16 12:00+0000\n"
+"PO-Revision-Date: 2025-01-16 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Menú"
+msgstr "Menu"
+
+msgid "Inicio"
+msgstr "Home"
+
+msgid "Quiénes Somos"
+msgstr "About Us"
+
+msgid "Equipo"
+msgstr "Team"
+
+msgid "Servicios"
+msgstr "Services"
+
+msgid "Análisis"
+msgstr "Analysis"
+
+msgid "Investigación"
+msgstr "Research"
+
+msgid "Formación"
+msgstr "Education"
+
+msgid "Noticias"
+msgstr "News"
+
+msgid "Contacto"
+msgstr "Contact"
+
+msgid "Solicitar Análisis"
+msgstr "Request Analysis"
+
+msgid "Iniciar sesión"
+msgstr "Log in"
+
+msgid "Laboratorio de excelencia científica"
+msgstr "Scientific excellence laboratory"
+
+msgid "Laboratorio de Farmacología Veterinaria"
+msgstr "Veterinary Pharmacology Laboratory"
+
+msgid "Universidad de Chile"
+msgstr "University of Chile"
+
+msgid "Más de 30 años liderando la inocuidad alimentaria en Latinoamérica, con acreditación ISO 17025 y designación como Centro Colaborador OMSA."
+msgstr "Over 30 years leading food safety in Latin America, with ISO 17025 accreditation and designation as WOAH Collaborating Center."
+
+msgid "Servicios acreditados ISO 17025"
+msgstr "ISO 17025 accredited services"
+
+msgid "Centro Colaborador OMSA"
+msgstr "WOAH Collaborating Center"
+
+msgid "Investigación y docencia de alto impacto"
+msgstr "High-impact research and education"
+
+msgid "Conocer Servicios"
+msgstr "Learn about Services"
+
+msgid "FARMAVET es el Laboratorio de Farmacología Veterinaria de la Facultad de Ciencias Veterinarias y Pecuarias (FAVET) de la Universidad de Chile. Desde hace más de tres décadas entregamos servicios analíticos especializados, investigación científica y formación de capital humano avanzado para garantizar la inocuidad de alimentos de origen animal en Chile y la región."
+msgstr "FARMAVET is the Veterinary Pharmacology Laboratory of the Faculty of Veterinary and Animal Sciences (FAVET) at the University of Chile. For over three decades, we have provided specialized analytical services, scientific research, and advanced human capital training to ensure food safety of animal origin products in Chile and the region."
+
+msgid "Somos el único laboratorio en Latinoamérica designado como Centro Colaborador OMSA para Gestión de Antimicrobianos en Acuicultura, y mantenemos una acreditación ISO 17025 continua por más de 20 años, respaldo que garantiza la calidad y confianza de nuestros resultados."
+msgstr "We are the only laboratory in Latin America designated as a WOAH Collaborating Center for Antimicrobial Management in Aquaculture, and we maintain continuous ISO 17025 accreditation for over 20 years, a guarantee of quality and reliability of our results."
+
+msgid "Trayectoria en cifras"
+msgstr "Track record in numbers"
+
+msgid "30+ años de experiencia"
+msgstr "30+ years of experience"
+
+msgid "70+ metodologías acreditadas"
+msgstr "70+ accredited methodologies"
+
+msgid "Red de alianzas público-privadas"
+msgstr "Public-private partnership network"
+
+msgid "Nuestros Pilares"
+msgstr "Our Pillars"
+
+msgid "Acompañamos a la industria y a la autoridad sanitaria con un enfoque integral que combina excelencia analítica, generación de conocimiento y formación continua."
+msgstr "We support industry and health authorities with a comprehensive approach that combines analytical excellence, knowledge generation, and continuous training."
+
+msgid "Servicio de Análisis"
+msgstr "Analysis Services"
+
+msgid "Más de 70 metodologías analíticas acreditadas, cobertura nacional e infraestructura de última generación en cromatografía y espectrometría de masas."
+msgstr "Over 70 accredited analytical methodologies, national coverage, and state-of-the-art infrastructure in chromatography and mass spectrometry."
+
+msgid "Ver metodologías"
+msgstr "View methodologies"
+
+msgid "Desarrollamos proyectos FONDECYT, FONDEF y colaboraciones internacionales en farmacocinética, inocuidad y resistencia antimicrobiana."
+msgstr "We develop FONDECYT and FONDEF projects and international collaborations in pharmacokinetics, food safety, and antimicrobial resistance."
+
+msgid "Explorar proyectos"
+msgstr "Explore projects"
+
+msgid "Acreditación"
+msgstr "Accreditation"
+
+msgid "ISO 17025 con más de 20 años de vigencia continua. Laboratorio de verificación oficial para SERNAPESCA y SAG, y Centro Colaborador OMSA."
+msgstr "ISO 17025 with over 20 years of continuous validity. Official verification laboratory for SERNAPESCA and SAG, and WOAH Collaborating Center."
+
+msgid "Ver reconocimientos"
+msgstr "View recognitions"
+
+msgid "Programas de pregrado, postgrado y educación continua. Diplomados y cursos especializados para la industria y el sector público."
+msgstr "Undergraduate, graduate, and continuing education programs. Diplomas and specialized courses for industry and the public sector."
+
+msgid "Programas vigentes"
+msgstr "Current programs"
+
+msgid "años de experiencia"
+msgstr "years of experience"
+
+msgid "metodologías acreditadas"
+msgstr "accredited methodologies"
+
+msgid "años con acreditación ISO 17025"
+msgstr "years with ISO 17025 accreditation"
+
+msgid "organismos de verificación oficiales"
+msgstr "official verification agencies"
+
+msgid "Centro Colaborador OMSA en Latinoamérica"
+msgstr "WOAH Collaborating Center in Latin America"
+
+msgid "Noticias y eventos recientes"
+msgstr "Recent news and events"
+
+msgid "Mantente al día con los reconocimientos, publicaciones y actividades en las que participa FARMAVET."
+msgstr "Stay up to date with recognitions, publications, and activities in which FARMAVET participates."
+
+msgid "Ver más"
+msgstr "Read more"
+
+msgid "Ver programas"
+msgstr "View programs"
+
+msgid "Publicación científica"
+msgstr "Scientific publication"
+
+msgid "Monitoreo multirresiduo LC-MS/MS en salmónidos"
+msgstr "Multi-residue LC-MS/MS monitoring in salmonids"
+
+msgid "Investigación liderada por FARMAVET publicada en Journal of Veterinary Pharmacology con nuevos límites de cuantificación para matrices hidrobiológicas."
+msgstr "Research led by FARMAVET published in Journal of Veterinary Pharmacology with new quantification limits for hydrobiological matrices."
+
+msgid "Ver publicación"
+msgstr "View publication"
+
+msgid "Noticias anteriores"
+msgstr "Previous news"
+
+msgid "Noticias siguientes"
+msgstr "Next news"
+
+msgid "Clientes y aliados"
+msgstr "Clients and partners"
+
+msgid "Colaboramos con organismos públicos, universidades y el sector productivo para fortalecer la inocuidad alimentaria en Chile y el mundo."
+msgstr "We collaborate with public agencies, universities, and the productive sector to strengthen food safety in Chile and the world."
+
+msgid "Anterior"
+msgstr "Previous"
+
+msgid "Siguiente"
+msgstr "Next"
+
+msgid "¿Necesitas un análisis acreditado o asesoría técnica?"
+msgstr "Do you need an accredited analysis or technical advice?"
+
+msgid "Nuestro equipo está disponible para orientarte sobre metodologías, matrices y requisitos normativos."
+msgstr "Our team is available to guide you on methodologies, matrices, and regulatory requirements."
+
+msgid "Contactar a FARMAVET"
+msgstr "Contact FARMAVET"
+
+msgid "Laboratorio de Farmacología Veterinaria, Facultad de Ciencias Veterinarias y Pecuarias, Universidad de Chile. Excelencia analítica, investigación y formación profesional al servicio de la salud pública."
+msgstr "Veterinary Pharmacology Laboratory, Faculty of Veterinary and Animal Sciences, University of Chile. Analytical excellence, research, and professional training at the service of public health."
+
+msgid "Enlaces rápidos"
+msgstr "Quick links"
+
+msgid "Servicios analíticos"
+msgstr "Analytical services"
+
+msgid "Formación y capacitación"
+msgstr "Education and training"
+
+msgid "Formulario de contacto"
+msgstr "Contact form"
+
+msgid "Av. Santa Rosa 11735, La Pintana, Santiago"
+msgstr "Av. Santa Rosa 11735, La Pintana, Santiago"
+
+msgid "Teléfono"
+msgstr "Phone"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Programas"
+msgstr "Programs"
+
+msgid "Acreditaciones"
+msgstr "Accreditations"
+
+msgid "Laboratorio Verificador SERNAPESCA"
+msgstr "SERNAPESCA Verification Laboratory"
+
+msgid "Laboratorio Verificador SAG"
+msgstr "SAG Verification Laboratory"
+
+msgid "Todos los derechos reservados."
+msgstr "All rights reserved."
+
+# Admin Panel Translations
+msgid "Dashboard"
+msgstr "Dashboard"
+
+msgid "Welcome"
+msgstr "Welcome"
+
+msgid "Active Programs"
+msgstr "Active Programs"
+
+msgid "Manage"
+msgstr "Manage"
+
+msgid "Active Testimonials"
+msgstr "Active Testimonials"
+
+msgid "Active News"
+msgstr "Active News"
+
+msgid "Team Members"
+msgstr "Team Members"
+
+msgid "Featured Projects"
+msgstr "Featured Projects"
+
+msgid "Scientific Publications"
+msgstr "Scientific Publications"
+
+msgid "Clients/Partners"
+msgstr "Clients/Partners"
+
+msgid "Statistics"
+msgstr "Statistics"
+
+msgid "Quick Actions"
+msgstr "Quick Actions"
+
+msgid "New Program"
+msgstr "New Program"
+
+msgid "New Testimonial"
+msgstr "New Testimonial"
+
+msgid "New News"
+msgstr "New News"
+
+msgid "New Member"
+msgstr "New Member"
+
+msgid "New Project"
+msgstr "New Project"
+
+msgid "New Publication"
+msgstr "New Publication"
+
+msgid "Programs"
+msgstr "Programs"
+
+msgid "Testimonials"
+msgstr "Testimonials"
+
+msgid "News"
+msgstr "News"
+
+msgid "Events"
+msgstr "Events"
+
+msgid "Organization Chart"
+msgstr "Organization Chart"
+
+msgid "Change Password"
+msgstr "Change Password"
+
+msgid "View Website"
+msgstr "View Website"
+
+msgid "Logout"
+msgstr "Logout"
+
+# Servicios page translations
+msgid "Servicios Analíticos Acreditados"
+msgstr "Accredited Analytical Services"
+
+msgid "Servicios analíticos acreditados"
+msgstr "Accredited analytical services"
+
+msgid "Más de 70 metodologías para asegurar la inocuidad alimentaria"
+msgstr "Over 70 methodologies to ensure food safety"
+
+msgid "Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario certificado bajo ISO 17025 para garantizar resultados confiables y trazables."
+msgstr "We have state-of-the-art infrastructure (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) and a multidisciplinary team certified under ISO 17025 to ensure reliable and traceable results."
+
+msgid "Matrices hidrobiológicas y pecuarias"
+msgstr "Hydrobiological and livestock matrices"
+
+msgid "Validación de metodologías"
+msgstr "Method validation"
+
+msgid "Asesoría técnica integral"
+msgstr "Comprehensive technical advice"
+
+msgid "¿Por qué elegir FARMAVET?"
+msgstr "Why choose FARMAVET?"
+
+msgid "Acreditación ISO 17025 vigente (INN)"
+msgstr "Current ISO 17025 accreditation (INN)"
+
+msgid "Laboratorio de Verificación oficial SERNAPESCA y SAG"
+msgstr "Official Verification Laboratory for SERNAPESCA and SAG"
+
+msgid "Equipo con más de 20 años de experiencia en inocuidad alimentaria"
+msgstr "Team with over 20 years of experience in food safety"
+
+msgid "Protocolos de aseguramiento de calidad y cadena de custodia"
+msgstr "Quality assurance protocols and chain of custody"
+
+msgid "Capacidades analíticas"
+msgstr "Analytical capabilities"
+
+msgid "Nuestros servicios cubren el control de residuos de medicamentos veterinarios, contaminantes químicos y la validación de metodologías en matrices hidrobiológicas, pecuarias y productos derivados."
+msgstr "Our services cover the control of veterinary drug residues, chemical contaminants, and method validation in hydrobiological and livestock matrices and derived products."
+
+msgid "Equipamiento"
+msgstr "Equipment"
+
+msgid "Cromatografía líquida acoplada a espectrometría de masas (LC-MS/MS), cromatografía de gases con detector de espectrometría de masas (GC-MS), HPLC, espectrofotometría de absorción atómica e inmunoensayos ELISA."
+msgstr "Liquid chromatography coupled to mass spectrometry (LC-MS/MS), gas chromatography with mass spectrometry detector (GC-MS), HPLC, atomic absorption spectrophotometry and ELISA immunoassays."
+
+msgid "Cobertura"
+msgstr "Coverage"
+
+msgid "Productos hidrobiológicos (salmón, trucha, mariscos), carnes, leche, matrices ambientales (agua, plumas, deyecciones) y alimentos balanceados."
+msgstr "Hydrobiological products (salmon, trout, seafood), meats, milk, environmental matrices (water, feathers, droppings) and balanced feeds."
+
+msgid "Servicio integral"
+msgstr "Comprehensive service"
+
+msgid "Asesoría técnica, instrucciones de muestreo, trazabilidad completa, informes técnicos bilingües y acompañamiento en auditorías de clientes."
+msgstr "Technical advice, sampling instructions, complete traceability, bilingual technical reports and support in client audits."
+
+msgid "Tipos de análisis"
+msgstr "Types of analysis"
+
+msgid "Organiza tu búsqueda por categorías temáticas para identificar las metodologías más adecuadas."
+msgstr "Organize your search by thematic categories to identify the most suitable methodologies."
+
+msgid "Residuos de medicamentos veterinarios"
+msgstr "Veterinary drug residues"
+
+msgid "Contaminantes químicos"
+msgstr "Chemical contaminants"
+
+msgid "Matrices analizadas"
+msgstr "Analyzed matrices"
+
+msgid "Metodologías analíticas"
+msgstr "Analytical methodologies"
+
+msgid "Antimicrobianos"
+msgstr "Antimicrobials"
+
+msgid "Tetraciclinas, fluoroquinolonas, sulfonamidas, macrólidos, aminoglucósidos, β-lactámicos."
+msgstr "Tetracyclines, fluoroquinolones, sulfonamides, macrolides, aminoglycosides, β-lactams."
+
+msgid "Antiparasitarios"
+msgstr "Antiparasitics"
+
+msgid "Benzimidazoles, avermectinas, piretinas y otros tratamientos utilizados en acuicultura y producción animal."
+msgstr "Benzimidazoles, avermectins, pyrethrins and other treatments used in aquaculture and animal production."
+
+msgid "Anabólicos"
+msgstr "Anabolics"
+
+msgid "Promotores de crecimiento y sustancias dopantes prohibidas en alimentos de origen animal."
+msgstr "Growth promoters and doping substances prohibited in foods of animal origin."
+
+msgid "Otros fármacos"
+msgstr "Other drugs"
+
+msgid "Analgésicos, antiinflamatorios y tranquilizantes sujetos a vigilancia por normativa internacional."
+msgstr "Analgesics, anti-inflammatories and tranquilizers subject to international regulatory surveillance."
+
+msgid "Metales pesados"
+msgstr "Heavy metals"
+
+msgid "Plomo, mercurio, cadmio, arsénico y otros elementos traza regulados en exportaciones."
+msgstr "Lead, mercury, cadmium, arsenic and other trace elements regulated in exports."
+
+msgid "Orgánicos persistentes"
+msgstr "Persistent organics"
+
+msgid "Dioxinas, furanos, PCBs y contaminantes ambientales emergentes."
+msgstr "Dioxins, furans, PCBs and emerging environmental contaminants."
+
+msgid "Pesticidas"
+msgstr "Pesticides"
+
+msgid "Organoclorados, organofosforados, carbamatos y nuevas generaciones de plaguicidas."
+msgstr "Organochlorines, organophosphates, carbamates and new generations of pesticides."
+
+msgid "Otros contaminantes"
+msgstr "Other contaminants"
+
+msgid "Micotoxinas, hidrocarburos aromáticos policíclicos y residuos industriales."
+msgstr "Mycotoxins, polycyclic aromatic hydrocarbons and industrial residues."
+
+msgid "Productos hidrobiológicos"
+msgstr "Hydrobiological products"
+
+msgid "Salmón, trucha, peces de cultivo, mariscos y productos derivados."
+msgstr "Salmon, trout, farmed fish, seafood and derived products."
+
+msgid "Tejidos animales"
+msgstr "Animal tissues"
+
+msgid "Músculo, hígado, riñón, grasa, sangre y matrices asociadas a producción pecuaria."
+msgstr "Muscle, liver, kidney, fat, blood and matrices associated with livestock production."
+
+msgid "Productos pecuarios"
+msgstr "Livestock products"
+
+msgid "Carnes de ave, cerdo, bovino y productos listos para exportación."
+msgstr "Poultry, pork, beef and products ready for export."
+
+msgid "Leche y lácteos"
+msgstr "Milk and dairy products"
+
+msgid "Leche cruda, leche en polvo, quesos y sueros lácteos."
+msgstr "Raw milk, powdered milk, cheeses and dairy whey."
+
+msgid "Matrices alternativas"
+msgstr "Alternative matrices"
+
+msgid "Plumas, deyecciones, alimento animal, agua, biofilms y matrices ambientales."
+msgstr "Feathers, droppings, animal feed, water, biofilms and environmental matrices."
+
+msgid "Cromatografía líquida acoplada a espectrometría de masas en tándem para detección multirresiduo."
+msgstr "Liquid chromatography coupled to tandem mass spectrometry for multi-residue detection."
+
+msgid "Cromatografía de gases con espectrometría de masas para compuestos volátiles y semivolátiles."
+msgstr "Gas chromatography with mass spectrometry for volatile and semivolatile compounds."
+
+msgid "Cromatografía líquida de alta resolución para cuantificación de fármacos."
+msgstr "High-resolution liquid chromatography for drug quantification."
+
+msgid "Espectrofotometría"
+msgstr "Spectrophotometry"
+
+msgid "Métodos ópticos para cuantificación de metales y otras especies químicas."
+msgstr "Optical methods for quantification of metals and other chemical species."
+
+msgid "Servicios complementarios"
+msgstr "Complementary services"
+
+msgid "Estudios completos de validación bajo guías internacionales (SANTE, CODEX, FDA) y elaboración de protocolos de aseguramiento de calidad."
+msgstr "Complete validation studies under international guidelines (SANTE, CODEX, FDA) and development of quality assurance protocols."
+
+msgid "Estudios de depleción y bioequivalencia"
+msgstr "Depletion and bioequivalence studies"
+
+msgid "Determinamos la cinética de residuos en matrices animales y validamos la equivalencia terapéutica de medicamentos veterinarios."
+msgstr "We determine the kinetics of residues in animal matrices and validate the therapeutic equivalence of veterinary drugs."
+
+msgid "Acompañamos a empresas y organismos públicos en diseño de planes de monitoreo, interpretación de normas y preparación de auditorías."
+msgstr "We support companies and public agencies in designing monitoring plans, interpreting regulations and preparing audits."
+
+msgid "Capacitación"
+msgstr "Training"
+
+msgid "Talleres a medida en toma de muestras, control de calidad, gestión de residuos y buenas prácticas en uso de fármacos."
+msgstr "Customized workshops on sampling, quality control, waste management and good practices in drug use."
+
+msgid "Proceso de solicitud"
+msgstr "Request process"
+
+msgid "1. Contacto inicial"
+msgstr "1. Initial contact"
+
+msgid "Escríbenos a través del formulario o por correo. Nuestro equipo te orientará sobre la metodología más adecuada según tus necesidades."
+msgstr "Write to us through the form or by email. Our team will guide you on the most suitable methodology according to your needs."
+
+msgid "2. Asesoría técnica"
+msgstr "2. Technical advice"
+
+msgid "Definimos matrices, límites de cuantificación, número de muestras y requisitos normativos aplicables."
+msgstr "We define matrices, quantification limits, number of samples and applicable regulatory requirements."
+
+msgid "3. Toma y envío de muestras"
+msgstr "3. Sample collection and shipping"
+
+msgid "Entregamos instrucciones y empaques. Contamos con cadena de custodia y control de temperatura."
+msgstr "We provide instructions and packaging. We have chain of custody and temperature control."
+
+msgid "4. Análisis y entrega de informe"
+msgstr "4. Analysis and report delivery"
+
+msgid "Procesamos las muestras en laboratorio acreditado y emitimos informes técnicos en español e inglés con interpretación de resultados."
+msgstr "We process samples in an accredited laboratory and issue technical reports in Spanish and English with interpretation of results."
+
+msgid "Solicita una cotización personalizada"
+msgstr "Request a customized quote"
+
+msgid "Indícanos matriz, tipo de análisis y número estimado de muestras. Responderemos en menos de 48 horas hábiles."
+msgstr "Tell us the matrix, type of analysis and estimated number of samples. We will respond within 48 business hours."
+
+msgid "Contactar laboratorio"
+msgstr "Contact laboratory"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Brindamos servicios analíticos acreditados y asesoría científica al sector público y privado."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We provide accredited analytical services and scientific advice to the public and private sectors."
+
+# Contacto page translations
+msgid "Contacto directo"
+msgstr "Direct contact"
+
+msgid "Conversemos sobre tus necesidades analíticas"
+msgstr "Let's talk about your analytical needs"
+
+msgid "Estamos disponibles para asesorarte en servicios acreditados, proyectos de investigación, programas de capacitación y colaboraciones estratégicas. Completa el formulario o utiliza los canales oficiales."
+msgstr "We are available to advise you on accredited services, research projects, training programs and strategic collaborations. Complete the form or use the official channels."
+
+msgid "Atención sector público"
+msgstr "Public sector service"
+
+msgid "Industria exportadora"
+msgstr "Export industry"
+
+msgid "Universidades y centros de investigación"
+msgstr "Universities and research centers"
+
+msgid "Horario de atención"
+msgstr "Business hours"
+
+msgid "Lunes a viernes, 09:00 a 17:30 hrs."
+msgstr "Monday to Friday, 9:00 AM to 5:30 PM"
+
+msgid "Atención presencial con agendamiento previo."
+msgstr "In-person service by appointment."
+
+msgid "central"
+msgstr "central"
+
+msgid "general"
+msgstr "general"
+
+msgid "Nombre completo"
+msgstr "Full name"
+
+msgid "Institución / Empresa"
+msgstr "Institution / Company"
+
+msgid "Correo electrónico"
+msgstr "Email"
+
+msgid "Tipo de consulta"
+msgstr "Type of inquiry"
+
+msgid "Selecciona una opción"
+msgstr "Select an option"
+
+msgid "Solicitud de análisis"
+msgstr "Analysis request"
+
+msgid "Consulta sobre servicios"
+msgstr "Service inquiry"
+
+msgid "Capacitación y docencia"
+msgstr "Training and education"
+
+msgid "Investigación y colaboración"
+msgstr "Research and collaboration"
+
+msgid "Otra consulta"
+msgstr "Other inquiry"
+
+msgid "Mensaje"
+msgstr "Message"
+
+msgid "Enviar consulta"
+msgstr "Send inquiry"
+
+msgid "Información de contacto"
+msgstr "Contact information"
+
+msgid "Dirección"
+msgstr "Address"
+
+msgid "Av. Santa Rosa 11735, La Pintana, Santiago, Chile."
+msgstr "Av. Santa Rosa 11735, La Pintana, Santiago, Chile."
+
+msgid "Email principal"
+msgstr "Main email"
+
+msgid "Programas académicos"
+msgstr "Academic programs"
+
+msgid "Gracias por tu mensaje. Nos pondremos en contacto a la brevedad."
+msgstr "Thank you for your message. We will contact you shortly."
+
+msgid "Preguntas frecuentes"
+msgstr "Frequently asked questions"
+
+msgid "¿Cuál es el tiempo de respuesta para una cotización?"
+msgstr "What is the response time for a quote?"
+
+msgid "El tiempo estándar es de 48 horas hábiles desde la recepción de la consulta. Para proyectos complejos, coordinamos una reunión técnica dentro de los cinco días hábiles siguientes."
+msgstr "The standard time is 48 business hours from receipt of the inquiry. For complex projects, we coordinate a technical meeting within the following five business days."
+
+msgid "¿Qué información debo incluir en la solicitud de análisis?"
+msgstr "What information should I include in the analysis request?"
+
+msgid "Indica la matriz a analizar, tipo de contaminante o fármaco, número de muestras y normativa objetivo. Nuestro equipo te orientará sobre volúmenes, embalaje y requisitos logísticos."
+msgstr "Indicate the matrix to be analyzed, type of contaminant or drug, number of samples and target regulation. Our team will guide you on volumes, packaging and logistical requirements."
+
+msgid "¿FARMAVET ofrece servicios en regiones?"
+msgstr "Does FARMAVET offer services in regions?"
+
+msgid "Sí. Contamos con logística para recepción de muestras desde todo Chile y alianzas con laboratorios asociados para asegurar la cadena de custodia."
+msgstr "Yes. We have logistics for receiving samples from all over Chile and partnerships with associated laboratories to ensure chain of custody."
+
+msgid "¿Puedo solicitar informes en inglés?"
+msgstr "Can I request reports in English?"
+
+msgid "Todos los informes técnicos pueden emitirse en español o inglés según lo requiera la autoridad o el mercado de destino."
+msgstr "All technical reports can be issued in Spanish or English as required by the authority or target market."
+
+msgid "¿Listo para trabajar con FARMAVET?"
+msgstr "Ready to work with FARMAVET?"
+
+msgid "Agendemos una reunión técnica para revisar tus requerimientos y definir el plan de análisis o colaboración más adecuado."
+msgstr "Let's schedule a technical meeting to review your requirements and define the most suitable analysis or collaboration plan."
+
+msgid "Agendar reunión"
+msgstr "Schedule meeting"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Acompañamos al sector público y privado con servicios analíticos acreditados y asesoría técnica."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We support the public and private sectors with accredited analytical services and technical advice."
+
+msgid "Secciones"
+msgstr "Sections"
+
+msgid "Reuniones técnicas"
+msgstr "Technical meetings"
+
+# Quiénes Somos page translations
+msgid "Excelencia científica al servicio de la salud pública"
+msgstr "Scientific excellence at the service of public health"
+
+msgid "FARMAVET es un laboratorio universitario con más de 30 años de trayectoria, acreditado ISO 17025 y reconocido como Centro Colaborador OMSA. Acompañamos al país y a la región desde la ciencia aplicada y el servicio público."
+msgstr "FARMAVET is a university laboratory with over 30 years of experience, ISO 17025 accredited and recognized as a WOAH Collaborating Center. We support the country and the region through applied science and public service."
+
+msgid "Fundado en 1993"
+msgstr "Founded in 1993"
+
+msgid "30+ años de trayectoria"
+msgstr "30+ years of experience"
+
+msgid "Vinculación permanente con la industria"
+msgstr "Permanent connection with industry"
+
+msgid "Datos destacados"
+msgstr "Highlights"
+
+msgid "Centro Colaborador OMSA para Gestión de Antimicrobianos en Acuicultura"
+msgstr "WOAH Collaborating Center for Antimicrobial Management in Aquaculture"
+
+msgid "Laboratorio de Verificación oficial para SERNAPESCA y SAG"
+msgstr "Official Verification Laboratory for SERNAPESCA and SAG"
+
+msgid "Laboratorio Bromatológico acreditado por el Ministerio de Salud"
+msgstr "Bromatological Laboratory accredited by the Ministry of Health"
+
+msgid "Nuestra Historia"
+msgstr "Our History"
+
+msgid "A lo largo de tres décadas, FARMAVET ha consolidado un modelo de excelencia que integra ciencia, servicio e impacto social. Estos hitos resumen nuestra evolución."
+msgstr "Over three decades, FARMAVET has consolidated an excellence model that integrates science, service and social impact. These milestones summarize our evolution."
+
+msgid "Fundación"
+msgstr "Foundation"
+
+msgid "Se crea FARMAVET como laboratorio especializado de la Facultad de Ciencias Veterinarias y Pecuarias para dar respuesta a los desafíos de inocuidad alimentaria del país."
+msgstr "FARMAVET is created as a specialized laboratory of the Faculty of Veterinary and Animal Sciences to address the country's food safety challenges."
+
+msgid "Obtenemos por primera vez la acreditación ISO 17025 del INN, iniciando un camino de mejora continua y ampliación del alcance metodológico."
+msgstr "We obtain ISO 17025 accreditation from INN for the first time, beginning a path of continuous improvement and expansion of methodological scope."
+
+msgid "Alianzas estratégicas"
+msgstr "Strategic alliances"
+
+msgid "Firmamos convenios con SERNAPESCA, SAG e INTESAL para apoyar el monitoreo de residuos de medicamentos veterinarios en productos de exportación."
+msgstr "We sign agreements with SERNAPESCA, SAG and INTESAL to support monitoring of veterinary drug residues in export products."
+
+msgid "Centro CASA-OMSA"
+msgstr "CASA-WOAH Center"
+
+msgid "FARMAVET es designado Centro Colaborador OMSA para Gestión de Antimicrobianos en Acuicultura, único en Latinoamérica, fortaleciendo la proyección internacional."
+msgstr "FARMAVET is designated as WOAH Collaborating Center for Antimicrobial Management in Aquaculture, unique in Latin America, strengthening international projection."
+
+msgid "Innovación y expansión"
+msgstr "Innovation and expansion"
+
+msgid "Ampliamos alcance a nuevas matrices y metodologías LC-MS/MS de alta resolución, integrando investigación, docencia y servicios con enfoque sostenible."
+msgstr "We expand scope to new matrices and high-resolution LC-MS/MS methodologies, integrating research, teaching and services with a sustainable approach."
+
+msgid "Misión"
+msgstr "Mission"
+
+msgid "Contribuir a la salud pública y al desarrollo del país mediante servicios analíticos de excelencia, investigación científica de alto nivel y formación de profesionales especializados en farmacología veterinaria e inocuidad alimentaria."
+msgstr "Contribute to public health and country development through excellent analytical services, high-level scientific research and training of professionals specialized in veterinary pharmacology and food safety."
+
+msgid "Visión"
+msgstr "Vision"
+
+msgid "Ser el laboratorio de referencia nacional e internacional en control de residuos de medicamentos veterinarios y contaminantes en alimentos de origen animal, liderando la investigación y transferencia tecnológica en beneficio de la sociedad."
+msgstr "To be the national and international reference laboratory in the control of veterinary drug residues and contaminants in foods of animal origin, leading research and technology transfer for the benefit of society."
+
+msgid "Nuestros Valores"
+msgstr "Our Values"
+
+msgid "Nuestra cultura se sustenta en principios que orientan cada proyecto, servicio y relación con nuestros aliados estratégicos."
+msgstr "Our culture is based on principles that guide each project, service and relationship with our strategic partners."
+
+msgid "Excelencia científica"
+msgstr "Scientific excellence"
+
+msgid "Operamos con metodologías validadas, equipamiento de última generación y equipos humanos certificados para garantizar resultados confiables."
+msgstr "We operate with validated methodologies, state-of-the-art equipment and certified human teams to ensure reliable results."
+
+msgid "Compromiso con la salud pública"
+msgstr "Commitment to public health"
+
+msgid "Nuestro trabajo aporta a la seguridad alimentaria, protegiendo a la ciudadanía y respaldando la cadena exportadora."
+msgstr "Our work contributes to food safety, protecting citizens and supporting the export chain."
+
+msgid "Integridad y transparencia"
+msgstr "Integrity and transparency"
+
+msgid "Nos regimos por protocolos éticos y normativas internacionales, asegurando trazabilidad y transparencia en cada proceso."
+msgstr "We are governed by ethical protocols and international regulations, ensuring traceability and transparency in each process."
+
+msgid "Innovación y desarrollo"
+msgstr "Innovation and development"
+
+msgid "Impulsamos investigación aplicada, ampliamos el alcance de la acreditación y adoptamos tecnologías de vanguardia."
+msgstr "We promote applied research, expand the scope of accreditation and adopt cutting-edge technologies."
+
+msgid "Responsabilidad social"
+msgstr "Social responsibility"
+
+msgid "Formamos profesionales, apoyamos políticas públicas y contribuimos a la sustentabilidad del sector alimentario."
+msgstr "We train professionals, support public policies and contribute to the sustainability of the food sector."
+
+msgid "Colaboración multisectorial"
+msgstr "Multisectoral collaboration"
+
+msgid "Trabajamos con redes nacionales e internacionales para abordar desafíos complejos desde la ciencia y la co-creación."
+msgstr "We work with national and international networks to address complex challenges through science and co-creation."
+
+msgid "Acreditaciones y Reconocimientos"
+msgstr "Accreditations and Recognitions"
+
+msgid "Respaldos nacionales e internacionales que certifican la calidad, la confiabilidad y el impacto de FARMAVET."
+msgstr "National and international endorsements that certify the quality, reliability and impact of FARMAVET."
+
+msgid "Acreditación continua por más de 20 años. Certifica la competencia técnica y la validez de los resultados analíticos emitidos por el laboratorio."
+msgstr "Continuous accreditation for over 20 years. Certifies the technical competence and validity of analytical results issued by the laboratory."
+
+msgid "Laboratorio Bromatológico MINSAL"
+msgstr "MINSAL Bromatological Laboratory"
+
+msgid "Autorización del Ministerio de Salud para análisis bromatológicos que protegen a los consumidores a nivel nacional."
+msgstr "Authorization from the Ministry of Health for bromatological analyses that protect consumers at the national level."
+
+msgid "Único centro en Latinoamérica dedicado a la gestión de antimicrobianos en acuicultura, colaborando con países miembros de la OMSA."
+msgstr "Unique center in Latin America dedicated to antimicrobial management in aquaculture, collaborating with WOAH member countries."
+
+msgid "Solicitar más información"
+msgstr "Request more information"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Contribuimos a la inocuidad alimentaria a través de ciencia aplicada, servicios acreditados y formación de excelencia."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We contribute to food safety through applied science, accredited services and excellence in training."
+
+msgid "Explora"
+msgstr "Explore"
+
+msgid "Docencia y capacitación"
+msgstr "Teaching and training"
+
+msgid "Noticias y eventos"
+msgstr "News and events"
+
+msgid "Certificaciones"
+msgstr "Certifications"
+
+# Equipo page translations
+msgid "Equipo HUMANO"
+msgstr "HUMAN Team"
+
+msgid "Equipo humano"
+msgstr "Human team"
+
+msgid "Excelencia científica respaldada por personas comprometidas"
+msgstr "Scientific excellence backed by committed people"
+
+msgid "La calidad de nuestros resultados descansa en un equipo multidisciplinario, altamente calificado y comprometido con la salud pública y la inocuidad alimentaria. Conoce a quienes hacen posible el prestigio de FARMAVET."
+msgstr "The quality of our results rests on a multidisciplinary, highly qualified team committed to public health and food safety. Meet those who make FARMAVET's prestige possible."
+
+msgid "Dirección científica"
+msgstr "Scientific direction"
+
+msgid "Profesionales y técnicos"
+msgstr "Professionals and technicians"
+
+msgid "Colaboradores nacionales e internacionales"
+msgstr "National and international collaborators"
+
+msgid "Nuestra filosofía"
+msgstr "Our philosophy"
+
+msgid "Fomentamos una cultura basada en la excelencia, la colaboración y la innovación. Promovemos el desarrollo profesional continuo y la equidad de género en los equipos científicos."
+msgstr "We foster a culture based on excellence, collaboration and innovation. We promote continuous professional development and gender equity in scientific teams."
+
+msgid "Directora FARMAVET e INOCUIVET. Directora Ejecutiva CASA-OMSA. Médico Veterinario y Doctora en Ciencias Silvoagropecuarias y Veterinarias. Especialista en inocuidad alimentaria, gestión de antimicrobianos e investigación aplicada."
+msgstr "Director of FARMAVET and INOCUIVET. Executive Director CASA-WOAH. Veterinarian and Doctor in Silvoagricultural and Veterinary Sciences. Specialist in food safety, antimicrobial management and applied research."
+
+msgid "Encargado del laboratorio FARMAVET. Médico Veterinario con trayectoria en farmacología, validación de metodologías y aseguramiento de calidad en laboratorios acreditados."
+msgstr "Head of FARMAVET laboratory. Veterinarian with experience in pharmacology, method validation and quality assurance in accredited laboratories."
+
+msgid "Organigrama institucional"
+msgstr "Institutional organization chart"
+
+msgid "Estructura organizacional de FARMAVET. Explora cada área para conocer al equipo que hace posible nuestra labor."
+msgstr "FARMAVET's organizational structure. Explore each area to meet the team that makes our work possible."
+
+msgid "Dirección y Jefatura"
+msgstr "Direction and Management"
+
+msgid "Jefe Técnico (Responsable Técnico)"
+msgstr "Technical Manager (Technical Responsible)"
+
+msgid "Jefe de Calidad (Responsable de Calidad)"
+msgstr "Quality Manager (Quality Responsible)"
+
+msgid "Área de Administración"
+msgstr "Administration Area"
+
+msgid "Responsable Área I+D"
+msgstr "R&D Area Manager"
+
+msgid "No hay organigrama configurado. Configúralo desde el panel de administración."
+msgstr "No organization chart configured. Configure it from the administration panel."
+
+msgid "Equipo técnico y profesional"
+msgstr "Technical and professional team"
+
+msgid "Químicos farmacéuticos"
+msgstr "Pharmaceutical chemists"
+
+msgid "Especialistas en cromatografía de alta resolución, espectrometría de masas y validación de metodologías multirresiduo."
+msgstr "Specialists in high-resolution chromatography, mass spectrometry and multi-residue method validation."
+
+msgid "Médicos veterinarios"
+msgstr "Veterinarians"
+
+msgid "Profesionales responsables de la interpretación normativa, manejo de matrices y vinculación con clientes del sector pecuario y acuícola."
+msgstr "Professionals responsible for regulatory interpretation, matrix handling and relationship with clients in the livestock and aquaculture sectors."
+
+msgid "Tecnólogos médicos y bioquímicos"
+msgstr "Medical technologists and biochemists"
+
+msgid "Ejecutan protocolos analíticos, controlan calidad instrumental y gestionan la cadena de custodia de muestras."
+msgstr "They execute analytical protocols, control instrumental quality and manage the chain of custody of samples."
+
+msgid "Analistas de datos"
+msgstr "Data analysts"
+
+msgid "Procesan datos complejos, generan reportes automatizados y apoyan la toma de decisiones basada en evidencia."
+msgstr "They process complex data, generate automated reports and support evidence-based decision making."
+
+msgid "Colaboradores y asociados"
+msgstr "Collaborators and associates"
+
+msgid "Nuestra red se extiende a distintas facultades, centros de investigación y socios estratégicos que aportan conocimiento y experiencia."
+msgstr "Our network extends to different faculties, research centers and strategic partners that contribute knowledge and experience."
+
+msgid "Laboratorio de Inocuidad de los Alimentos"
+msgstr "Food Safety Laboratory"
+
+msgid "Centro de Investigación e Innovación para la Acuicultura"
+msgstr "Research and Innovation Center for Aquaculture"
+
+msgid "Instituto de Nutrición y Tecnología de los Alimentos"
+msgstr "Institute of Nutrition and Food Technology"
+
+msgid "Laboratorio de Genómica Acuícola"
+msgstr "Aquaculture Genomics Laboratory"
+
+msgid "Colaboraciones con universidades y centros OMSA de Noruega, Canadá, España, Reino Unido y Estados Unidos para proyectos de investigación y transferencia."
+msgstr "Collaborations with universities and WOAH centers in Norway, Canada, Spain, United Kingdom and United States for research and transfer projects."
+
+msgid "Coordinación con SERNAPESCA, SAG, Subsecretaría de Pesca, INTESAL, SalmonChile y empresas exportadoras que confían en nuestros servicios."
+msgstr "Coordination with SERNAPESCA, SAG, Undersecretary of Fisheries, INTESAL, SalmonChile and exporting companies that trust our services."
+
+msgid "Nuestra cultura"
+msgstr "Our culture"
+
+msgid "Desarrollo profesional"
+msgstr "Professional development"
+
+msgid "Programas de capacitación continua, participación en congresos internacionales y acceso a redes de investigación globales."
+msgstr "Continuous training programs, participation in international congresses and access to global research networks."
+
+msgid "Igualdad y diversidad"
+msgstr "Equality and diversity"
+
+msgid "Promovemos la equidad de género, la inclusión y ambientes de trabajo seguros, colaborativos y respetuosos."
+msgstr "We promote gender equity, inclusion and safe, collaborative and respectful work environments."
+
+msgid "Estimulamos la adopción de nuevas tecnologías, la mejora continua y la generación de soluciones para desafíos emergentes."
+msgstr "We encourage the adoption of new technologies, continuous improvement and the generation of solutions for emerging challenges."
+
+msgid "¿Quieres trabajar con nosotros?"
+msgstr "Do you want to work with us?"
+
+msgid "Escríbenos para conocer oportunidades de colaboración, pasantías o posiciones abiertas en FARMAVET."
+msgstr "Write to us to learn about collaboration opportunities, internships or open positions at FARMAVET."
+
+msgid "Postular o colaborar"
+msgstr "Apply or collaborate"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Nuestro equipo es la base de la excelencia que entregamos en servicios, investigación y docencia."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. Our team is the foundation of the excellence we deliver in services, research and teaching."
+
+msgid "Foto"
+msgstr "Photo"
+
+# Docencia page translations
+msgid "Docencia y Capacitación"
+msgstr "Teaching and Training"
+
+msgid "Formación continua"
+msgstr "Continuous training"
+
+msgid "Docencia, postgrado y capacitación para el sector veterinario"
+msgstr "Teaching, postgraduate and training for the veterinary sector"
+
+msgid "FARMAVET integra la docencia universitaria con la práctica profesional. Ofrecemos programas para estudiantes, investigadores y profesionales del sector público y privado, con énfasis en inocuidad alimentaria y uso responsable de antimicrobianos."
+msgstr "FARMAVET integrates university teaching with professional practice. We offer programs for students, researchers and professionals from the public and private sectors, with emphasis on food safety and responsible use of antimicrobials."
+
+msgid "Prácticas y pasantías"
+msgstr "Internships and placements"
+
+msgid "Diplomados y cursos"
+msgstr "Diplomas and courses"
+
+msgid "Programas a medida"
+msgstr "Custom programs"
+
+msgid "Oferta formativa"
+msgstr "Training offer"
+
+msgid "Programas de pregrado y postgrado de FAVET"
+msgstr "FAVET undergraduate and postgraduate programs"
+
+msgid "Diplomados en gestión de antimicrobianos y buenas prácticas"
+msgstr "Diplomas in antimicrobial management and good practices"
+
+msgid "Cursos certificados para industria acuícola y pecuaria"
+msgstr "Certified courses for aquaculture and livestock industry"
+
+msgid "Talleres y seminarios temáticos"
+msgstr "Thematic workshops and seminars"
+
+msgid "Formación de pregrado"
+msgstr "Undergraduate training"
+
+msgid "Prácticas profesionales"
+msgstr "Professional internships"
+
+msgid "Estudiantes de Medicina Veterinaria realizan prácticas en laboratorios acreditados, participando en el ciclo completo de análisis y aseguramiento de calidad."
+msgstr "Veterinary Medicine students carry out internships in accredited laboratories, participating in the complete cycle of analysis and quality assurance."
+
+msgid "Tutorías y proyectos"
+msgstr "Tutoring and projects"
+
+msgid "Acompañamiento en memorias de título y proyectos de investigación aplicada con acceso a equipamiento avanzado."
+msgstr "Support for thesis and applied research projects with access to advanced equipment."
+
+msgid "Programas intensivos en farmacología, inocuidad y gestión de laboratorios, abiertos a estudiantes nacionales e internacionales."
+msgstr "Intensive programs in pharmacology, safety and laboratory management, open to national and international students."
+
+msgid "Programas de postgrado"
+msgstr "Postgraduate programs"
+
+msgid "Doctorado en Ciencias Silvoagropecuarias y Veterinarias"
+msgstr "Doctorate in Silvoagricultural and Veterinary Sciences"
+
+msgid "Dirección de tesis en farmacología, inocuidad, RAM y metodologías analíticas. Acceso a redes internacionales y publicaciones indexadas."
+msgstr "Thesis supervision in pharmacology, safety, AMR and analytical methodologies. Access to international networks and indexed publications."
+
+msgid "Magíster en Ciencias Veterinarias y Pecuarias"
+msgstr "Master's in Veterinary and Livestock Sciences"
+
+msgid "Investigaciones aplicadas a monitoreo de residuos, validación metodológica y gestión de riesgos sanitarios."
+msgstr "Applied research on residue monitoring, methodological validation and health risk management."
+
+msgid "Programas de especialidad"
+msgstr "Specialty programs"
+
+msgid "Supervisión de residencias profesionales y especializaciones en farmacología clínica veterinaria e inocuidad."
+msgstr "Supervision of professional residencies and specializations in veterinary clinical pharmacology and safety."
+
+msgid "Educación continua"
+msgstr "Continuing education"
+
+msgid "Modalidad"
+msgstr "Modality"
+
+msgid "Horario"
+msgstr "Schedule"
+
+msgid "Patrocinio"
+msgstr "Sponsorship"
+
+msgid "Auspicio"
+msgstr "Support"
+
+msgid "Postular"
+msgstr "Apply"
+
+msgid "Buenas prácticas en uso de fármacos en salmonicultura"
+msgstr "Good practices in drug use in salmon farming"
+
+msgid "Modalidad online (Zoom). Miércoles 17:30-19:45 y sábados 08:00-13:00. Contenidos: farmacocinética, normativas nacionales e internacionales, stewardship, casos prácticos."
+msgstr "Online modality (Zoom). Wednesdays 5:30-7:45 PM and Saturdays 8:00 AM-1:00 PM. Contents: pharmacokinetics, national and international regulations, stewardship, practical cases."
+
+msgid "Subsecretaría de Pesca"
+msgstr "Undersecretary of Fisheries"
+
+msgid "Historias y testimonios"
+msgstr "Stories and testimonials"
+
+msgid "FARMAVET impulsó mi tesis en inocuidad alimentaria"
+msgstr "FARMAVET boosted my thesis in food safety"
+
+msgid "Camila, médico veterinario FAVET, desarrolló una metodología de control de residuos en mejillones con apoyo de profesionales y equipamiento del laboratorio."
+msgstr "Camila, FAVET veterinarian, developed a residue control methodology in mussels with support from professionals and laboratory equipment."
+
+msgid "Investigación aplicada"
+msgstr "Applied research"
+
+msgid "¿Quieres sumarte a nuestros programas?"
+msgstr "Do you want to join our programs?"
+
+msgid "Escríbenos para conocer requisitos, plazos de postulación y cupos disponibles en docencia, postgrado y capacitación."
+msgstr "Write to us to learn about requirements, application deadlines and available spots in teaching, postgraduate and training."
+
+msgid "Contactar programas"
+msgstr "Contact programs"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Vinculamos la investigación con la formación de profesionales en inocuidad alimentaria."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We link research with the training of professionals in food safety."
+
+# Noticias page translations
+msgid "Noticias y Eventos"
+msgstr "News and Events"
+
+msgid "Actualidad FARMAVET"
+msgstr "FARMAVET News"
+
+msgid "Noticias, publicaciones y eventos"
+msgstr "News, publications and events"
+
+msgid "Mantente informado sobre nuestras acreditaciones, investigaciones, conferencias y actividades de docencia. Aquí encontrarás historias que reflejan nuestro compromiso con la inocuidad alimentaria."
+msgstr "Stay informed about our accreditations, research, conferences and teaching activities. Here you will find stories that reflect our commitment to food safety."
+
+msgid "Noticias destacadas"
+msgstr "Featured news"
+
+msgid "Ver más"
+msgstr "See more"
+
+msgid "Ver programas"
+msgstr "See programs"
+
+msgid "Sesión de educación continua de FARMAVET"
+msgstr "FARMAVET continuing education session"
+
+msgid "Calendario de cursos y diplomados FARMAVET 2025"
+msgstr "FARMAVET courses and diplomas calendar 2025"
+
+msgid "Diplomado en buenas prácticas, cursos de gestión de antimicrobianos y talleres especializados para reforzar capacidades en inocuidad alimentaria. Modalidad híbrida y certificación FAVET."
+msgstr "Diploma in good practices, antimicrobial management courses and specialized workshops to strengthen food safety capabilities. Hybrid modality and FAVET certification."
+
+msgid "Noticias anteriores"
+msgstr "Previous news"
+
+msgid "Noticias siguientes"
+msgstr "Next news"
+
+msgid "Síguenos en redes sociales"
+msgstr "Follow us on social media"
+
+msgid "Mantente al día con nuestras últimas publicaciones, investigaciones y eventos en Instagram y LinkedIn."
+msgstr "Stay up to date with our latest publications, research and events on Instagram and LinkedIn."
+
+msgid "Instagram Feed"
+msgstr "Instagram Feed"
+
+msgid "El feed de Instagram aparecerá aquí una vez configurado"
+msgstr "Instagram feed will appear here once configured"
+
+msgid "LinkedIn Feed"
+msgstr "LinkedIn Feed"
+
+msgid "El feed de LinkedIn aparecerá aquí una vez configurado"
+msgstr "LinkedIn feed will appear here once configured"
+
+msgid "Próximos eventos"
+msgstr "Upcoming events"
+
+msgid "Abril 2025"
+msgstr "April 2025"
+
+msgid "Workshop internacional: Stewardship en acuicultura"
+msgstr "International Workshop: Stewardship in aquaculture"
+
+msgid "Modalidad híbrida"
+msgstr "Hybrid modality"
+
+msgid "Taller de dos días en colaboración con OMSA y SERNAPESCA. Cupos limitados para profesionales y autoridades."
+msgstr "Two-day workshop in collaboration with WOAH and SERNAPESCA. Limited spots for professionals and authorities."
+
+msgid "Inscribirse"
+msgstr "Register"
+
+msgid "Mayo 2025"
+msgstr "May 2025"
+
+msgid "Jornadas de Investigación FARMAVET"
+msgstr "FARMAVET Research Days"
+
+msgid "Auditorio FAVET"
+msgstr "FAVET Auditorium"
+
+msgid "Presentación de avances en farmacología veterinaria, matrices alternativas y resistencia antimicrobiana."
+msgstr "Presentation of advances in veterinary pharmacology, alternative matrices and antimicrobial resistance."
+
+msgid "Ver programa"
+msgstr "See program"
+
+msgid "Junio 2025"
+msgstr "June 2025"
+
+msgid "Curso intensivo de toma de muestras acreditadas"
+msgstr "Intensive course on accredited sampling"
+
+msgid "Modalidad presencial"
+msgstr "In-person modality"
+
+msgid "Laboratorio FARMAVET"
+msgstr "FARMAVET Laboratory"
+
+msgid "Entrenamiento práctico para profesionales de la industria pecuaria e hidrobiológica."
+msgstr "Practical training for professionals in the livestock and hydrobiological industry."
+
+msgid "¿Quieres difundir una noticia o actividad?"
+msgstr "Do you want to share news or an activity?"
+
+msgid "Escríbenos para coordinar cobertura o incluir tu evento en nuestro calendario oficial."
+msgstr "Write to us to coordinate coverage or include your event in our official calendar."
+
+msgid "Enviar información"
+msgstr "Send information"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Comunicamos avances, logros y actividades que fortalecen la inocuidad alimentaria."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We communicate advances, achievements and activities that strengthen food safety."
+
+msgid "Redes sociales"
+msgstr "Social media"
+
+# CASA-OMSA page translations
+msgid "Centro CASA-OMSA"
+msgstr "CASA-WOAH Center"
+
+msgid "Centro colaborador OMSA"
+msgstr "WOAH Collaborating Center"
+
+msgid "CASA: Gestión de antimicrobianos en acuicultura"
+msgstr "CASA: Antimicrobial Management in Aquaculture"
+
+msgid "Desde 2022, FARMAVET integra el Center for Antimicrobial Stewardship in Aquaculture (CASA), uno de los cuatro centros colaboradores OMSA en el mundo y el único especializado en gestión de antimicrobianos en acuicultura."
+msgstr "Since 2022, FARMAVET integrates the Center for Antimicrobial Stewardship in Aquaculture (CASA), one of the four WOAH collaborating centers in the world and the only one specialized in antimicrobial management in aquaculture."
+
+msgid "Único en Latinoamérica"
+msgstr "Unique in Latin America"
+
+msgid "Alianza público-privada"
+msgstr "Public-private alliance"
+
+msgid "Proyección internacional"
+msgstr "International projection"
+
+msgid "¿Qué es CASA?"
+msgstr "What is CASA?"
+
+msgid "El Center for Antimicrobial Stewardship in Aquaculture (CASA) apoya a los países miembros de la OMSA en la implementación de estándares del Código Acuático, fortaleciendo la gestión responsable de antimicrobianos y la vigilancia de la resistencia antimicrobiana."
+msgstr "The Center for Antimicrobial Stewardship in Aquaculture (CASA) supports WOAH member countries in implementing Aquatic Code standards, strengthening responsible antimicrobial management and antimicrobial resistance surveillance."
+
+msgid "Visitar sitio oficial"
+msgstr "Visit official website"
+
+msgid "Objetivos estratégicos"
+msgstr "Strategic objectives"
+
+msgid "Asistencia técnica"
+msgstr "Technical assistance"
+
+msgid "Acompañamos a países miembros de la OMSA para implementar estándares y guías del Código Acuático en materia de antimicrobianos."
+msgstr "We accompany WOAH member countries to implement Aquatic Code standards and guidelines on antimicrobials."
+
+msgid "Gestión de RAM"
+msgstr "AMR Management"
+
+msgid "Promovemos programas de stewardship, monitoreo de resistencia antimicrobiana y uso prudente de fármacos."
+msgstr "We promote stewardship programs, antimicrobial resistance monitoring and prudent use of drugs."
+
+msgid "Investigación aplicada"
+msgstr "Applied research"
+
+msgid "Desarrollamos proyectos que exploran alternativas a antimicrobianos y nuevas estrategias de control."
+msgstr "We develop projects that explore alternatives to antimicrobials and new control strategies."
+
+msgid "Fortalecimiento de capacidades"
+msgstr "Capacity building"
+
+msgid "Organizamos seminarios, talleres, cursos y asesorías para entidades públicas y privadas."
+msgstr "We organize seminars, workshops, courses and advisory services for public and private entities."
+
+msgid "Alianzas estratégicas"
+msgstr "Strategic alliances"
+
+msgid "Vinculamos instituciones nacionales e internacionales para lograr impactos sostenibles en la acuicultura."
+msgstr "We link national and international institutions to achieve sustainable impacts in aquaculture."
+
+msgid "Equipo multidisciplinario"
+msgstr "Multidisciplinary team"
+
+msgid "Dirección"
+msgstr "Management"
+
+msgid "Dra. Javiera Cornejo — Directora Ejecutiva CASA-OMSA, Directora FARMAVET e INOCUIVET. Médico Veterinario y Doctora en Ciencias Silvoagropecuarias y Veterinarias."
+msgstr "Dr. Javiera Cornejo — Executive Director CASA-WOAH, Director FARMAVET and INOCUIVET. Veterinarian and Doctor in Agricultural and Veterinary Sciences."
+
+msgid "Colaboradores U. de Chile"
+msgstr "University of Chile Collaborators"
+
+msgid "Laboratorio de Inocuidad de los Alimentos"
+msgstr "Food Safety Laboratory"
+
+msgid "Centro de Investigación e Innovación para la Acuicultura"
+msgstr "Research and Innovation Center for Aquaculture"
+
+msgid "Laboratorio de Genómica Acuícola"
+msgstr "Aquatic Genomics Laboratory"
+
+msgid "Red internacional"
+msgstr "International network"
+
+msgid "Expertos en farmacología, microbiología, epidemiología y gestión acuícola de universidades y agencias de países miembros."
+msgstr "Experts in pharmacology, microbiology, epidemiology and aquaculture management from universities and agencies of member countries."
+
+msgid "Actividades principales"
+msgstr "Main activities"
+
+msgid "Seminarios internacionales"
+msgstr "International seminars"
+
+msgid "Organización de encuentros regionales con la participación de más de 15 países para compartir buenas prácticas en gestión de antimicrobianos."
+msgstr "Organization of regional meetings with the participation of more than 15 countries to share best practices in antimicrobial management."
+
+msgid "Regiones OMSA"
+msgstr "WOAH Regions"
+
+msgid "Boletines científicos"
+msgstr "Scientific bulletins"
+
+msgid "Publicación periódica de reportes técnicos con avances en investigación, normativa y vigilancia de RAM en acuicultura."
+msgstr "Periodic publication of technical reports with advances in research, regulations and AMR surveillance in aquaculture."
+
+msgid "Divulgación"
+msgstr "Dissemination"
+
+msgid "Asesorías a gobiernos"
+msgstr "Government advisory services"
+
+msgid "Apoyo en el diseño de planes nacionales de acción contra la resistencia antimicrobiana y la actualización de normativas acuícolas."
+msgstr "Support in designing national action plans against antimicrobial resistance and updating aquaculture regulations."
+
+msgid "Política pública"
+msgstr "Public policy"
+
+msgid "Cursos de capacitación"
+msgstr "Training courses"
+
+msgid "Programas e-learning y presenciales orientados a profesionales de la industria y autoridades sanitarias sobre stewardship."
+msgstr "E-learning and in-person programs aimed at industry professionals and health authorities on stewardship."
+
+msgid "Profesionales"
+msgstr "Professionals"
+
+msgid "Aliados estratégicos"
+msgstr "Strategic partners"
+
+msgid "Colaboramos con organismos nacionales e internacionales para potenciar la gestión responsable de antimicrobianos."
+msgstr "We collaborate with national and international organizations to strengthen responsible antimicrobial management."
+
+msgid "¿Requieres apoyo en gestión de antimicrobianos?"
+msgstr "Do you need support in antimicrobial management?"
+
+msgid "Contáctanos para coordinar asesorías, capacitaciones o proyectos colaborativos vinculados a CASA-OMSA."
+msgstr "Contact us to coordinate advisory services, training or collaborative projects related to CASA-WOAH."
+
+msgid "Escríbenos"
+msgstr "Write to us"
+
+msgid "Secciones"
+msgstr "Sections"
+
+msgid "Objetivos"
+msgstr "Objectives"
+
+msgid "Equipo CASA"
+msgstr "CASA Team"
+
+msgid "Actividades"
+msgstr "Activities"
+
+msgid "Alianzas"
+msgstr "Partnerships"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Centro Colaborador OMSA para gestión de antimicrobianos en acuicultura."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. WOAH Collaborating Center for antimicrobial management in aquaculture."
+
+msgid "Centro Colaborador OMSA"
+msgstr "WOAH Collaborating Center"# Investigación page translations
+msgid "Generamos conocimiento para fortalecer la farmacología veterinaria"
+msgstr "We generate knowledge to strengthen veterinary pharmacology"
+
+msgid "FARMAVET lidera líneas de investigación en farmacocinética, inocuidad alimentaria, resistencia antimicrobiana y desarrollo de metodologías analíticas. Nuestro trabajo se materializa en proyectos nacionales e internacionales, publicaciones indexadas y transferencia tecnológica."
+msgstr "FARMAVET leads research lines in pharmacokinetics, food safety, antimicrobial resistance and analytical methodology development. Our work materializes in national and international projects, indexed publications and technology transfer."
+
+msgid "Proyectos FONDECYT y FONDEF"
+msgstr "FONDECYT and FONDEF Projects"
+
+msgid "Colaboraciones internacionales"
+msgstr "International collaborations"
+
+msgid "Transferencia a la industria"
+msgstr "Technology transfer to industry"
+
+msgid "Áreas clave"
+msgstr "Key areas"
+
+msgid "Farmacocinética y farmacodinamia en especies acuícolas y pecuarias"
+msgstr "Pharmacokinetics and pharmacodynamics in aquaculture and livestock species"
+
+msgid "Resistencia antimicrobiana y uso prudente de fármacos"
+msgstr "Antimicrobial resistance and prudent use of drugs"
+
+msgid "Metodologías analíticas multirresiduo de vanguardia"
+msgstr "State-of-the-art multi-residue analytical methodologies"
+
+msgid "Monitoreo de matrices alternativas y ambientales"
+msgstr "Monitoring of alternative and environmental matrices"
+
+msgid "Líneas de investigación"
+msgstr "Research lines"
+
+msgid "Farmacocinética y farmacodinamia"
+msgstr "Pharmacokinetics and pharmacodynamics"
+
+msgid "Estudios de absorción, distribución, metabolismo y excreción de fármacos veterinarios. Modelamiento farmacocinético para optimizar dosificaciones y reducir residuos en alimentos."
+msgstr "Studies of absorption, distribution, metabolism and excretion of veterinary drugs. Pharmacokinetic modeling to optimize dosages and reduce residues in food."
+
+msgid "Desarrollo de metodologías innovadoras para control de residuos, evaluación de riesgos y generación de evidencia para las políticas públicas."
+msgstr "Development of innovative methodologies for residue control, risk assessment and generation of evidence for public policies."
+
+msgid "Monitoreo de RAM en producción animal, programas de stewardship y alternativas terapéuticas emergentes."
+msgstr "AMR monitoring in animal production, stewardship programs and emerging therapeutic alternatives."
+
+msgid "Validación, ampliación de alcance y acreditación de métodos multirresiduo mediante LC-MS/MS y tecnologías emergentes."
+msgstr "Validation, scope expansion and accreditation of multi-residue methods using LC-MS/MS and emerging technologies."
+
+msgid "Matrices alternativas"
+msgstr "Alternative matrices"
+
+msgid "Investigación de residuos en plumas, deyecciones, agua y bioindicadores ambientales para vigilancia integral."
+msgstr "Research on residues in feathers, droppings, water and environmental bioindicators for comprehensive surveillance."
+
+msgid "Proyectos destacados"
+msgstr "Featured projects"
+
+msgid "Ver más"
+msgstr "See more"
+
+msgid "FONDECYT Regular"
+msgstr "FONDECYT Regular"
+
+msgid "Farmacocinética de antimicrobianos en salmón Atlántico"
+msgstr "Pharmacokinetics of antimicrobials in Atlantic salmon"
+
+msgid "Optimización de esquemas terapéuticos para reducir la persistencia de residuos en productos de exportación. Colaboración con Universidad de Tromsø y empresas acuícolas nacionales."
+msgstr "Optimization of therapeutic schemes to reduce residue persistence in export products. Collaboration with University of Tromsø and national aquaculture companies."
+
+msgid "Biomarcadores de resistencia antimicrobiana"
+msgstr "Antimicrobial resistance biomarkers"
+
+msgid "Desarrollo de paneles moleculares para la detección temprana de RAM en centros de cultivo acuícola. Alianza con SERNAPESCA y SalmonChile."
+msgstr "Development of molecular panels for early detection of AMR in aquaculture farming centers. Alliance with SERNAPESCA and SalmonChile."
+
+msgid "Cooperación internacional"
+msgstr "International cooperation"
+
+msgid "CASA-OMSA: Stewardship en acuicultura"
+msgstr "CASA-WOAH: Stewardship in aquaculture"
+
+msgid "Asistencia técnica a países miembros de la OMSA para implementar estándares de gestión de antimicrobianos y monitorear resistencia."
+msgstr "Technical assistance to WOAH member countries to implement antimicrobial management standards and monitor resistance."
+
+msgid "FONDECYT Iniciación"
+msgstr "FONDECYT Initiation"
+
+msgid "Nuevas metodologías LC-MS/MS para matrices alternativas"
+msgstr "New LC-MS/MS methodologies for alternative matrices"
+
+msgid "Validación de métodos rápidos para detectar residuos en plumas y deyecciones, facilitando la vigilancia ambiental."
+msgstr "Validation of rapid methods to detect residues in feathers and droppings, facilitating environmental surveillance."
+
+msgid "Publicaciones científicas"
+msgstr "Scientific publications"
+
+msgid "Selección de artículos recientes publicados en revistas indexadas. Revisa nuestro repositorio institucional para conocer el catálogo completo."
+msgstr "Selection of recent articles published in indexed journals. Check our institutional repository to see the complete catalog."
+
+msgid "Ver publicación"
+msgstr "View publication"
+
+msgid "LC-MS/MS multirresiduo para monitoreo de tetraciclinas en salmónidos"
+msgstr "Multi-residue LC-MS/MS for monitoring tetracyclines in salmonids"
+
+msgid "Estudio que valida una metodología multirresiduo con límites de cuantificación acordes a normativas europeas y FDA."
+msgstr "Study validating a multi-residue methodology with quantification limits in accordance with European and FDA regulations."
+
+msgid "Salmonicultura"
+msgstr "Salmon farming"
+
+msgid "Modelamiento farmacocinético de benzimidazoles en trucha arcoíris"
+msgstr "Pharmacokinetic modeling of benzimidazoles in rainbow trout"
+
+msgid "Investigación colaborativa con centros internacionales para optimizar períodos de resguardo en producción acuícola."
+msgstr "Collaborative research with international centers to optimize withdrawal periods in aquaculture production."
+
+msgid "Benzimidazoles"
+msgstr "Benzimidazoles"
+
+msgid "Resistencia antimicrobiana en producción avícola chilena"
+msgstr "Antimicrobial resistance in Chilean poultry production"
+
+msgid "Evaluación de patrones RAM y propuestas de lineamientos para uso responsable de antimicrobianos."
+msgstr "Assessment of AMR patterns and proposals for guidelines for responsible use of antimicrobials."
+
+msgid "Avicultura"
+msgstr "Poultry farming"
+
+msgid "Ir al repositorio completo"
+msgstr "Go to complete repository"
+
+msgid "Equipo de investigación"
+msgstr "Research team"
+
+msgid "Nuestro capital humano combina investigadores principales, estudiantes de postgrado y colaboradores nacionales e internacionales."
+msgstr "Our human capital combines principal researchers, graduate students and national and international collaborators."
+
+msgid "Investigadores principales"
+msgstr "Principal researchers"
+
+msgid "Dra. Javiera Cornejo – Directora FARMAVET, experta en inocuidad alimentaria."
+msgstr "Dr. Javiera Cornejo – FARMAVET Director, food safety expert."
+
+msgid "Dr. Aldo Maddaleno – Farmacología veterinaria y metodologías analíticas."
+msgstr "Dr. Aldo Maddaleno – Veterinary pharmacology and analytical methodologies."
+
+msgid "Dra. María José Torres – Resistencia antimicrobiana."
+msgstr "Dr. María José Torres – Antimicrobial resistance."
+
+msgid "Estudiantes de postgrado"
+msgstr "Graduate students"
+
+msgid "Doctorado en Ciencias Silvoagropecuarias y Veterinarias, Magíster en Ciencias Veterinarias y Pecuarias, proyectos de titulación en medicina veterinaria."
+msgstr "Doctorate in Agricultural and Veterinary Sciences, Master's in Veterinary and Animal Sciences, undergraduate thesis projects in veterinary medicine."
+
+msgid "Colaboraciones"
+msgstr "Collaborations"
+
+msgid "LIA, CRIA, Laboratorio de Genómica Acuícola, universidades internacionales (Noruega, Canadá, España) y centros OMSA."
+msgstr "LIA, CRIA, Aquatic Genomics Laboratory, international universities (Norway, Canada, Spain) and WOAH centers."
+
+msgid "¿Buscas colaboración científica?"
+msgstr "Looking for scientific collaboration?"
+
+msgid "Conversemos sobre proyectos, publicaciones o transferencia tecnológica. Nuestra experiencia puede potenciar tu iniciativa."
+msgstr "Let's talk about projects, publications or technology transfer. Our experience can enhance your initiative."
+
+msgid "Contactar equipo investigador"
+msgstr "Contact research team"
+
+msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Investigamos para generar conocimiento aplicado en inocuidad alimentaria."
+msgstr "Veterinary Pharmacology Laboratory, University of Chile. We research to generate applied knowledge in food safety."
+

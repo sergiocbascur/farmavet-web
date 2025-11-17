@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ _('Noticias y Eventos') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="Noticias, publicaciones y eventos del laboratorio FARMAVET. Mantente al día con acreditaciones, investigación, publicaciones científicas y actividades formativas."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/noticias.html" />
+    <meta property="og:title" content="Noticias y Eventos | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Noticias, publicaciones y eventos del laboratorio FARMAVET. Mantente al día con acreditaciones, investigación y actividades formativas." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-investigacion.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/noticias.html" />
+    <meta name="twitter:title" content="Noticias y Eventos | FARMAVET" />
+    <meta name="twitter:description" content="Noticias, publicaciones y eventos del laboratorio FARMAVET. Mantente al día con acreditaciones, investigación y actividades formativas." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-investigacion.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="noticias">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            {{ _('Menú') }}
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Actualidad FARMAVET') }}</p>
+            <h1 class="hero-title">{{ _('Noticias, publicaciones y eventos') }}</h1>
+            <p class="hero-description">
+              {{ _('Mantente informado sobre nuestras acreditaciones, investigaciones, conferencias y actividades de docencia. Aquí encontrarás historias que reflejan nuestro compromiso con la inocuidad alimentaria.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Investigación') }}</span>
+              <span class="pill">{{ _('Servicios') }}</span>
+              <span class="pill">{{ _('Docencia') }}</span>
+              <span class="pill">CASA-OMSA</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="noticias-recientes">
+        <div class="container">
+          <h2 class="section-title">{{ _('Noticias destacadas') }}</h2>
+          <div class="news-carousel" data-carousel>
+            <div class="news-track" data-carousel-track>
+              {% if noticias %}
+                {% for noticia in noticias %}
+                <article class="news-card">
+                  {% if noticia.imagen %}
+                  <div style="height: 200px; overflow: hidden; position: relative; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ noticia.imagen }}" alt="{{ get_translated_field(noticia, 'titulo') }}" 
+                         style="width: 100%; height: 100%; object-fit: contain;{% if noticia.imagen_zoom or noticia.imagen_x or noticia.imagen_y %} transform: scale({{ noticia.imagen_zoom or 1.0 }}) translate({{ noticia.imagen_x or 0.0 }}px, {{ noticia.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" />
+                  </div>
+                  {% else %}
+                  <img src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}" alt="{{ get_translated_field(noticia, 'titulo') }}" />
+                  {% endif %}
+                  <div class="news-body">
+                    <span class="news-meta">
+                      {% if noticia.fecha %}{{ noticia.fecha }}{% endif %}{% if noticia.fecha and get_translated_field(noticia, 'categoria') %} · {% endif %}{% if get_translated_field(noticia, 'categoria') %}{{ get_translated_field(noticia, 'categoria')|title }}{% endif %}
+                    </span>
+                    <h3 class="news-title">{{ get_translated_field(noticia, 'titulo') }}</h3>
+                    <p>{{ get_translated_field(noticia, 'resumen') or get_translated_field(noticia, 'contenido') or '' }}</p>
+                    {% if noticia.enlace_externo %}
+                    <a
+                      class="news-link"
+                      href="{{ noticia.enlace_externo }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ _('Ver más') }}
+                    </a>
+                    {% elif get_translated_field(noticia, 'categoria') == 'docencia' or 'educacion' in get_translated_field(noticia, 'categoria')|lower %}
+                    <a
+                      class="news-link"
+                      href="{{ url_for('page', page='docencia') }}#educacion-continua"
+                    >
+                      {{ _('Ver programas') }}
+                    </a>
+                    {% else %}
+                    <a
+                      class="news-link"
+                      href="{{ url_for('page', page='noticias') }}"
+                    >
+                      {{ _('Ver más') }}
+                    </a>
+                    {% endif %}
+                  </div>
+                </article>
+                {% endfor %}
+              {% else %}
+                <!-- Noticias por defecto si no hay en BD -->
+                <article class="news-card">
+                  <img src="{{ url_for('assets', filename='images/noticias/alianza-omsa.svg') }}" alt="{{ _('Sesión de educación continua de FARMAVET') }}" />
+                  <div class="news-body">
+                    <span class="news-meta">ABR 2025 · {{ _('Educación continua') }}</span>
+                    <h3 class="news-title">{{ _('Calendario de cursos y diplomados FARMAVET 2025') }}</h3>
+                    <p>
+                      {{ _('Diplomado en buenas prácticas, cursos de gestión de antimicrobianos y talleres especializados para reforzar capacidades en inocuidad alimentaria. Modalidad híbrida y certificación FAVET.') }}
+                    </p>
+                    <a class="news-link" href="{{ url_for('page', page='docencia') }}#educacion-continua">{{ _('Ver programas') }}</a>
+                  </div>
+                </article>
+              {% endif %}
+            </div>
+            <div class="carousel-buttons">
+              <button class="carousel-button" type="button" aria-label="{{ _('Noticias anteriores') }}" data-carousel-prev>
+                ‹
+              </button>
+              <button class="carousel-button" type="button" aria-label="{{ _('Noticias siguientes') }}" data-carousel-next>
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="redes-sociales">
+        <div class="container">
+          <h2 class="section-title">{{ _('Síguenos en redes sociales') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Mantente al día con nuestras últimas publicaciones, investigaciones y eventos en Instagram y LinkedIn.') }}
+          </p>
+          
+          <div class="social-feeds-grid">
+            <!-- Instagram Feed Widget -->
+            <!-- 
+              INSTRUCCIONES: 
+              1. Ve a https://snapwidget.com (o similar)
+              2. Conecta tu cuenta de Instagram
+              3. Personaliza el diseño (grid, número de columnas, etc.)
+              4. Copia el código que te proporcionen
+              5. Pégalo debajo de este comentario, reemplazando este bloque
+            -->
+            <div class="social-feed-widget" id="instagram-feed">
+              <div class="social-feed-placeholder">
+                <div style="text-align: center; padding: 3rem; background: var(--color-light); border-radius: 16px; border: 2px dashed rgba(0, 61, 122, 0.2);">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem; color: var(--color-primary);">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                  <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">{{ _('Instagram Feed') }}</h3>
+                  <p style="color: var(--color-muted); margin-bottom: 0;">{{ _('El feed de Instagram aparecerá aquí una vez configurado') }}</p>
+                </div>
+              </div>
+              <!-- Pega aquí el código del widget de Instagram -->
+            </div>
+            
+            <!-- LinkedIn Feed Widget -->
+            <!-- 
+              INSTRUCCIONES:
+              1. Ve a https://elfsight.com/es/linkedin-feed-widget/ (o similar)
+              2. Conecta tu página de LinkedIn
+              3. Personaliza el diseño
+              4. Copia el código que te proporcionen
+              5. Pégalo debajo de este comentario, reemplazando este bloque
+            -->
+            <div class="social-feed-widget" id="linkedin-feed">
+              <div class="social-feed-placeholder">
+                <div style="text-align: center; padding: 3rem; background: var(--color-light); border-radius: 16px; border: 2px dashed rgba(0, 61, 122, 0.2);">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem; color: var(--color-primary);">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                  </svg>
+                  <h3 style="color: var(--color-primary); margin-bottom: 0.5rem;">{{ _('LinkedIn Feed') }}</h3>
+                  <p style="color: var(--color-muted); margin-bottom: 0;">{{ _('El feed de LinkedIn aparecerá aquí una vez configurado') }}</p>
+                </div>
+              </div>
+              <!-- Pega aquí el código del widget de LinkedIn -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="eventos">
+        <div class="container">
+          <h2 class="section-title">{{ _('Próximos eventos') }}</h2>
+          <div class="cards-grid">
+            {% if eventos %}
+              {% for evento in eventos %}
+              <article class="event-card">
+                <div class="event-date">{{ evento.fecha }}</div>
+                <h3 class="pillar-title">{{ get_translated_field(evento, 'titulo') }}</h3>
+                {% if get_translated_field(evento, 'meta') %}
+                <div class="event-meta">{{ get_translated_field(evento, 'meta') }}</div>
+                {% endif %}
+                {% if get_translated_field(evento, 'descripcion') %}
+                <p>{{ get_translated_field(evento, 'descripcion') }}</p>
+                {% endif %}
+                {% if evento.enlace %}
+                <a class="cta-inline" href="{{ evento.enlace }}" {% if 'http' in evento.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ get_translated_field(evento, 'texto_boton') or _('Ver más') }}</a>
+                {% else %}
+                <a class="cta-inline" href="#">{{ get_translated_field(evento, 'texto_boton') or _('Ver más') }}</a>
+                {% endif %}
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Eventos por defecto si no hay en BD -->
+              <article class="event-card">
+                <div class="event-date">{{ _('Abril 2025') }}</div>
+                <h3 class="pillar-title">{{ _('Workshop internacional: Stewardship en acuicultura') }}</h3>
+                <div class="event-meta">{{ _('Modalidad híbrida') }} · Santiago / Online</div>
+                <p>
+                  {{ _('Taller de dos días en colaboración con OMSA y SERNAPESCA. Cupos limitados para profesionales y autoridades.') }}
+                </p>
+                <a class="cta-inline" href="#">{{ _('Inscribirse') }}</a>
+              </article>
+              <article class="event-card">
+                <div class="event-date">{{ _('Mayo 2025') }}</div>
+                <h3 class="pillar-title">{{ _('Jornadas de Investigación FARMAVET') }}</h3>
+                <div class="event-meta">{{ _('Auditorio FAVET') }} · Santiago</div>
+                <p>
+                  {{ _('Presentación de avances en farmacología veterinaria, matrices alternativas y resistencia antimicrobiana.') }}
+                </p>
+                <a class="cta-inline" href="#">{{ _('Ver programa') }}</a>
+              </article>
+              <article class="event-card">
+                <div class="event-date">{{ _('Junio 2025') }}</div>
+                <h3 class="pillar-title">{{ _('Curso intensivo de toma de muestras acreditadas') }}</h3>
+                <div class="event-meta">{{ _('Modalidad presencial') }} · {{ _('Laboratorio FARMAVET') }}</div>
+                <p>
+                  {{ _('Entrenamiento práctico para profesionales de la industria pecuaria e hidrobiológica.') }}
+                </p>
+                <a class="cta-inline" href="#">{{ _('Postular') }}</a>
+              </article>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="cta-noticias">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿Quieres difundir una noticia o actividad?') }}</h3>
+            <p>
+              {{ _('Escríbenos para coordinar cobertura o incluir tu evento en nuestro calendario oficial.') }}
+            </p>
+            <a class="cta-button" href="{{ url_for('page', page='contacto') }}">{{ _('Enviar información') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Comunicamos avances, logros y actividades que fortalecen la inocuidad alimentaria.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Secciones') }}</h3>
+          <ul class="footer-links">
+            <li><a href="#noticias-recientes">{{ _('Noticias') }}</a></li>
+            <li><a href="#redes-sociales">{{ _('Redes sociales') }}</a></li>
+            <li><a href="#eventos">{{ _('Eventos') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>{{ _('Email') }}: comunicaciones@farmavet.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>

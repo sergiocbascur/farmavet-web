@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Tarjetas Destacadas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Tarjetas Destacadas</h1>
+    <a href="{{ url_for('admin_tarjeta_destacada_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva Tarjeta
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Página</th>
+                        <th>Título</th>
+                        <th>Contenido</th>
+                        <th>Enlace</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if tarjetas %}
+                        {% for tarjeta in tarjetas %}
+                        <tr>
+                            <td>{{ tarjeta.pagina }}</td>
+                            <td>{{ tarjeta.titulo }}</td>
+                            <td>{{ tarjeta.contenido[:50] }}{% if tarjeta.contenido|length > 50 %}...{% endif %}</td>
+                            <td>
+                                {% if tarjeta.enlace %}
+                                    <a href="{{ tarjeta.enlace }}" target="_blank" class="text-decoration-none">
+                                        <i class="bi bi-link-45deg"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ tarjeta.orden }}</td>
+                            <td>
+                                {% if tarjeta.activo %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactiva</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_tarjeta_destacada_editar', tarjeta_id=tarjeta.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin_tarjeta_destacada_eliminar', tarjeta_id=tarjeta.id) }}" style="display: inline;" onsubmit="return confirm('¿Estás seguro de eliminar esta tarjeta?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay tarjetas destacadas creadas</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

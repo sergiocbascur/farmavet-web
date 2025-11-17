@@ -1,0 +1,183 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if testimonio %}Editar{% else %}Nuevo{% endif %} Testimonio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if testimonio else 'plus-circle' }} me-2"></i>
+        {% if testimonio %}Editar{% else %}Nuevo{% endif %} Testimonio
+    </h2>
+    <a href="{{ url_for('admin_testimonios') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label for="titulo" class="form-label">Título del Testimonio <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ testimonio.titulo if testimonio else '' }}" required
+                           placeholder="Ej: 'FARMAVET impulsó mi tesis en inocuidad alimentaria'">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ testimonio.orden if testimonio else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <label for="contenido" class="form-label">Contenido del Testimonio <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="contenido" name="contenido" rows="5" required>{{ testimonio.contenido if testimonio else '' }}</textarea>
+                    <small class="text-muted">Texto completo del testimonio que se mostrará en el sitio</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="autor" class="form-label">Autor</label>
+                    <input type="text" class="form-control" id="autor" name="autor" 
+                           value="{{ testimonio.autor if testimonio else '' }}" 
+                           placeholder="Ej: Camila, médico veterinario FAVET">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" name="categoria">
+                        <option value="">Seleccionar...</option>
+                        <option value="pregrado" {% if testimonio and testimonio.categoria == 'pregrado' %}selected{% endif %}>Pregrado</option>
+                        <option value="postgrado" {% if testimonio and testimonio.categoria == 'postgrado' %}selected{% endif %}>Postgrado</option>
+                        <option value="industria" {% if testimonio and testimonio.categoria == 'industria' %}selected{% endif %}>Industria</option>
+                        <option value="doctorado" {% if testimonio and testimonio.categoria == 'doctorado' %}selected{% endif %}>Doctorado</option>
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <label for="tags" class="form-label">Tags (separados por comas)</label>
+                    <input type="text" class="form-control" id="tags" name="tags" 
+                           value="{{ testimonio.tags if testimonio else '' }}" 
+                           placeholder="Ej: Investigación aplicada, Stewardship, RAM">
+                    <small class="text-muted">Tags que aparecerán como chips en el testimonio</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el testimonio se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ testimonio.titulo_en if testimonio and testimonio.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="contenido_en" class="form-label">Contenido (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="contenido_en" name="contenido_en" rows="5" 
+                              placeholder="Content in English">{{ testimonio.contenido_en if testimonio and testimonio.contenido_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <label for="imagen" class="form-label">URL de Imagen (opcional)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="imagen" name="imagen" 
+                               value="{{ testimonio.imagen if testimonio else '' }}" 
+                               placeholder="/static/uploads/testimonios/imagen.jpg o assets/images/...">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-upload me-1"></i>Subir
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="uploadImage(event)">
+                    </div>
+                    <small class="text-muted">Pega la URL de la imagen o sube una nueva. Formatos: JPG, PNG, WEBP, SVG</small>
+                    {% if testimonio and testimonio.imagen %}
+                    <div class="mt-2">
+                        <small>Imagen actual:</small><br>
+                        <img src="{{ testimonio.imagen }}" alt="Vista previa" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 0.5rem;" onerror="this.style.display='none';">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not testimonio or testimonio.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Testimonio activo (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Testimonio
+                        </button>
+                        <a href="{{ url_for('admin_testimonios') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'testimonios');
+        
+        const btn = event.target.previousElementSibling;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Subiendo...';
+        
+        fetch('{{ url_for("upload_file") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) {
+                document.getElementById('imagen').value = data.url;
+                btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Subido';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert('Error al subir imagen: ' + (data.error || 'Error desconocido'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al subir la imagen');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+</script>
+{% endblock %}

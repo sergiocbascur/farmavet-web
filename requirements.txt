@@ -1,0 +1,5 @@
+Flask==3.0.0
+Werkzeug==3.0.1
+Flask-Babel==4.0.0
+Babel==2.13.1
+gunicorn==21.2.0

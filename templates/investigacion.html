@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ _('Investigación') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="Líneas de investigación, proyectos FONDECYT y publicaciones científicas del laboratorio FARMAVET. Farmacocinética, inocuidad alimentaria y resistencia antimicrobiana."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/investigacion.html" />
+    <meta property="og:title" content="Investigación | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Líneas de investigación, proyectos FONDECYT y publicaciones científicas del laboratorio FARMAVET. Farmacocinética, inocuidad alimentaria y resistencia antimicrobiana." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-investigacion.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/investigacion.html" />
+    <meta name="twitter:title" content="Investigación | FARMAVET" />
+    <meta name="twitter:description" content="Líneas de investigación, proyectos FONDECYT y publicaciones científicas del laboratorio FARMAVET." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-investigacion.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="investigacion">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            {{ _('Menú') }}
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Investigación aplicada') }}</p>
+            <h1 class="hero-title">{{ _('Generamos conocimiento para fortalecer la farmacología veterinaria') }}</h1>
+            <p class="hero-description">
+              {{ _('FARMAVET lidera líneas de investigación en farmacocinética, inocuidad alimentaria, resistencia antimicrobiana y desarrollo de metodologías analíticas. Nuestro trabajo se materializa en proyectos nacionales e internacionales, publicaciones indexadas y transferencia tecnológica.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Proyectos FONDECYT y FONDEF') }}</span>
+              <span class="pill">{{ _('Colaboraciones internacionales') }}</span>
+              <span class="pill">{{ _('Transferencia a la industria') }}</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              {{ _('Áreas clave') }}
+            </h2>
+            <ul class="footer-links">
+              <li>{{ _('Farmacocinética y farmacodinamia en especies acuícolas y pecuarias') }}</li>
+              <li>{{ _('Resistencia antimicrobiana y uso prudente de fármacos') }}</li>
+              <li>{{ _('Metodologías analíticas multirresiduo de vanguardia') }}</li>
+              <li>{{ _('Monitoreo de matrices alternativas y ambientales') }}</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="lineas">
+        <div class="container">
+          <h2 class="section-title">{{ _('Líneas de investigación') }}</h2>
+          <div class="infinite-carousel" data-carousel-infinite data-items-per-view="3" data-autoplay="true" data-autoplay-speed="5000">
+            <div class="carousel-wrapper">
+              <div class="carousel-track-infinite" data-carousel-track-infinite>
+                <article class="card">
+                  <h3 class="pillar-title">{{ _('Farmacocinética y farmacodinamia') }}</h3>
+                  <p>
+                    {{ _('Estudios de absorción, distribución, metabolismo y excreción de fármacos veterinarios. Modelamiento farmacocinético para optimizar dosificaciones y reducir residuos en alimentos.') }}
+                  </p>
+                </article>
+                <article class="card">
+                  <h3 class="pillar-title">{{ _('Inocuidad alimentaria') }}</h3>
+                  <p>
+                    {{ _('Desarrollo de metodologías innovadoras para control de residuos, evaluación de riesgos y generación de evidencia para las políticas públicas.') }}
+                  </p>
+                </article>
+                <article class="card">
+                  <h3 class="pillar-title">{{ _('Resistencia antimicrobiana') }}</h3>
+                  <p>
+                    {{ _('Monitoreo de RAM en producción animal, programas de stewardship y alternativas terapéuticas emergentes.') }}
+                  </p>
+                </article>
+                <article class="card">
+                  <h3 class="pillar-title">{{ _('Metodologías analíticas') }}</h3>
+                  <p>
+                    {{ _('Validación, ampliación de alcance y acreditación de métodos multirresiduo mediante LC-MS/MS y tecnologías emergentes.') }}
+                  </p>
+                </article>
+                <article class="card">
+                  <h3 class="pillar-title">{{ _('Matrices alternativas') }}</h3>
+                  <p>
+                    {{ _('Investigación de residuos en plumas, deyecciones, agua y bioindicadores ambientales para vigilancia integral.') }}
+                  </p>
+                </article>
+              </div>
+            </div>
+            <div class="carousel-nav-infinite">
+              <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+              <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="proyectos">
+        <div class="container">
+          <h2 class="section-title">{{ _('Proyectos destacados') }}</h2>
+          <div class="cards-grid">
+            {% if proyectos %}
+              {% for proyecto in proyectos %}
+              <article class="card">
+                {% if get_translated_field(proyecto, 'tipo') %}
+                <span class="badge">{{ get_translated_field(proyecto, 'tipo') }}</span>
+                {% endif %}
+                <h3 class="pillar-title">{{ get_translated_field(proyecto, 'titulo') }}</h3>
+                {% if get_translated_field(proyecto, 'descripcion') %}
+                <p>{{ get_translated_field(proyecto, 'descripcion') }}</p>
+                {% endif %}
+                {% if proyecto.enlace %}
+                <a class="cta-inline" href="{{ proyecto.enlace }}" {% if 'http' in proyecto.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ _('Ver más') }}</a>
+                {% endif %}
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Proyectos por defecto si no hay en BD -->
+              <article class="card">
+                <span class="badge">{{ _('FONDECYT Regular') }}</span>
+                <h3 class="pillar-title">{{ _('Farmacocinética de antimicrobianos en salmón Atlántico') }}</h3>
+                <p>
+                  {{ _('Optimización de esquemas terapéuticos para reducir la persistencia de residuos en productos de exportación. Colaboración con Universidad de Tromsø y empresas acuícolas nacionales.') }}
+                </p>
+              </article>
+              <article class="card">
+                <span class="badge">FONDEF</span>
+                <h3 class="pillar-title">{{ _('Biomarcadores de resistencia antimicrobiana') }}</h3>
+                <p>
+                  {{ _('Desarrollo de paneles moleculares para la detección temprana de RAM en centros de cultivo acuícola. Alianza con SERNAPESCA y SalmonChile.') }}
+                </p>
+              </article>
+              <article class="card">
+                <span class="badge">{{ _('Cooperación internacional') }}</span>
+                <h3 class="pillar-title">{{ _('CASA-OMSA: Stewardship en acuicultura') }}</h3>
+                <p>
+                  {{ _('Asistencia técnica a países miembros de la OMSA para implementar estándares de gestión de antimicrobianos y monitorear resistencia.') }}
+                </p>
+              </article>
+              <article class="card">
+                <span class="badge">{{ _('FONDECYT Iniciación') }}</span>
+                <h3 class="pillar-title">{{ _('Nuevas metodologías LC-MS/MS para matrices alternativas') }}</h3>
+                <p>
+                  {{ _('Validación de métodos rápidos para detectar residuos en plumas y deyecciones, facilitando la vigilancia ambiental.') }}
+                </p>
+              </article>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="publicaciones">
+        <div class="container">
+          <h2 class="section-title">{{ _('Publicaciones científicas') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Selección de artículos recientes publicados en revistas indexadas. Revisa nuestro repositorio institucional para conocer el catálogo completo.') }}
+          </p>
+          <div class="news-feed">
+            {% if publicaciones %}
+              {% for publicacion in publicaciones %}
+              <article class="news-item">
+                <h3 class="pillar-title">{{ get_translated_field(publicacion, 'titulo') }}</h3>
+                <div class="news-meta">
+                  {% if publicacion.revista %}{{ publicacion.revista }}{% endif %}{% if publicacion.revista and publicacion.año %} · {% endif %}{% if publicacion.año %}{{ publicacion.año }}{% endif %}
+                </div>
+                {% if get_translated_field(publicacion, 'descripcion') %}
+                <p>{{ get_translated_field(publicacion, 'descripcion') }}</p>
+                {% endif %}
+                {% if publicacion.tags %}
+                  {% set tags_list = publicacion.tags|from_json %}
+                  {% if tags_list %}
+                  <div class="news-tags">
+                    {% for tag in tags_list %}
+                    <span class="chip">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                {% endif %}
+                {% if publicacion.enlace and publicacion.enlace.strip() %}
+                <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ _('Ver publicación') }}</a>
+                {% endif %}
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Publicaciones por defecto si no hay en BD -->
+              <article class="news-item">
+                <h3 class="pillar-title">
+                  {{ _('LC-MS/MS multirresiduo para monitoreo de tetraciclinas en salmónidos') }}
+                </h3>
+                <div class="news-meta">Journal of Veterinary Pharmacology · 2025</div>
+                <p>
+                  {{ _('Estudio que valida una metodología multirresiduo con límites de cuantificación acordes a normativas europeas y FDA.') }}
+                </p>
+                <div class="news-tags">
+                  <span class="chip">LC-MS/MS</span>
+                  <span class="chip">{{ _('Inocuidad') }}</span>
+                  <span class="chip">{{ _('Salmonicultura') }}</span>
+                </div>
+                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
+              </article>
+              <article class="news-item">
+                <h3 class="pillar-title">
+                  {{ _('Modelamiento farmacocinético de benzimidazoles en trucha arcoíris') }}
+                </h3>
+                <div class="news-meta">Aquaculture Research · 2024</div>
+                <p>
+                  {{ _('Investigación colaborativa con centros internacionales para optimizar períodos de resguardo en producción acuícola.') }}
+                </p>
+                <div class="news-tags">
+                  <span class="chip">{{ _('Farmacocinética') }}</span>
+                  <span class="chip">{{ _('Benzimidazoles') }}</span>
+                </div>
+                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
+              </article>
+              <article class="news-item">
+                <h3 class="pillar-title">
+                  {{ _('Resistencia antimicrobiana en producción avícola chilena') }}
+                </h3>
+                <div class="news-meta">Frontiers in Veterinary Science · 2024</div>
+                <p>
+                  {{ _('Evaluación de patrones RAM y propuestas de lineamientos para uso responsable de antimicrobianos.') }}
+                </p>
+                <div class="news-tags">
+                  <span class="chip">RAM</span>
+                  <span class="chip">{{ _('Avicultura') }}</span>
+                  <span class="chip">Stewardship</span>
+                </div>
+                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
+              </article>
+            {% endif %}
+          </div>
+          <div style="margin-top:2.5rem; text-align:center">
+            <a class="cta-button" href="#">{{ _('Ir al repositorio completo') }}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="equipo-investigacion">
+        <div class="container">
+          <h2 class="section-title">{{ _('Equipo de investigación') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Nuestro capital humano combina investigadores principales, estudiantes de postgrado y colaboradores nacionales e internacionales.') }}
+          </p>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Investigadores principales') }}</h3>
+              <ul class="footer-links">
+                <li>{{ _('Dra. Javiera Cornejo – Directora FARMAVET, experta en inocuidad alimentaria.') }}</li>
+                <li>{{ _('Dr. Aldo Maddaleno – Farmacología veterinaria y metodologías analíticas.') }}</li>
+                <li>{{ _('Dra. María José Torres – Resistencia antimicrobiana.') }}</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Estudiantes de postgrado') }}</h3>
+              <p>
+                {{ _('Doctorado en Ciencias Silvoagropecuarias y Veterinarias, Magíster en Ciencias Veterinarias y Pecuarias, proyectos de titulación en medicina veterinaria.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Colaboraciones') }}</h3>
+              <p>
+                {{ _('LIA, CRIA, Laboratorio de Genómica Acuícola, universidades internacionales (Noruega, Canadá, España) y centros OMSA.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿Buscas colaboración científica?') }}</h3>
+            <p>
+              {{ _('Conversemos sobre proyectos, publicaciones o transferencia tecnológica. Nuestra experiencia puede potenciar tu iniciativa.') }}
+            </p>
+            <a class="cta-button" href="{{ url_for('page', page='contacto') }}">{{ _('Contactar equipo investigador') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Investigamos para generar conocimiento aplicado en inocuidad alimentaria.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Investigación') }}</h3>
+          <ul class="footer-links">
+            <li><a href="#lineas">{{ _('Líneas de investigación') }}</a></li>
+            <li><a href="#proyectos">{{ _('Proyectos') }}</a></li>
+            <li><a href="#publicaciones">{{ _('Publicaciones') }}</a></li>
+            <li><a href="#equipo-investigacion">{{ _('Equipo') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>Av. Santa Rosa 11735, La Pintana</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>Email: investigacion@farmavet.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - Universidad de Chile.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>

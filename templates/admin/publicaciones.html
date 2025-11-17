@@ -1,0 +1,65 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Publicaciones Científicas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-journal-text me-2"></i>Gestión de Publicaciones Científicas</h2>
+    <a href="{{ url_for('admin_publicacion_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva Publicación
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Revista</th>
+                        <th>Año</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for publicacion in publicaciones %}
+                    <tr>
+                        <td><strong>{{ publicacion.titulo }}</strong></td>
+                        <td>{{ publicacion.revista or '—' }}</td>
+                        <td>{{ publicacion.año or '—' }}</td>
+                        <td>{{ publicacion.orden }}</td>
+                        <td>
+                            {% if publicacion.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_publicacion_editar', publicacion_id=publicacion.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_publicacion_eliminar', publicacion_id=publicacion.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta publicación?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No hay publicaciones registradas. <a href="{{ url_for('admin_publicacion_nuevo') }}">Crear la primera</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,183 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if programa %}Editar{% else %}Nuevo{% endif %} Programa{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if programa else 'plus-circle' }} me-2"></i>
+        {% if programa %}Editar{% else %}Nuevo{% endif %} Programa
+    </h2>
+    <a href="{{ url_for('admin_programas') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="tipo" class="form-label">Tipo de Programa <span class="text-danger">*</span></label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="diplomado" {% if programa and programa.tipo == 'diplomado' %}selected{% endif %}>Diplomado</option>
+                        <option value="curso" {% if programa and programa.tipo == 'curso' %}selected{% endif %}>Curso</option>
+                        <option value="taller" {% if programa and programa.tipo == 'taller' %}selected{% endif %}>Taller</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" value="{{ programa.orden if programa else 0 }}" min="0">
+                    <small class="text-muted">Los programas se ordenan por este número (menor = primero)</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título del Programa <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ programa.titulo if programa else '' }}" required>
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4">{{ programa.descripcion if programa else '' }}</textarea>
+                    <small class="text-muted">Descripción del programa que se mostrará en la tarjeta</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="modalidad" class="form-label">Modalidad</label>
+                    <input type="text" class="form-control" id="modalidad" name="modalidad" 
+                           value="{{ programa.modalidad if programa else '' }}" 
+                           placeholder="Ej: Online (Zoom), Presencial, E-learning">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="horario" class="form-label">Horario</label>
+                    <input type="text" class="form-control" id="horario" name="horario" 
+                           value="{{ programa.horario if programa else '' }}" 
+                           placeholder="Ej: Miércoles 17:30-19:45 y sábados 08:00-13:00">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="patrocinio" class="form-label">Patrocinio</label>
+                    <input type="text" class="form-control" id="patrocinio" name="patrocinio" 
+                           value="{{ programa.patrocinio if programa else '' }}" 
+                           placeholder="Ej: SAG, SERNAPESCA, Subsecretaría de Pesca">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="auspicio" class="form-label">Auspicio</label>
+                    <input type="text" class="form-control" id="auspicio" name="auspicio" 
+                           value="{{ programa.auspicio if programa else '' }}" 
+                           placeholder="Ej: INTESAL">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="email_contacto" class="form-label">Email de contacto</label>
+                    <input type="email" class="form-control" id="email_contacto" name="email_contacto" 
+                           value="{{ programa.email_contacto if programa else 'postitulo@veterinaria.uchile.cl' }}">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="texto_boton" class="form-label">Texto del botón</label>
+                    <input type="text" class="form-control" id="texto_boton" name="texto_boton" 
+                           value="{{ programa.texto_boton if programa else 'Postular' }}">
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el programa se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ programa.titulo_en if programa and programa.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion_en" class="form-label">Descripción (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="descripcion_en" name="descripcion_en" rows="4" 
+                              placeholder="Description in English">{{ programa.descripcion_en if programa and programa.descripcion_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tipo_en" class="form-label">Tipo de Programa (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="tipo_en" name="tipo_en" 
+                           value="{{ programa.tipo_en if programa and programa.tipo_en else '' }}" 
+                           placeholder="Program type in English (e.g., Diploma, Course, Workshop)">
+                    <small class="text-muted">Si se deja vacío, se usará la traducción automática del tipo seleccionado</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="modalidad_en" class="form-label">Modalidad (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="modalidad_en" name="modalidad_en" 
+                           value="{{ programa.modalidad_en if programa and programa.modalidad_en else '' }}" 
+                           placeholder="Modality in English (e.g., Online (Zoom), In-person, E-learning)">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="horario_en" class="form-label">Horario (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="horario_en" name="horario_en" 
+                           value="{{ programa.horario_en if programa and programa.horario_en else '' }}" 
+                           placeholder="Schedule in English (e.g., Wednesdays 5:30-7:45 PM and Saturdays 8:00 AM-1:00 PM)">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="texto_boton_en" class="form-label">Texto del botón (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="texto_boton_en" name="texto_boton_en" 
+                           value="{{ programa.texto_boton_en if programa and programa.texto_boton_en else '' }}" 
+                           placeholder="Button text in English (e.g., Apply, Register)">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="patrocinio_en" class="form-label">Patrocinio (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="patrocinio_en" name="patrocinio_en" 
+                           value="{{ programa.patrocinio_en if programa and programa.patrocinio_en else '' }}" 
+                           placeholder="Sponsorship in English">
+                    <small class="text-muted">Si se deja vacío, se mostrará el texto original</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="auspicio_en" class="form-label">Auspicio (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="auspicio_en" name="auspicio_en" 
+                           value="{{ programa.auspicio_en if programa and programa.auspicio_en else '' }}" 
+                           placeholder="Support in English">
+                    <small class="text-muted">Si se deja vacío, se mostrará el texto original</small>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not programa or programa.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Programa activo (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Programa
+                        </button>
+                        <a href="{{ url_for('admin_programas') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

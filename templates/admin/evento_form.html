@@ -1,0 +1,130 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Editar Evento' if evento else 'Nuevo Evento' }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-calendar-event me-2"></i>{{ 'Editar Evento' if evento else 'Nuevo Evento' }}
+    </h2>
+    <a href="{{ url_for('admin_eventos') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ evento.titulo if evento else '' }}" required>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="fecha" name="fecha" 
+                           value="{{ evento.fecha if evento else '' }}" 
+                           placeholder="Ej: Abril 2025, Mayo 2025" required>
+                    <small class="text-muted">Formato: "Mes Año" (ej: Abril 2025)</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="meta" class="form-label">Meta / Ubicación</label>
+                    <input type="text" class="form-control" id="meta" name="meta" 
+                           value="{{ evento.meta if evento else '' }}" 
+                           placeholder="Ej: Modalidad híbrida · Santiago / Online">
+                    <small class="text-muted">Modalidad, ubicación, etc.</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4">{{ evento.descripcion if evento else '' }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="enlace" class="form-label">Enlace (opcional)</label>
+                    <input type="url" class="form-control" id="enlace" name="enlace" 
+                           value="{{ evento.enlace if evento else '' }}" 
+                           placeholder="https://...">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="texto_boton" class="form-label">Texto del Botón</label>
+                    <input type="text" class="form-control" id="texto_boton" name="texto_boton" 
+                           value="{{ evento.texto_boton if evento else 'Ver más' }}" 
+                           placeholder="Ver más, Inscribirse, Postular, etc.">
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el evento se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ evento.titulo_en if evento and evento.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion_en" class="form-label">Descripción (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="descripcion_en" name="descripcion_en" rows="4" 
+                              placeholder="Description in English">{{ evento.descripcion_en if evento and evento.descripcion_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="meta_en" class="form-label">Meta / Ubicación (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="meta_en" name="meta_en" 
+                           value="{{ evento.meta_en if evento and evento.meta_en else '' }}" 
+                           placeholder="Modality, location, etc. in English">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="texto_boton_en" class="form-label">Texto del Botón (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="texto_boton_en" name="texto_boton_en" 
+                           value="{{ evento.texto_boton_en if evento and evento.texto_boton_en else '' }}" 
+                           placeholder="Button text in English">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ evento.orden if evento else 0 }}" min="0">
+                    <small class="text-muted">Menor número = aparece primero</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if evento and evento.activo == 1 %}checked{% elif not evento %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Evento activo (visible en el sitio)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>{{ 'Actualizar' if evento else 'Crear' }} Evento
+                    </button>
+                    <a href="{{ url_for('admin_eventos') }}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

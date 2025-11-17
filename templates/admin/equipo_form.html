@@ -1,0 +1,469 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if miembro %}Editar{% else %}Nuevo{% endif %} Miembro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if miembro else 'plus-circle' }} me-2"></i>
+        {% if miembro %}Editar{% else %}Nuevo{% endif %} Miembro del Equipo
+    </h2>
+    <a href="{{ url_for('admin_equipo') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                           value="{{ miembro.nombre if miembro else '' }}" required>
+                </div>
+                
+                <div class="col-12">
+                    <label for="cargo_id" class="form-label">Cargo del Organigrama <span class="text-danger">*</span></label>
+                    <select class="form-select" id="cargo_id" name="cargo_id" required>
+                        <option value="">Seleccionar un cargo del organigrama...</option>
+                        {% if cargos %}
+                            {% set secciones_unicas = cargos|map(attribute='seccion')|unique|list %}
+                            {% for seccion_nombre in secciones_unicas %}
+                                <optgroup label="{{ seccion_nombre|title }}">
+                                    {% for cargo in cargos %}
+                                        {% if cargo.seccion == seccion_nombre %}
+                                        <option value="{{ cargo.id }}" 
+                                                {% if miembro and miembro.cargo_id == cargo.id %}selected{% endif %}>
+                                            {{ cargo.cargo }}{% if cargo.subseccion %} ({{ cargo.subseccion }}){% endif %}
+                                        </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                    <small class="text-muted">
+                        Selecciona un cargo del organigrama. Si no existe el cargo que necesitas, 
+                        <a href="{{ url_for('admin_organigrama_nuevo') }}" target="_blank">crea uno nuevo en el organigrama</a> primero.
+                    </small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="biografia" class="form-label">Biografía</label>
+                    <textarea class="form-control" id="biografia" name="biografia" rows="4">{{ miembro.biografia if miembro else '' }}</textarea>
+                    <small class="text-muted">Descripción del perfil profesional</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas este campo, la biografía se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="biografia_en" class="form-label">Biografía (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="biografia_en" name="biografia_en" rows="4" 
+                              placeholder="Biography in English">{{ miembro.biografia_en if miembro and miembro.biografia_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <label for="imagen" class="form-label">URL de Imagen (opcional)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="imagen" name="imagen" 
+                               value="{{ miembro.imagen if miembro else '' }}" 
+                               placeholder="/static/uploads/equipo/foto.jpg o assets/images/..."
+                               oninput="updatePreview()">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-upload me-1"></i>Subir
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="uploadImage(event)">
+                    </div>
+                    <small class="text-muted">Pega la URL de la imagen o sube una nueva. Formatos: JPG, PNG, WEBP</small>
+                    {% if miembro and miembro.imagen %}
+                    <div class="mt-2">
+                        <small>Imagen actual:</small><br>
+                        <img id="currentImage" src="{{ miembro.imagen }}" alt="Vista previa" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 0.5rem; object-fit: cover;" onerror="this.style.display='none';">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Campos ocultos para guardar transformación de imagen -->
+                <input type="hidden" id="imagen_zoom" name="imagen_zoom" value="{{ miembro.imagen_zoom if miembro and miembro.imagen_zoom else 1.0 }}">
+                <input type="hidden" id="imagen_x" name="imagen_x" value="{{ miembro.imagen_x if miembro and miembro.imagen_x else 0.0 }}">
+                <input type="hidden" id="imagen_y" name="imagen_y" value="{{ miembro.imagen_y if miembro and miembro.imagen_y else 0.0 }}">
+                
+                <!-- Vista Previa de la imagen del equipo -->
+                <div class="col-12 mt-4">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-eye me-2"></i>Vista Previa de Foto <small class="text-muted">(Tamaño real: 120px × 120px circular)</small></h5>
+                    <div class="card" style="max-width: 300px; margin: 0 auto; overflow: visible;">
+                        <div class="card-body p-0" style="overflow: visible;">
+                            <div id="previewImage" style="width: 120px; height: 120px; overflow: hidden; position: relative; background-color: #f5f5f5; cursor: move; user-select: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 20px auto; border: 3px solid rgba(0, 61, 122, 0.1); flex-shrink: 0;">
+                            {% if miembro and miembro.imagen %}
+                            <img src="{{ miembro.imagen }}" alt="Preview" id="previewImg" style="width: 100%; height: 100%; object-fit: cover; transform-origin: center center; transition: transform 0.1s; user-select: none; pointer-events: none;{% if miembro.imagen_zoom or miembro.imagen_x or miembro.imagen_y %} transform: scale({{ miembro.imagen_zoom or 1.0 }}) translate({{ miembro.imagen_x or 0.0 }}px, {{ miembro.imagen_y or 0.0 }}px);{% endif %}">
+                            {% else %}
+                            <div style="text-align: center; color: #999;">
+                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                <p style="margin-top: 0.5rem; font-size: 0.875rem;">Sin imagen</p>
+                            </div>
+                            {% endif %}
+                            <div id="imageControls" style="position: absolute; bottom: 10px; right: 10px; display: none; background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10;">
+                                <div class="btn-group-vertical" role="group">
+                                    <button type="button" class="btn btn-sm btn-light" onclick="resetImageTransform()" title="Resetear">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="zoomImage(0.1)" title="Acercar">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-light" onclick="zoomImage(-0.1)" title="Alejar">
+                                        <i class="bi bi-zoom-out"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="imageHint" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,61,122,0.8); color: white; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.875rem; display: none; z-index: 10; white-space: nowrap;">
+                                <i class="bi bi-hand-index me-1"></i>Arrastra para mover · Rueda para zoom
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tags" class="form-label">Tags (separados por comas)</label>
+                    <input type="text" class="form-control" id="tags" name="tags" 
+                           value="{% if miembro and miembro.tags %}{{ miembro.tags|from_json|join(', ') }}{% endif %}" 
+                           placeholder="Ej: Inocuidad alimentaria, CASA-OMSA">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ miembro.orden if miembro else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3">Redes Sociales y Contacto (opcional)</h5>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ miembro.email if miembro else '' }}" 
+                           placeholder="email@farmavet.cl">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="linkedin" class="form-label">LinkedIn</label>
+                    <input type="url" class="form-control" id="linkedin" name="linkedin" 
+                           value="{% if miembro and miembro.redes_sociales %}{{ (miembro.redes_sociales|from_json).get('linkedin', '') }}{% endif %}" 
+                           placeholder="https://linkedin.com/in/usuario">
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not miembro or miembro.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Miembro activo (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Miembro
+                        </button>
+                        <a href="{{ url_for('admin_equipo') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let imageScale = 1;
+    let imageX = 0;
+    let imageY = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let imageStartX = 0;
+    let imageStartY = 0;
+    
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'equipo');
+        
+        const btn = event.target.previousElementSibling;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Subiendo...';
+        
+        fetch('{{ url_for("upload_file") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) {
+                document.getElementById('imagen').value = data.url;
+                updatePreview();
+                btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Subido';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert('Error al subir imagen: ' + (data.error || 'Error desconocido'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al subir la imagen');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+    
+    function updatePreview() {
+        const imagen = document.getElementById('imagen').value || '';
+        const previewImageDiv = document.getElementById('previewImage');
+        const previewImg = document.getElementById('previewImg');
+        const imageControls = document.getElementById('imageControls');
+        const imageHint = document.getElementById('imageHint');
+        const currentImage = document.getElementById('currentImage');
+        
+        // Cargar valores guardados si existen
+        const zoomField = document.getElementById('imagen_zoom');
+        const xField = document.getElementById('imagen_x');
+        const yField = document.getElementById('imagen_y');
+        
+        if (zoomField && zoomField.value && imagen) {
+            imageScale = parseFloat(zoomField.value) || 1.0;
+        }
+        if (xField && xField.value && imagen) {
+            imageX = parseFloat(xField.value) || 0.0;
+        }
+        if (yField && yField.value && imagen) {
+            imageY = parseFloat(yField.value) || 0.0;
+        }
+        
+        if (imagen) {
+            if (!previewImg) {
+                const img = document.createElement('img');
+                img.id = 'previewImg';
+                img.src = imagen;
+                img.alt = 'Preview';
+                img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; transform: scale(' + imageScale + ') translate(' + imageX + 'px, ' + imageY + 'px); transform-origin: center center; transition: transform 0.1s; user-select: none; pointer-events: none;';
+                previewImageDiv.innerHTML = '';
+                previewImageDiv.appendChild(img);
+                previewImageDiv.appendChild(imageControls);
+                previewImageDiv.appendChild(imageHint);
+                setupImageEditor(img, previewImageDiv);
+            } else {
+                previewImg.src = imagen;
+                applyImageTransform();
+            }
+            if (currentImage) {
+                currentImage.src = imagen;
+                currentImage.style.display = 'block';
+            }
+            imageControls.style.display = 'block';
+            imageHint.style.display = 'block';
+            setTimeout(() => {
+                if (imageHint) imageHint.style.display = 'none';
+            }, 3000);
+        } else {
+            previewImageDiv.innerHTML = `
+                <div style="text-align: center; color: #999;">
+                    <i class="bi bi-image" style="font-size: 3rem;"></i>
+                    <p style="margin-top: 0.5rem; font-size: 0.875rem;">Sin imagen</p>
+                </div>
+            `;
+            if (currentImage) currentImage.style.display = 'none';
+            imageControls.style.display = 'none';
+            imageHint.style.display = 'none';
+            imageScale = 1;
+            imageX = 0;
+            imageY = 0;
+        }
+    }
+    
+    function setupImageEditor(img, container) {
+        // Arrastrar imagen
+        container.addEventListener('mousedown', function(e) {
+            if (!img || img.style.display === 'none') return;
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            imageStartX = imageX;
+            imageStartY = imageY;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging || !img) return;
+            const deltaX = e.clientX - dragStartX;
+            const deltaY = e.clientY - dragStartY;
+            // Movimiento más directo, sin dividir por imageScale para permitir movimiento libre
+            imageX = imageStartX + deltaX;
+            imageY = imageStartY + deltaY;
+            applyImageTransform();
+            saveImageTransform();
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                container.style.cursor = 'move';
+            }
+        });
+        
+        // Zoom con rueda del mouse
+        container.addEventListener('wheel', function(e) {
+            if (!img || img.style.display === 'none') return;
+            e.preventDefault();
+            const zoomSpeed = 0.05;
+            const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+            zoomImage(delta);
+            saveImageTransform();
+        });
+        
+        // Touch events para móviles
+        let touchStartDistance = 0;
+        let touchStartScale = 1;
+        
+        container.addEventListener('touchstart', function(e) {
+            if (!img || img.style.display === 'none') return;
+            if (e.touches.length === 2) {
+                touchStartDistance = getTouchDistance(e.touches[0], e.touches[1]);
+                touchStartScale = imageScale;
+            } else if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+                imageStartX = imageX;
+                imageStartY = imageY;
+            }
+            e.preventDefault();
+        });
+        
+        container.addEventListener('touchmove', function(e) {
+            if (!img || img.style.display === 'none') return;
+            if (e.touches.length === 2) {
+                const distance = getTouchDistance(e.touches[0], e.touches[1]);
+                const scaleChange = distance / touchStartDistance;
+                imageScale = Math.max(0.5, Math.min(5, touchStartScale * scaleChange));
+                applyImageTransform();
+            } else if (e.touches.length === 1 && isDragging) {
+                const deltaX = e.touches[0].clientX - dragStartX;
+                const deltaY = e.touches[0].clientY - dragStartY;
+                // Movimiento más directo para touch también
+                imageX = imageStartX + deltaX;
+                imageY = imageStartY + deltaY;
+                applyImageTransform();
+                saveImageTransform();
+            }
+            e.preventDefault();
+        });
+        
+        container.addEventListener('touchend', function() {
+            isDragging = false;
+        });
+    }
+    
+    function getTouchDistance(touch1, touch2) {
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    function zoomImage(delta) {
+        const newScale = imageScale + delta;
+        imageScale = Math.max(0.5, Math.min(5, newScale));
+        applyImageTransform();
+        saveImageTransform();
+    }
+    
+    function resetImageTransform() {
+        imageScale = 1;
+        imageX = 0;
+        imageY = 0;
+        applyImageTransform();
+        saveImageTransform();
+    }
+    
+    function saveImageTransform() {
+        const zoomField = document.getElementById('imagen_zoom');
+        const xField = document.getElementById('imagen_x');
+        const yField = document.getElementById('imagen_y');
+        
+        if (zoomField) zoomField.value = imageScale;
+        if (xField) xField.value = imageX;
+        if (yField) yField.value = imageY;
+    }
+    
+    function applyImageTransform() {
+        const previewImg = document.getElementById('previewImg');
+        if (previewImg) {
+            previewImg.style.objectFit = 'cover';
+            previewImg.style.width = '100%';
+            previewImg.style.height = '100%';
+            previewImg.style.transform = `scale(${imageScale}) translate(${imageX}px, ${imageY}px)`;
+            previewImg.style.transformOrigin = 'center center';
+        }
+    }
+    
+    // Inicializar preview al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const zoomField = document.getElementById('imagen_zoom');
+        const xField = document.getElementById('imagen_x');
+        const yField = document.getElementById('imagen_y');
+        
+        if (zoomField && zoomField.value) {
+            imageScale = parseFloat(zoomField.value) || 1.0;
+        }
+        if (xField && xField.value) {
+            imageX = parseFloat(xField.value) || 0.0;
+        }
+        if (yField && yField.value) {
+            imageY = parseFloat(yField.value) || 0.0;
+        }
+        
+        updatePreview();
+        const previewImg = document.getElementById('previewImg');
+        const previewImageDiv = document.getElementById('previewImage');
+        if (previewImg && previewImageDiv) {
+            setupImageEditor(previewImg, previewImageDiv);
+            setTimeout(() => {
+                applyImageTransform();
+            }, 100);
+        }
+    });
+</script>
+{% endblock %}

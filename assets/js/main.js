@@ -1,0 +1,1163 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const navToggle = document.querySelector("[data-nav-toggle]");
+  const navLinks = document.querySelector("[data-nav-links]");
+  const navLinkItems = document.querySelectorAll("[data-nav-link]");
+
+  if (navToggle && navLinks) {
+    navToggle.addEventListener("click", () => {
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", String(!expanded));
+      navLinks.classList.toggle("open");
+      document.body.classList.toggle("no-scroll", !expanded);
+    });
+
+    navLinkItems.forEach((link) => {
+      link.addEventListener("click", () => {
+        navLinks.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+        document.body.classList.remove("no-scroll");
+      });
+    });
+  }
+
+  // Dropdown menu functionality
+  const dropdownItems = document.querySelectorAll(".nav-item.has-dropdown");
+  dropdownItems.forEach((item) => {
+    // Get the first direct child <a> element (the toggle link)
+    const dropdownToggle = item.children[0]?.tagName === "A" ? item.children[0] : item.querySelector("a:first-of-type");
+    const dropdownMenu = item.querySelector(".dropdown-menu");
+    // Get direct links (not in sub-menus)
+    const allLinks = dropdownMenu?.querySelectorAll("a");
+    const dropdownLinks = allLinks ? Array.from(allLinks).filter(link => {
+      // Only include links that are direct children of dropdown-menu > li (not in sub-menus)
+      const parent = link.parentElement;
+      return parent && parent.parentElement === dropdownMenu;
+    }) : null;
+
+    if (!dropdownToggle || !dropdownMenu) return;
+
+    // Click handler for mobile (only on the toggle link, not sub-menu links)
+    dropdownToggle.addEventListener("click", (e) => {
+      if (window.innerWidth <= 1024) {
+        e.preventDefault();
+        const isExpanded = item.getAttribute("aria-expanded") === "true";
+        item.setAttribute("aria-expanded", String(!isExpanded));
+      }
+    });
+
+    // Close dropdown when clicking on direct links (mobile)
+    if (dropdownLinks) {
+      dropdownLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          if (window.innerWidth <= 1024) {
+            // Close mobile menu after clicking a link
+            const navLinks = document.querySelector("[data-nav-links]");
+            const navToggle = document.querySelector("[data-nav-toggle]");
+            if (navLinks) navLinks.classList.remove("open");
+            if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("no-scroll");
+          }
+          // Allow navigation to proceed normally
+        });
+      });
+    }
+  });
+
+  // Nested dropdown menu (sub-menu) functionality
+  const subDropdownItems = document.querySelectorAll(".nav-item.has-dropdown-sub");
+  subDropdownItems.forEach((item) => {
+    // Get the first direct child <a> element (the toggle link)
+    const subDropdownToggle = item.children[0]?.tagName === "A" ? item.children[0] : item.querySelector("a:first-of-type");
+    const subDropdownMenu = item.querySelector(".dropdown-menu-sub");
+    const subDropdownLinks = subDropdownMenu?.querySelectorAll("a");
+
+    if (!subDropdownToggle || !subDropdownMenu) return;
+
+    // Click handler for mobile
+    subDropdownToggle.addEventListener("click", (e) => {
+      if (window.innerWidth <= 1024) {
+        e.preventDefault();
+        const isExpanded = item.getAttribute("aria-expanded") === "true";
+        item.setAttribute("aria-expanded", String(!isExpanded));
+      }
+    });
+
+    // Close sub-dropdown when clicking on links (mobile)
+    if (subDropdownLinks) {
+      subDropdownLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          if (window.innerWidth <= 1024) {
+            // Close mobile menu after clicking a link
+            const navLinks = document.querySelector("[data-nav-links]");
+            const navToggle = document.querySelector("[data-nav-toggle]");
+            if (navLinks) navLinks.classList.remove("open");
+            if (navToggle) navToggle.setAttribute("aria-expanded", "false");
+            document.body.classList.remove("no-scroll");
+          }
+          // Allow navigation to proceed normally
+        });
+      });
+    }
+  });
+
+  const currentPage = document.body.dataset.page;
+  if (currentPage) {
+    document
+      .querySelectorAll(`[data-nav-link][href*="${currentPage}"]`)
+      .forEach((link) => {
+        link.classList.add("active");
+        // If this link is in a dropdown, mark parent as active
+        const dropdownItem = link.closest(".dropdown-menu");
+        if (dropdownItem) {
+          const parentNavItem = dropdownItem.closest(".nav-item.has-dropdown");
+          if (parentNavItem) {
+            parentNavItem.classList.add("active");
+          }
+        }
+      });
+  }
+
+  const counterItems = document.querySelectorAll("[data-counter]");
+  if (counterItems.length) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    counterItems.forEach((counter) => observer.observe(counter));
+  }
+
+  function animateCounter(element) {
+    const target = Number(element.dataset.counter || 0);
+    const suffix = element.dataset.suffix || "+";
+    const duration = 1200;
+    const start = performance.now();
+
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const value = Math.floor(progress * target);
+      
+      // Only add suffix when value equals target, otherwise show just the number
+      if (value === target) {
+        element.textContent = value.toLocaleString("es-CL") + suffix;
+      } else {
+        element.textContent = value.toLocaleString("es-CL");
+      }
+      
+      if (progress < 1) requestAnimationFrame(update);
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  document.querySelectorAll("[data-accordion]").forEach((accordion) => {
+    accordion.querySelectorAll("[data-accordion-toggle]").forEach((toggle) => {
+      toggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const item = toggle.closest("[data-accordion-item]");
+        const content = item?.querySelector("[data-accordion-content]");
+        const isOpen = item?.classList.contains("open");
+
+        // Close other accordion items in the same accordion
+        accordion
+          .querySelectorAll("[data-accordion-item]")
+          .forEach((accordionItem) => {
+            if (accordionItem !== item) {
+              accordionItem.classList.remove("open");
+              const c = accordionItem.querySelector("[data-accordion-content]");
+              if (c) {
+                c.style.maxHeight = "";
+                c.style.display = "none";
+              }
+            }
+          });
+
+        // Toggle current item
+        if (item && content) {
+          if (isOpen) {
+            // Close
+            item.classList.remove("open");
+            content.style.maxHeight = "";
+            setTimeout(() => {
+              content.style.display = "none";
+            }, 350);
+          } else {
+            // Open
+            content.style.display = "block";
+            item.classList.add("open");
+            // Use requestAnimationFrame to ensure display: block is applied before setting maxHeight
+            requestAnimationFrame(() => {
+              content.style.maxHeight = `${content.scrollHeight}px`;
+            });
+          }
+        }
+      });
+    });
+  });
+
+  document.querySelectorAll("[data-tabs]").forEach((tabs) => {
+    const tabButtons = tabs.querySelectorAll("[role=tab]");
+    const tabPanels = tabs.querySelectorAll("[role=tabpanel]");
+
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.getAttribute("aria-controls");
+
+        tabButtons.forEach((btn) => {
+          btn.setAttribute("aria-selected", String(btn === button));
+          btn.setAttribute("tabindex", btn === button ? "0" : "-1");
+        });
+
+        tabPanels.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === target);
+        });
+      });
+    });
+  });
+
+  const toast = document.querySelector("[data-toast]");
+  const forms = document.querySelectorAll("form[data-toast-success]");
+  if (toast && forms.length) {
+    forms.forEach((form) => {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        toast.textContent = form.dataset.toastSuccess || "Mensaje enviado correctamente.";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 4000);
+        form.reset();
+      });
+    });
+  }
+
+  // Inicializar todos los carruseles hero (imágenes y tarjetas destacadas)
+  document.querySelectorAll("[data-hero-slider]").forEach((heroSlider) => {
+    const track = heroSlider;
+    const slides = Array.from(heroSlider.querySelectorAll("[data-hero-slide]")).sort(
+      (a, b) => Number(a.dataset.heroOrder || 0) - Number(b.dataset.heroOrder || 0)
+    );
+    const dotsContainer = heroSlider.querySelector("[data-hero-dots]");
+    if (!slides.length || !dotsContainer) return;
+
+    slides.forEach((slide) => {
+      slide.classList.remove("is-active");
+      track.insertBefore(slide, dotsContainer);
+    });
+    slides[0].classList.add("is-active");
+
+    dotsContainer.innerHTML = "";
+    const dots = Array.from(slides).map((slide, slideIndex) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "hero-dot" + (slideIndex === 0 ? " is-active" : "");
+      dot.setAttribute("aria-label", `Ver imagen: ${slide.dataset.heroLabel || slideIndex + 1}`);
+      dot.dataset.heroDot = "";
+      dotsContainer.appendChild(dot);
+      return dot;
+    });
+
+    const interval = Number(heroSlider.dataset.heroInterval) || 6000;
+    let index = 0;
+    let timer;
+
+    const setActiveSlide = (nextIndex) => {
+      slides[index].classList.remove("is-active");
+      dots[index].classList.remove("is-active");
+      index = nextIndex;
+      slides[index].classList.add("is-active");
+      dots[index].classList.add("is-active");
+    };
+
+    const startAutoPlay = () => {
+      stopAutoPlay();
+      timer = setInterval(() => {
+        const next = (index + 1) % slides.length;
+        setActiveSlide(next);
+      }, interval);
+    };
+
+    const stopAutoPlay = () => {
+      if (timer) clearInterval(timer);
+    };
+
+    dots.forEach((dot, dotIndex) => {
+      dot.addEventListener("click", () => {
+        if (dotIndex === index) return;
+        setActiveSlide(dotIndex);
+        startAutoPlay();
+      });
+    });
+
+    heroSlider.addEventListener("mouseenter", stopAutoPlay);
+    heroSlider.addEventListener("mouseleave", startAutoPlay);
+    startAutoPlay();
+  });
+
+  document.querySelectorAll("[data-carousel]").forEach((carousel) => {
+    const track = carousel.querySelector("[data-carousel-track]");
+    const prev = carousel.querySelector("[data-carousel-prev]");
+    const next = carousel.querySelector("[data-carousel-next]");
+
+    if (!track || !prev || !next) return;
+
+    const updateButtons = () => {
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      prev.disabled = track.scrollLeft <= 0;
+      next.disabled = track.scrollLeft >= maxScroll - 1;
+    };
+
+    prev.addEventListener("click", () => {
+      track.scrollBy({ left: -track.clientWidth, behavior: "smooth" });
+    });
+
+    next.addEventListener("click", () => {
+      track.scrollBy({ left: track.clientWidth, behavior: "smooth" });
+    });
+
+    track.addEventListener("scroll", updateButtons);
+    window.addEventListener("resize", updateButtons);
+    updateButtons();
+  });
+});
+const nav = document.querySelector(".navbar");
+const body = document.body;
+const burger = document.querySelector(".burger");
+const navLinks = document.querySelector(".nav-links");
+
+const toggleNav = () => {
+  body.classList.toggle("mobile-nav-open");
+  const expanded = burger.getAttribute("aria-expanded") === "true";
+  burger.setAttribute("aria-expanded", String(!expanded));
+  if (!expanded) {
+    navLinks.querySelector("a").focus({ preventScroll: true });
+  } else {
+    burger.focus({ preventScroll: true });
+  }
+};
+
+if (burger) {
+  burger.addEventListener("click", toggleNav);
+  burger.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleNav();
+    }
+  });
+}
+
+navLinks?.querySelectorAll("a").forEach((link) => {
+  link.addEventListener("click", () => {
+    if (body.classList.contains("mobile-nav-open")) {
+      toggleNav();
+    }
+  });
+});
+
+// Shadow on scroll for navbar clarity
+const handleScroll = () => {
+  if (!nav) return;
+  if (window.scrollY > 10) {
+    nav.classList.add("navbar-shadow");
+  } else {
+    nav.classList.remove("navbar-shadow");
+  }
+};
+
+handleScroll();
+window.addEventListener("scroll", handleScroll);
+
+// Removed duplicate counter function - using the one inside DOMContentLoaded instead
+
+// Tabbed panels
+document.querySelectorAll("[data-tabs]").forEach((tabs) => {
+  const buttons = Array.from(tabs.querySelectorAll("[data-tab-button]"));
+  const panels = Array.from(tabs.querySelectorAll("[data-tab-panel]"));
+
+  const activate = (id) => {
+    buttons.forEach((btn) => {
+      const isActive = btn.dataset.tabButton === id;
+      btn.classList.toggle("is-active", isActive);
+      btn.setAttribute("aria-selected", String(isActive));
+      btn.setAttribute("tabindex", isActive ? "0" : "-1");
+    });
+
+    panels.forEach((panel) => {
+      const isActive = panel.dataset.tabPanel === id;
+      panel.classList.toggle("is-active", isActive);
+      panel.hidden = !isActive;
+    });
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => activate(button.dataset.tabButton));
+    button.addEventListener("keydown", (event) => {
+      if (!["ArrowRight", "ArrowLeft"].includes(event.key)) return;
+      event.preventDefault();
+      const index = buttons.indexOf(button);
+      const offset = event.key === "ArrowRight" ? 1 : -1;
+      const nextButton = buttons[(index + offset + buttons.length) % buttons.length];
+      nextButton.focus();
+      activate(nextButton.dataset.tabButton);
+    });
+  });
+
+  if (buttons.length) {
+    activate(buttons[0].dataset.tabButton);
+  }
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+  anchor.addEventListener("click", (event) => {
+    const targetId = anchor.getAttribute("href").slice(1);
+    if (!targetId) return;
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+
+// Social carousel controls for embedded posts
+document.querySelectorAll("[data-social-carousel]").forEach((carousel) => {
+  const track = carousel.querySelector("[data-social-track]");
+  const prev = carousel.querySelector("[data-social-prev]");
+  const next = carousel.querySelector("[data-social-next]");
+
+  if (!track || !prev || !next) return;
+
+  const slideWidth = () => track.firstElementChild?.getBoundingClientRect().width || 320;
+
+  const updateButtons = () => {
+    const maxScroll = track.scrollWidth - track.clientWidth - 4;
+    prev.disabled = track.scrollLeft <= 4;
+    next.disabled = track.scrollLeft >= maxScroll;
+  };
+
+  prev.addEventListener("click", () => {
+    track.scrollBy({ left: -slideWidth(), behavior: "smooth" });
+  });
+
+  next.addEventListener("click", () => {
+    track.scrollBy({ left: slideWidth(), behavior: "smooth" });
+  });
+
+  track.addEventListener("scroll", updateButtons, { passive: true });
+  window.addEventListener("resize", updateButtons);
+
+  updateButtons();
+});
+
+// Infinite Carousel - debe ejecutarse independientemente del timeline
+document.addEventListener("DOMContentLoaded", () => {
+  // Infinite Carousel
+  const infiniteCarousels = document.querySelectorAll("[data-carousel-infinite]");
+  console.log("Found infinite carousels:", infiniteCarousels.length);
+  
+  infiniteCarousels.forEach((carousel, carouselIndex) => {
+    const track = carousel.querySelector("[data-carousel-track-infinite]");
+    const prevBtn = carousel.querySelector("[data-carousel-prev-infinite]");
+    const nextBtn = carousel.querySelector("[data-carousel-next-infinite]");
+    const autoplayEnabled = carousel.dataset.autoplay === "true";
+    const autoplaySpeed = parseInt(carousel.dataset.autoplaySpeed || "4000", 10);
+    const itemsPerView = parseInt(carousel.dataset.itemsPerView || "4", 10);
+
+    console.log(`Carousel ${carouselIndex}:`, { 
+      track: !!track, 
+      prevBtn: !!prevBtn, 
+      nextBtn: !!nextBtn,
+      autoplayEnabled,
+      autoplaySpeed,
+      itemsPerView
+    });
+
+    if (!track) {
+      console.warn("Carousel track not found", carousel);
+      return;
+    }
+
+    const originalItems = Array.from(track.children);
+    if (originalItems.length === 0) {
+      console.warn("Carousel has no items", carousel);
+      return;
+    }
+    
+    console.log(`Carousel ${carouselIndex} has ${originalItems.length} items`);
+
+    const totalItems = originalItems.length;
+    
+    // Don't initialize carousel if we have no items
+    if (totalItems === 0) return;
+    
+    // For very few items, clone more times to ensure smooth infinite scroll
+    // Always clone at least enough for seamless scrolling
+    const cloneCount = totalItems <= itemsPerView ? 6 : 4;
+    const beginningCloneCount = totalItems <= itemsPerView ? 4 : 3;
+
+    // Clone items multiple times for seamless infinite effect
+    // Clone more copies when we have few items to ensure smooth scrolling
+    for (let i = 0; i < cloneCount; i++) {
+      originalItems.forEach((item) => {
+        track.appendChild(item.cloneNode(true));
+      });
+    }
+    
+    // Clone items at the beginning (reversed order for going backwards)
+    for (let i = 0; i < beginningCloneCount; i++) {
+      const reversedItems = [...originalItems].reverse();
+      reversedItems.forEach((item) => {
+        track.insertBefore(item.cloneNode(true), track.firstChild);
+      });
+    }
+
+    // Start position: after the cloned items at the beginning
+    let currentIndex = totalItems * beginningCloneCount;
+    let autoplayInterval = null;
+    let isTransitioning = false;
+    let resetTimeout = null;
+
+    function getItemsPerView() {
+      const width = window.innerWidth;
+      if (width <= 600) return 1;
+      if (width <= 900) return 2;
+      if (width <= 1200) return 3;
+      return itemsPerView;
+    }
+
+    function getItemWidth() {
+      const wrapper = track.parentElement;
+      if (!wrapper || wrapper.offsetWidth === 0) {
+        // Fallback if wrapper not ready
+        return 300; // Default item width
+      }
+      const gap = 24; // 1.5rem = 24px
+      const itemsShown = getItemsPerView();
+      const calculatedWidth = (wrapper.offsetWidth - (gap * (itemsShown - 1))) / itemsShown;
+      return calculatedWidth > 0 ? calculatedWidth : 300;
+    }
+
+    function updateTransform(instant = false) {
+      const itemWidth = getItemWidth();
+      if (itemWidth <= 0 || isNaN(itemWidth)) {
+        // If width not ready, retry after a short delay
+        setTimeout(() => updateTransform(instant), 100);
+        return;
+      }
+      const gap = 24;
+      const offset = -(currentIndex * (itemWidth + gap));
+      
+      if (instant) {
+        track.style.transition = "none";
+        track.style.transform = `translateX(${offset}px)`;
+        // Force reflow
+        track.offsetHeight;
+        requestAnimationFrame(() => {
+          track.style.transition = "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        });
+      } else {
+        // Ensure transition is set for smooth animation
+        if (!track.style.transition || track.style.transition === "none") {
+          track.style.transition = "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        }
+        track.style.transform = `translateX(${offset}px)`;
+      }
+    }
+
+    function nextSlide() {
+      if (isTransitioning) return;
+      
+      isTransitioning = true;
+      stopAutoplay(); // Stop autoplay when manually navigating
+      
+      currentIndex++;
+      updateTransform();
+
+      // Calculate positions
+      // Start position: just after beginning clones (where original items start)
+      const startPosition = totalItems * beginningCloneCount;
+      // End of original items: just after the original set
+      const endOriginal = totalItems * (beginningCloneCount + 1);
+      // Total cloned items at the end
+      const totalClonedAtEnd = totalItems * cloneCount;
+      // Reset threshold: reset when we're about halfway through the end clones
+      // This ensures we have plenty of room for seamless reset
+      const resetThreshold = endOriginal + Math.floor(totalClonedAtEnd * 0.5);
+      
+      // When we've moved far enough into the clones, reset seamlessly
+      if (currentIndex >= resetThreshold) {
+        clearTimeout(resetTimeout);
+        resetTimeout = setTimeout(() => {
+          // Calculate how many items into the clones we are from endOriginal
+          const offsetIntoClones = currentIndex - endOriginal;
+          // Reset to start position plus the offset modulo totalItems
+          // This ensures seamless transition back to original items
+          track.style.transition = "none";
+          currentIndex = startPosition + (offsetIntoClones % totalItems);
+          updateTransform(true);
+          isTransitioning = false;
+          
+          // Restore transition after reset
+          requestAnimationFrame(() => {
+            track.style.transition = "";
+            if (autoplayEnabled) {
+              startAutoplay();
+            }
+          });
+        }, 50); // Very short delay to ensure transition completed
+      } else {
+        setTimeout(() => {
+          isTransitioning = false;
+          if (autoplayEnabled) {
+            startAutoplay();
+          }
+        }, 650);
+      }
+    }
+
+    function prevSlide() {
+      if (isTransitioning) return;
+      
+      isTransitioning = true;
+      stopAutoplay(); // Stop autoplay when manually navigating
+
+      // Calculate positions
+      const startPosition = totalItems * beginningCloneCount;
+      const endOriginal = totalItems * (beginningCloneCount + 1);
+      // Total cloned items at the beginning
+      const totalClonedAtStart = totalItems * beginningCloneCount;
+      // Reset threshold: when we've gone back far enough into beginning clones
+      const resetThreshold = startPosition - Math.floor(totalClonedAtStart * 0.5);
+
+      currentIndex--;
+      
+      // When going backwards and reaching before the start clones, jump to end seamlessly
+      if (currentIndex < resetThreshold) {
+        // Calculate how far back we went from startPosition
+        const offsetBack = startPosition - currentIndex;
+        // Calculate equivalent position near the end of original items
+        // Use modulo to wrap around if needed
+        const equivalentPos = endOriginal - (offsetBack % totalItems);
+        currentIndex = equivalentPos > startPosition ? equivalentPos : endOriginal - 1;
+        updateTransform();
+        
+        clearTimeout(resetTimeout);
+        resetTimeout = setTimeout(() => {
+          // Ensure we're at the correct position
+          track.style.transition = "none";
+          updateTransform(true);
+          isTransitioning = false;
+          
+          // Restore transition after reset
+          requestAnimationFrame(() => {
+            track.style.transition = "";
+            if (autoplayEnabled) {
+              startAutoplay();
+            }
+          });
+        }, 50);
+      } else {
+        updateTransform();
+        setTimeout(() => {
+          isTransitioning = false;
+          if (autoplayEnabled) {
+            startAutoplay();
+          }
+        }, 650);
+      }
+    }
+
+    function startAutoplay() {
+      if (!autoplayEnabled) return;
+      stopAutoplay();
+      // Verify we have valid items before starting autoplay
+      if (totalItems === 0) return;
+      autoplayInterval = setInterval(() => {
+        if (!isTransitioning) {
+          nextSlide();
+        }
+      }, autoplaySpeed);
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+      if (resetTimeout) {
+        clearTimeout(resetTimeout);
+        resetTimeout = null;
+      }
+    }
+
+    // Event listeners
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        nextSlide();
+      });
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        prevSlide();
+      });
+    }
+
+    // Pause on hover
+    carousel.addEventListener("mouseenter", stopAutoplay);
+    carousel.addEventListener("mouseleave", startAutoplay);
+
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        updateTransform();
+      }, 250);
+    });
+
+    // Initialize - set to start position
+    // Wait for DOM and styles to be ready
+    const initCarousel = () => {
+      // Ensure wrapper has width
+      const wrapper = track.parentElement;
+      if (!wrapper || wrapper.offsetWidth === 0) {
+        setTimeout(initCarousel, 50);
+        return;
+      }
+      
+      updateTransform(true);
+      
+      // Only start autoplay if enabled
+      if (autoplayEnabled) {
+        // Small delay to ensure everything is ready
+        setTimeout(() => {
+          startAutoplay();
+        }, 100);
+      }
+    };
+    
+    // Try to initialize immediately
+    if (document.readyState === "complete") {
+      initCarousel();
+    } else {
+      window.addEventListener("load", initCarousel);
+      // Also try with requestAnimationFrame as fallback
+      requestAnimationFrame(initCarousel);
+    }
+  });
+});
+
+// Organigrama Accordions - debe ejecutarse independientemente del timeline
+document.addEventListener("DOMContentLoaded", () => {
+  const orgAccordions = document.querySelectorAll(".org-accordion");
+  console.log("Found org accordions:", orgAccordions.length);
+  
+  orgAccordions.forEach((accordion, index) => {
+    const header = accordion.querySelector(".org-accordion-header");
+    const content = accordion.querySelector(".org-accordion-content");
+    
+    console.log(`Accordion ${index}:`, { header: !!header, content: !!content });
+    
+    if (!header || !content) {
+      return;
+    }
+    
+    // Initialize closed state - asegurar que estén cerrados inicialmente
+    accordion.setAttribute("aria-expanded", "false");
+    header.setAttribute("aria-expanded", "false");
+    
+    // Establecer estilos iniciales - forzar siempre
+    content.style.display = "block"; // Asegurar que esté en display block
+    content.style.maxHeight = "0";
+    content.style.opacity = "0";
+    content.style.overflow = "hidden";
+    content.style.transition = "max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease";
+    
+    header.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      console.log("Accordion clicked:", index);
+      
+      const isExpanded = accordion.getAttribute("aria-expanded") === "true";
+      
+      // Toggle current accordion
+      if (isExpanded) {
+        // Close accordion
+        accordion.setAttribute("aria-expanded", "false");
+        header.setAttribute("aria-expanded", "false");
+        content.style.maxHeight = "0";
+        content.style.opacity = "0";
+        console.log("Closing accordion:", index);
+      } else {
+        // Open accordion
+        console.log("Opening accordion:", index);
+        
+        // Asegurar que el contenido sea medible
+        content.style.display = "block";
+        content.style.maxHeight = "none";
+        content.style.opacity = "1";
+        content.style.overflow = "visible";
+        
+        // Forzar reflow
+        const height = content.offsetHeight;
+        const scrollHeight = content.scrollHeight;
+        
+        console.log("Content dimensions:", { height, scrollHeight });
+        
+        // Resetear para animar
+        content.style.maxHeight = "0";
+        content.style.opacity = "0";
+        content.style.overflow = "hidden";
+        
+        // Establecer atributo
+        accordion.setAttribute("aria-expanded", "true");
+        header.setAttribute("aria-expanded", "true");
+        
+        // Animar después de asegurar que el reset se aplique
+        setTimeout(() => {
+          content.style.maxHeight = scrollHeight + "px";
+          content.style.opacity = "1";
+          content.style.overflow = "visible";
+        }, 10);
+      }
+    });
+  });
+});
+
+// Timeline animations and autoplay
+document.addEventListener("DOMContentLoaded", () => {
+  const timeline = document.querySelector(".timeline");
+  if (!timeline) return;
+
+  const items = timeline.querySelectorAll(".timeline-item");
+  if (items.length === 0) return;
+
+  let currentIndex = 0;
+  let autoplayInterval = null;
+  let isPaused = false;
+  const autoplaySpeed = 4000; // 4 segundos
+
+  // Calcular el ancho total del timeline
+  const updateTimelineLine = () => {
+    if (items.length > 0) {
+      const lastItem = items[items.length - 1];
+      const firstItem = items[0];
+      
+      // Obtener posiciones reales de los elementos
+      const firstRect = firstItem.getBoundingClientRect();
+      const lastRect = lastItem.getBoundingClientRect();
+      const timelineRect = timeline.getBoundingClientRect();
+      
+      // Calcular el scrollLeft para ajustar posiciones relativas
+      const scrollLeft = timeline.scrollLeft;
+      
+      // Calcular desde el centro del primer punto hasta el centro del último punto
+      const firstItemCenter = (firstRect.left - timelineRect.left + scrollLeft + firstItem.offsetWidth / 2);
+      const lastItemCenter = (lastRect.left - timelineRect.left + scrollLeft + lastItem.offsetWidth / 2);
+      
+      // Ancho de la línea: desde el primer punto hasta el último punto
+      const lineWidth = lastItemCenter - firstItemCenter;
+      
+      // Ajustar el ancho y posición de inicio de la línea
+      timeline.style.setProperty('--line-width', `${lineWidth}px`);
+      timeline.style.setProperty('--line-start', `${firstItemCenter}px`);
+      
+      return { firstItemCenter, lastItemCenter, lineWidth };
+    }
+    return null;
+  };
+  
+  // Función para animar el scroll sincronizado con la línea
+  let scrollAnimationFrame = null;
+  let isScrollingAnimated = false;
+  
+  const animateTimelineScroll = () => {
+    if (isScrollingAnimated) return;
+    
+    const lineInfo = updateTimelineLine();
+    if (!lineInfo) return;
+    
+    const scrollableWidth = timeline.scrollWidth - timeline.clientWidth;
+    
+    // Si no hay scroll disponible, no hacer nada
+    if (scrollableWidth <= 0) return;
+    
+    // Duración de la animación de la línea (8s según CSS)
+    const lineDuration = 8000;
+    const startTime = Date.now();
+    const startScroll = timeline.scrollLeft;
+    isScrollingAnimated = true;
+    
+    const animateScroll = () => {
+      if (!isScrollingAnimated) return;
+      
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / lineDuration, 1);
+      
+      // Usar cubic-bezier para que coincida con la línea CSS (0.4, 0, 0.2, 1)
+      // Aproximación de ease-in-out-cubic
+      const easedProgress = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      
+      // Calcular la posición de scroll basada en el progreso
+      const targetScroll = startScroll + (scrollableWidth * easedProgress);
+      
+      // Scroll directo para mejor sincronización
+      timeline.scrollLeft = targetScroll;
+      
+      // Continuar animación si no ha terminado
+      if (progress < 1) {
+        scrollAnimationFrame = requestAnimationFrame(animateScroll);
+      } else {
+        // Asegurar scroll al final cuando la línea termine
+        timeline.scrollLeft = startScroll + scrollableWidth;
+        isScrollingAnimated = false;
+        updateTimelineLine();
+      }
+    };
+    
+    // Esperar a que comience la animación de la línea (1s de delay según CSS)
+    setTimeout(() => {
+      animateScroll();
+    }, 1000);
+  };
+  
+  // Cancelar animación de scroll si el usuario interactúa manualmente
+  timeline.addEventListener('scroll', () => {
+    if (isScrollingAnimated) {
+      isScrollingAnimated = false;
+      if (scrollAnimationFrame) {
+        cancelAnimationFrame(scrollAnimationFrame);
+        scrollAnimationFrame = null;
+      }
+    }
+  }, { passive: true });
+  
+  // Inicializar línea al cargar
+  setTimeout(() => {
+    updateTimelineLine();
+  }, 100);
+
+  // Intersection Observer para animaciones iniciales
+  const timelineObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          timeline.classList.add("animated");
+          
+          // Actualizar línea primero
+          updateTimelineLine();
+          
+          // Animate timeline items with stagger - transiciones más lentas y profesionales
+          items.forEach((item, index) => {
+            setTimeout(() => {
+              item.classList.add("visible");
+            }, index * 500 + 1000);
+          });
+          
+          // Iniciar scroll sincronizado con la línea azul
+          setTimeout(() => {
+            animateTimelineScroll();
+          }, 500);
+          
+          // Iniciar autoplay después de que termine la animación de la línea (8s + 1s delay)
+          setTimeout(() => {
+            updateTimelineLine();
+            startAutoplay();
+          }, 10000);
+          
+          timelineObserver.unobserve(timeline);
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+  
+  timelineObserver.observe(timeline);
+
+  // Función para mover al siguiente item
+  const moveToNext = () => {
+    if (isPaused) return;
+    
+    currentIndex = (currentIndex + 1) % items.length;
+    const item = items[currentIndex];
+    
+    // Scroll suave al item
+    const itemRect = item.getBoundingClientRect();
+    const timelineRect = timeline.getBoundingClientRect();
+    const scrollLeft = timeline.scrollLeft;
+    const itemLeft = itemRect.left - timelineRect.left + scrollLeft;
+    const itemCenter = itemLeft - (timelineRect.width / 2) + (itemRect.width / 2);
+    
+    timeline.scrollTo({
+      left: itemCenter,
+      behavior: 'smooth'
+    });
+  };
+
+  // Iniciar autoplay
+  const startAutoplay = () => {
+    if (autoplayInterval) return;
+    
+    autoplayInterval = setInterval(() => {
+      moveToNext();
+    }, autoplaySpeed);
+  };
+
+  // Pausar autoplay
+  const pauseAutoplay = () => {
+    isPaused = true;
+    if (autoplayInterval) {
+      clearInterval(autoplayInterval);
+      autoplayInterval = null;
+    }
+  };
+
+  // Reanudar autoplay después de 5 segundos de inactividad
+  let pauseTimeout = null;
+  const resumeAutoplay = () => {
+    isPaused = false;
+    if (pauseTimeout) {
+      clearTimeout(pauseTimeout);
+    }
+    pauseTimeout = setTimeout(() => {
+      startAutoplay();
+    }, 5000);
+  };
+
+  // Pausar en hover o interacción
+  timeline.addEventListener('mouseenter', pauseAutoplay);
+  timeline.addEventListener('mouseleave', resumeAutoplay);
+  timeline.addEventListener('touchstart', pauseAutoplay);
+  timeline.addEventListener('touchend', () => {
+    setTimeout(resumeAutoplay, 5000);
+  });
+
+  // Actualizar línea cuando se hace scroll o resize - con debounce para mejor performance
+  let resizeTimeout;
+  let scrollTimeout;
+  
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      updateTimelineLine();
+    }, 250);
+  });
+  
+  timeline.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      updateTimelineLine();
+    }, 100);
+  }, { passive: true });
+
+  // Timeline item expand/collapse functionality
+  const timelineItems = document.querySelectorAll("[data-timeline-item]");
+  timelineItems.forEach((item, index) => {
+    const header = item.querySelector(".timeline-header");
+    const content = item.querySelector(".timeline-content");
+    
+    if (!header || !content) return;
+
+    header.addEventListener("click", () => {
+      const isExpanded = item.getAttribute("aria-expanded") === "true";
+      
+      // Pausar autoplay cuando se abre una card
+      pauseAutoplay();
+      
+      // Close other items
+      timelineItems.forEach((otherItem) => {
+        if (otherItem !== item) {
+          const otherHeader = otherItem.querySelector(".timeline-header");
+          const otherContent = otherItem.querySelector(".timeline-content");
+          if (otherHeader && otherContent) {
+            otherItem.setAttribute("aria-expanded", "false");
+            otherHeader.setAttribute("aria-expanded", "false");
+            otherContent.style.maxHeight = "0";
+            setTimeout(() => {
+              otherContent.style.paddingTop = "0";
+              otherContent.style.paddingBottom = "0";
+            }, 400);
+          }
+        }
+      });
+
+      // Toggle current item
+      if (isExpanded) {
+        item.setAttribute("aria-expanded", "false");
+        header.setAttribute("aria-expanded", "false");
+        content.style.maxHeight = "0";
+        setTimeout(() => {
+          content.style.paddingTop = "0";
+          content.style.paddingBottom = "0";
+        }, 400);
+        // Reanudar autoplay después de cerrar
+        resumeAutoplay();
+      } else {
+        item.setAttribute("aria-expanded", "true");
+        header.setAttribute("aria-expanded", "true");
+        content.style.display = "block";
+        content.style.paddingTop = "0";
+        content.style.paddingBottom = "1.75rem";
+        
+        // Scroll suave al item expandido - horizontal y vertical
+        setTimeout(() => {
+          const itemRect = item.getBoundingClientRect();
+          const timelineRect = timeline.getBoundingClientRect();
+          const scrollLeft = timeline.scrollLeft;
+          const scrollTop = timeline.scrollTop;
+          
+          // Scroll horizontal: centrar el item
+          const itemLeft = itemRect.left - timelineRect.left + scrollLeft;
+          const itemCenter = itemLeft - (timelineRect.width / 2) + (itemRect.width / 2);
+          
+          // Scroll vertical: asegurar que el item esté visible
+          const isOdd = Array.from(timeline.querySelectorAll('.timeline-item')).indexOf(item) % 2 === 0;
+          let verticalOffset = 0;
+          
+          if (isOdd) {
+            // Items impares: asegurar que estén visibles arriba
+            const itemTop = itemRect.top - timelineRect.top + scrollTop;
+            if (itemTop < 100) {
+              verticalOffset = itemTop - 120; // Dejar espacio arriba
+            }
+          } else {
+            // Items pares: asegurar que estén visibles abajo
+            const itemBottom = itemRect.bottom - timelineRect.bottom + scrollTop;
+            const timelineHeight = timeline.clientHeight;
+            if (itemBottom > timelineHeight - 100) {
+              verticalOffset = itemBottom - timelineHeight + 120; // Dejar espacio abajo
+            }
+          }
+          
+          timeline.scrollTo({
+            left: itemCenter,
+            top: scrollTop + verticalOffset,
+            behavior: 'smooth'
+          });
+        }, 100);
+        
+        // Calculate max height based on content
+        requestAnimationFrame(() => {
+          content.style.maxHeight = `${content.scrollHeight}px`;
+        });
+        
+        // Actualizar índice actual
+        currentIndex = index;
+      }
+    });
+  });
+
+});
+
+

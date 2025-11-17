@@ -1,0 +1,64 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Programas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-book me-2"></i>Gestión de Programas</h2>
+    <a href="{{ url_for('admin_programa_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Programa
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Título</th>
+                        <th>Modalidad</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for programa in programas %}
+                    <tr>
+                        <td><span class="badge bg-info">{{ programa.tipo }}</span></td>
+                        <td><strong>{{ programa.titulo }}</strong></td>
+                        <td>{{ programa.modalidad or '—' }}</td>
+                        <td>{{ programa.orden }}</td>
+                        <td>
+                            {% if programa.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_programa_editar', programa_id=programa.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_programa_eliminar', programa_id=programa.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este programa?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No hay programas registrados. <a href="{{ url_for('admin_programa_nuevo') }}">Crear el primero</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

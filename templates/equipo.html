@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ _('Equipo HUMANO') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/equipo.html" />
+    <meta property="og:title" content="Equipo HUMANO | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/equipo.html" />
+    <meta name="twitter:title" content="Equipo HUMANO | FARMAVET" />
+    <meta name="twitter:description" content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="equipo">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            {{ _('Menú') }}
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Equipo humano') }}</p>
+            <h1 class="hero-title">{{ _('Excelencia científica respaldada por personas comprometidas') }}</h1>
+            <p class="hero-description">
+              {{ _('La calidad de nuestros resultados descansa en un equipo multidisciplinario, altamente calificado y comprometido con la salud pública y la inocuidad alimentaria. Conoce a quienes hacen posible el prestigio de FARMAVET.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Dirección científica') }}</span>
+              <span class="pill">{{ _('Profesionales y técnicos') }}</span>
+              <span class="pill">{{ _('Colaboradores nacionales e internacionales') }}</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              {{ _('Nuestra filosofía') }}
+            </h2>
+            <p>
+              {{ _('Fomentamos una cultura basada en la excelencia, la colaboración y la innovación. Promovemos el desarrollo profesional continuo y la equidad de género en los equipos científicos.') }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="direccion">
+        <div class="container">
+          <h2 class="section-title">{{ _('Dirección') }}</h2>
+          <div class="cards-grid">
+            {% if direccion %}
+              {% for miembro in direccion %}
+              <article class="card">
+                <h3 class="pillar-title">{{ miembro.nombre }}</h3>
+              {% if get_translated_field(miembro, 'cargo_nombre') or miembro.cargo_nombre %}
+              <p class="text-muted mb-2" style="font-size: 0.95rem; font-weight: 600;">{{ get_translated_field(miembro, 'cargo_nombre') or miembro.cargo_nombre }}</p>
+              {% elif miembro.cargo %}
+              <p class="text-muted mb-2" style="font-size: 0.95rem; font-weight: 600;">{{ miembro.cargo }}</p>
+              {% endif %}
+              {% if get_translated_field(miembro, 'cargo_descripcion') or miembro.cargo_descripcion %}
+              <p>{{ get_translated_field(miembro, 'cargo_descripcion') or miembro.cargo_descripcion }}</p>
+              {% elif get_translated_field(miembro, 'biografia') %}
+              <p>{{ get_translated_field(miembro, 'biografia') }}</p>
+              {% endif %}
+                {% if miembro.tags %}
+                  {% set tags_list = miembro.tags|from_json %}
+                  {% if tags_list %}
+                  <div class="news-tags">
+                    {% for tag in tags_list %}
+                    <span class="chip">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                {% endif %}
+                {% if miembro.redes_sociales %}
+                <div class="mt-3 d-flex gap-3 align-items-center">
+                  {% set redes = miembro.redes_sociales|from_json if miembro.redes_sociales is string else (miembro.redes_sociales if miembro.redes_sociales is mapping else {}) %}
+                  {% if redes and redes.linkedin %}
+                  <a href="{{ redes.linkedin }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none" title="LinkedIn" style="color: #0077b5; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                    <i class="fab fa-linkedin" style="font-size: 1.5rem;"></i>
+                  </a>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Contenido por defecto si no hay miembros -->
+              <article class="card">
+                <h3 class="pillar-title">Dra. Javiera Cornejo Kelly</h3>
+                <p>
+                  {{ _('Directora FARMAVET e INOCUIVET. Directora Ejecutiva CASA-OMSA. Médico Veterinario y Doctora en Ciencias Silvoagropecuarias y Veterinarias. Especialista en inocuidad alimentaria, gestión de antimicrobianos e investigación aplicada.') }}
+                </p>
+                <div class="news-tags">
+                  <span class="chip">{{ _('Inocuidad alimentaria') }}</span>
+                  <span class="chip">CASA-OMSA</span>
+                </div>
+              </article>
+              <article class="card">
+                <h3 class="pillar-title">Dr. Aldo Maddaleno</h3>
+                <p>
+                  {{ _('Encargado del laboratorio FARMAVET. Médico Veterinario con trayectoria en farmacología, validación de metodologías y aseguramiento de calidad en laboratorios acreditados.') }}
+                </p>
+                <div class="news-tags">
+                  <span class="chip">{{ _('Farmacología') }}</span>
+                  <span class="chip">{{ _('Gestión de calidad') }}</span>
+                </div>
+              </article>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="organigrama">
+        <div class="container">
+          <h2 class="section-title">{{ _('Organigrama institucional') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Estructura organizacional de FARMAVET. Explora cada área para conocer al equipo que hace posible nuestra labor.') }}
+          </p>
+          
+          <div class="org-chart">
+            {% if organigrama %}
+              {% set secciones_orden = ['direccion', 'tecnico', 'calidad', 'administracion', 'investigacion'] %}
+              {% for seccion_nombre in secciones_orden %}
+                {% if seccion_nombre in organigrama %}
+                  {% set seccion_data = organigrama[seccion_nombre] %}
+                  {% set seccion_titulo = seccion_nombre|title|replace('Tecnico', 'TÉCNICA')|replace('Calidad', 'CALIDAD')|replace('Administracion', 'ADMINISTRACIÓN')|replace('Investigacion', 'I+D')|replace('Direccion', 'DIRECCIÓN') %}
+                  
+                  <div class="org-accordion" data-org-level="{% if seccion_nombre == 'direccion' %}1{% else %}3{% endif %}">
+                    <button class="org-accordion-header" aria-expanded="false">
+                      <span class="org-level-badge">{{ seccion_titulo }}</span>
+                      <h3>
+                        {% if seccion_nombre == 'direccion' %}{{ _('Dirección y Jefatura') }}
+                        {% elif seccion_nombre == 'tecnico' %}{{ _('Jefe Técnico (Responsable Técnico)') }}
+                        {% elif seccion_nombre == 'calidad' %}{{ _('Jefe de Calidad (Responsable de Calidad)') }}
+                        {% elif seccion_nombre == 'administracion' %}{{ _('Área de Administración') }}
+                        {% elif seccion_nombre == 'investigacion' %}{{ _('Responsable Área I+D') }}
+                        {% else %}{{ seccion_titulo }}{% endif %}
+                      </h3>
+                      <span class="org-accordion-icon">+</span>
+                    </button>
+                    <div class="org-accordion-content">
+                      {% for subseccion_nombre, cargos in seccion_data.items() %}
+                        <div class="org-subsection">
+                          {% if subseccion_nombre != 'Sin subsección' %}
+                          <h4 class="org-subsection-title">
+                            {% if cargos|length > 0 and get_translated_field(cargos[0], 'subseccion') %}
+                              {{ get_translated_field(cargos[0], 'subseccion') }}
+                            {% else %}
+                              {{ subseccion_nombre }}
+                            {% endif %}
+                          </h4>
+                          {% endif %}
+                          
+                          {% if cargos|length == 1 and seccion_nombre == 'direccion' %}
+                            <!-- Grid para dirección -->
+                            <div class="org-leadership-grid">
+                              {% for cargo in cargos %}
+                                <article class="org-member-card">
+                                  <div class="org-member-photo">
+                                    {% if cargo.miembro and cargo.miembro.imagen %}
+                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
+                                    <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
+                                      <span>{{ _('Foto') }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="org-member-info">
+                                    <h4 class="org-member-name">
+                                      {% if cargo.miembro %}{{ cargo.miembro.nombre }}{% else %}{{ get_translated_field(cargo, 'cargo') or cargo.cargo }}{% endif %}
+                                    </h4>
+                                    <p class="org-member-role">
+                                      {% if cargo.miembro and cargo.miembro.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.miembro.cargo_nombre }}
+                                      {% elif cargo.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo_nombre }}
+                                      {% elif cargo.cargo %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo }}
+                                      {% endif %}
+                                    </p>
+                                    {% if cargo.miembro and get_translated_field(cargo.miembro, 'biografia') %}
+                                    <p class="org-member-bio" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">{{ get_translated_field(cargo.miembro, 'biografia') }}</p>
+                                    {% endif %}
+                                    {% if cargo.miembro and (cargo.miembro.email or cargo.miembro.redes_sociales) %}
+                                    <div class="org-member-social d-flex gap-2 align-items-center mt-2">
+                                      {% if cargo.miembro.email %}
+                                      <a href="mailto:{{ cargo.miembro.email }}" title="{{ cargo.miembro.email }}" style="color: #d44638; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                        <i class="fas fa-envelope" style="font-size: 1.2rem;"></i>
+                                      </a>
+                                      {% endif %}
+                                      {% if cargo.miembro.redes_sociales %}
+                                        {% set redes = cargo.miembro.redes_sociales|from_json if cargo.miembro.redes_sociales is string else (cargo.miembro.redes_sociales if cargo.miembro.redes_sociales is mapping else {}) %}
+                                        {% if redes and redes.linkedin %}
+                                        <a href="{{ redes.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0077b5; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                          <i class="fab fa-linkedin" style="font-size: 1.2rem;"></i>
+                                        </a>
+                                        {% endif %}
+                                      {% endif %}
+                                    </div>
+                                    {% endif %}
+                                  </div>
+                                </article>
+                              {% endfor %}
+                            </div>
+                          {% elif cargos|length == 1 %}
+                            <!-- Single member -->
+                            <div class="org-single-member">
+                              {% for cargo in cargos %}
+                                <article class="org-member-card">
+                                  <div class="org-member-photo">
+                                    {% if cargo.miembro and cargo.miembro.imagen %}
+                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
+                                    <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
+                                      <span>{{ _('Foto') }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="org-member-info">
+                                    <h4 class="org-member-name">
+                                      {% if cargo.miembro %}{{ cargo.miembro.nombre }}{% else %}{{ get_translated_field(cargo, 'cargo') or cargo.cargo }}{% endif %}
+                                    </h4>
+                                    <p class="org-member-role">
+                                      {% if cargo.miembro and cargo.miembro.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.miembro.cargo_nombre }}
+                                      {% elif cargo.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo_nombre }}
+                                      {% elif cargo.cargo %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo }}
+                                      {% endif %}
+                                      {% if get_translated_field(cargo, 'descripcion') %}<br><small>{{ get_translated_field(cargo, 'descripcion') }}</small>{% endif %}
+                                    </p>
+                                    {% if cargo.miembro and get_translated_field(cargo.miembro, 'biografia') %}
+                                    <p class="org-member-bio" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">{{ get_translated_field(cargo.miembro, 'biografia') }}</p>
+                                    {% endif %}
+                                    {% if cargo.miembro and (cargo.miembro.email or cargo.miembro.redes_sociales) %}
+                                    <div class="org-member-social d-flex gap-2 align-items-center mt-2">
+                                      {% if cargo.miembro.email %}
+                                      <a href="mailto:{{ cargo.miembro.email }}" title="{{ cargo.miembro.email }}" style="color: #d44638; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                        <i class="fas fa-envelope" style="font-size: 1.2rem;"></i>
+                                      </a>
+                                      {% endif %}
+                                      {% if cargo.miembro.redes_sociales %}
+                                        {% set redes = cargo.miembro.redes_sociales|from_json if cargo.miembro.redes_sociales is string else (cargo.miembro.redes_sociales if cargo.miembro.redes_sociales is mapping else {}) %}
+                                        {% if redes and redes.linkedin %}
+                                        <a href="{{ redes.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0077b5; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                          <i class="fab fa-linkedin" style="font-size: 1.2rem;"></i>
+                                        </a>
+                                        {% endif %}
+                                      {% endif %}
+                                    </div>
+                                    {% endif %}
+                                  </div>
+                                </article>
+                              {% endfor %}
+                            </div>
+                          {% elif cargos|length <= 4 %}
+                            <!-- Grid para pocos miembros (máximo 4) -->
+                            <div class="org-members-grid">
+                              {% for cargo in cargos %}
+                                <article class="org-member-card">
+                                  <div class="org-member-photo">
+                                    {% if cargo.miembro and cargo.miembro.imagen %}
+                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
+                                    <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
+                                      <span>{{ _('Foto') }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="org-member-info">
+                                    <h4 class="org-member-name">
+                                      {% if cargo.miembro %}{{ cargo.miembro.nombre }}{% else %}{{ get_translated_field(cargo, 'cargo') or cargo.cargo }}{% endif %}
+                                    </h4>
+                                    <p class="org-member-role">
+                                      {% if cargo.miembro and cargo.miembro.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.miembro.cargo_nombre }}
+                                      {% elif cargo.cargo_nombre %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo_nombre }}
+                                      {% elif cargo.cargo %}
+                                        {{ get_translated_field(cargo, 'cargo') or cargo.cargo }}
+                                      {% endif %}
+                                    </p>
+                                    {% if cargo.miembro and get_translated_field(cargo.miembro, 'biografia') %}
+                                    <p class="org-member-bio" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">{{ get_translated_field(cargo.miembro, 'biografia') }}</p>
+                                    {% endif %}
+                                    {% if cargo.miembro and (cargo.miembro.email or cargo.miembro.redes_sociales) %}
+                                    <div class="org-member-social d-flex gap-2 align-items-center mt-2">
+                                      {% if cargo.miembro.email %}
+                                      <a href="mailto:{{ cargo.miembro.email }}" title="{{ cargo.miembro.email }}" style="color: #d44638; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                        <i class="fas fa-envelope" style="font-size: 1.2rem;"></i>
+                                      </a>
+                                      {% endif %}
+                                      {% if cargo.miembro.redes_sociales %}
+                                        {% set redes = cargo.miembro.redes_sociales|from_json if cargo.miembro.redes_sociales is string else (cargo.miembro.redes_sociales if cargo.miembro.redes_sociales is mapping else {}) %}
+                                        {% if redes and redes.linkedin %}
+                                        <a href="{{ redes.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0077b5; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                          <i class="fab fa-linkedin" style="font-size: 1.2rem;"></i>
+                                        </a>
+                                        {% endif %}
+                                      {% endif %}
+                                    </div>
+                                    {% endif %}
+                                  </div>
+                                </article>
+                              {% endfor %}
+                            </div>
+                          {% else %}
+                            <!-- Carousel para muchos miembros -->
+                            <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="false">
+                              <div class="carousel-wrapper">
+                                <div class="carousel-track-infinite" data-carousel-track-infinite>
+                                  {% for cargo in cargos %}
+                                    <article class="org-member-card">
+                                      <div class="org-member-photo">
+                                        {% if cargo.miembro and cargo.miembro.imagen %}
+                                        <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        {% endif %}
+                                        <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
+                                          <span>Foto</span>
+                                        </div>
+                                      </div>
+                                      <div class="org-member-info">
+                                        <h4 class="org-member-name">
+                                          {% if cargo.miembro %}{{ cargo.miembro.nombre }}{% else %}{{ get_translated_field(cargo, 'cargo') or cargo.cargo }}{% endif %}
+                                        </h4>
+                                        <p class="org-member-role">
+                                          {% if cargo.miembro and cargo.miembro.cargo_nombre %}
+                                            {{ get_translated_field(cargo, 'cargo') or cargo.miembro.cargo_nombre }}
+                                          {% elif cargo.cargo_nombre %}
+                                            {{ get_translated_field(cargo, 'cargo') or cargo.cargo_nombre }}
+                                          {% elif cargo.cargo %}
+                                            {{ get_translated_field(cargo, 'cargo') or cargo.cargo }}
+                                          {% endif %}
+                                        </p>
+                                        {% if cargo.miembro and get_translated_field(cargo.miembro, 'biografia') %}
+                                        <p class="org-member-bio" style="font-size: 0.8rem; color: #666; margin-top: 0.5rem; line-height: 1.4;">{{ get_translated_field(cargo.miembro, 'biografia') }}</p>
+                                        {% endif %}
+                                        {% if cargo.miembro and (cargo.miembro.email or cargo.miembro.redes_sociales) %}
+                                        <div class="org-member-social d-flex gap-2 align-items-center mt-2">
+                                          {% if cargo.miembro.email %}
+                                          <a href="mailto:{{ cargo.miembro.email }}" title="{{ cargo.miembro.email }}" style="color: #d44638; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                            <i class="fas fa-envelope" style="font-size: 1.2rem;"></i>
+                                          </a>
+                                          {% endif %}
+                                          {% if cargo.miembro.redes_sociales %}
+                                            {% set redes = cargo.miembro.redes_sociales|from_json if cargo.miembro.redes_sociales is string else (cargo.miembro.redes_sociales if cargo.miembro.redes_sociales is mapping else {}) %}
+                                            {% if redes and redes.linkedin %}
+                                            <a href="{{ redes.linkedin }}" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0077b5; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">
+                                              <i class="fab fa-linkedin" style="font-size: 1.2rem;"></i>
+                                            </a>
+                                            {% endif %}
+                                          {% endif %}
+                                        </div>
+                                        {% endif %}
+                                      </div>
+                                    </article>
+                                  {% endfor %}
+                                </div>
+                              </div>
+                              <div class="carousel-nav-infinite">
+                                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+                                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+                              </div>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              <!-- Organigrama por defecto si no hay datos -->
+              <p class="text-muted">{{ _('No hay organigrama configurado. Configúralo desde el panel de administración.') }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="equipo-tecnico">
+        <div class="container">
+          <h2 class="section-title">{{ _('Equipo técnico y profesional') }}</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Químicos farmacéuticos') }}</h3>
+              <p>
+                {{ _('Especialistas en cromatografía de alta resolución, espectrometría de masas y validación de metodologías multirresiduo.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Médicos veterinarios') }}</h3>
+              <p>
+                {{ _('Profesionales responsables de la interpretación normativa, manejo de matrices y vinculación con clientes del sector pecuario y acuícola.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Tecnólogos médicos y bioquímicos') }}</h3>
+              <p>
+                {{ _('Ejecutan protocolos analíticos, controlan calidad instrumental y gestionan la cadena de custodia de muestras.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Analistas de datos') }}</h3>
+              <p>
+                {{ _('Procesan datos complejos, generan reportes automatizados y apoyan la toma de decisiones basada en evidencia.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="colaboradores">
+        <div class="container">
+          <h2 class="section-title">{{ _('Colaboradores y asociados') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Nuestra red se extiende a distintas facultades, centros de investigación y socios estratégicos que aportan conocimiento y experiencia.') }}
+          </p>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Universidad de Chile') }}</h3>
+              <ul class="footer-links">
+                <li>INOCUIVET – {{ _('Laboratorio de Inocuidad de los Alimentos') }}</li>
+                <li>CRIA – {{ _('Centro de Investigación e Innovación para la Acuicultura') }}</li>
+                <li>INTA – {{ _('Instituto de Nutrición y Tecnología de los Alimentos') }}</li>
+                <li>{{ _('Laboratorio de Genómica Acuícola') }}</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Red internacional') }}</h3>
+              <p>
+                {{ _('Colaboraciones con universidades y centros OMSA de Noruega, Canadá, España, Reino Unido y Estados Unidos para proyectos de investigación y transferencia.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Sector público y privado') }}</h3>
+              <p>
+                {{ _('Coordinación con SERNAPESCA, SAG, Subsecretaría de Pesca, INTESAL, SalmonChile y empresas exportadoras que confían en nuestros servicios.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="cultura">
+        <div class="container">
+          <h2 class="section-title">{{ _('Nuestra cultura') }}</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Desarrollo profesional') }}</h3>
+              <p>
+                {{ _('Programas de capacitación continua, participación en congresos internacionales y acceso a redes de investigación globales.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Igualdad y diversidad') }}</h3>
+              <p>
+                {{ _('Promovemos la equidad de género, la inclusión y ambientes de trabajo seguros, colaborativos y respetuosos.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Innovación') }}</h3>
+              <p>
+                {{ _('Estimulamos la adopción de nuevas tecnologías, la mejora continua y la generación de soluciones para desafíos emergentes.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿Quieres trabajar con nosotros?') }}</h3>
+            <p>
+              {{ _('Escríbenos para conocer oportunidades de colaboración, pasantías o posiciones abiertas en FARMAVET.') }}
+            </p>
+            <a class="cta-button" href="{{ url_for('page', page='contacto') }}">{{ _('Postular o colaborar') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Nuestro equipo es la base de la excelencia que entregamos en servicios, investigación y docencia.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Secciones') }}</h3>
+          <ul class="footer-links">
+            <li><a href="#direccion">{{ _('Dirección') }}</a></li>
+            <li><a href="#organigrama">{{ _('Organigrama') }}</a></li>
+            <li><a href="#equipo-tecnico">{{ _('Equipo técnico') }}</a></li>
+            <li><a href="#colaboradores">{{ _('Colaboradores') }}</a></li>
+            <li><a href="#cultura">{{ _('Cultura') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>{{ _('Email') }}: equipo@farmavet.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
+

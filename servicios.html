@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Servicios Analíticos Acreditados | FARMAVET - Universidad de Chile</title>
+    <meta
+      name="description"
+      content="Más de 70 metodologías analíticas acreditadas ISO 17025. Residuos de medicamentos veterinarios, contaminantes químicos. Servicios nacionales e internacionales."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/servicios.html" />
+    <meta property="og:title" content="Servicios Analíticos Acreditados | FARMAVET" />
+    <meta property="og:description" content="Más de 70 metodologías analíticas acreditadas ISO 17025. Residuos de medicamentos veterinarios, contaminantes químicos. Servicios nacionales e internacionales." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/servicios.html" />
+    <meta name="twitter:title" content="Servicios Analíticos Acreditados | FARMAVET" />
+    <meta name="twitter:description" content="Más de 70 metodologías analíticas acreditadas ISO 17025. Residuos de medicamentos veterinarios, contaminantes químicos." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="servicios">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="Iniciar sesión" title="Iniciar sesión">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            Menú
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - Universidad de Chile">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET Universidad de Chile" />
+            <span class="sr-only">FARMAVET - Universidad de Chile</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>Inicio</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>Quiénes Somos</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>Equipo</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>Servicios</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>Análisis</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>Investigación</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>Formación</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>Noticias</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>Contacto</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>Solicitar Análisis</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">Servicios analíticos acreditados</p>
+            <h1 class="hero-title">Más de 70 metodologías para asegurar la inocuidad alimentaria</h1>
+            <p class="hero-description">
+              Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario
+              certificado bajo ISO 17025 para garantizar resultados confiables y trazables.
+            </p>
+            <div class="pill-group">
+              <span class="pill">Matrices hidrobiológicas y pecuarias</span>
+              <span class="pill">Validación de metodologías</span>
+              <span class="pill">Asesoría técnica integral</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              ¿Por qué elegir FARMAVET?
+            </h2>
+            <ul class="footer-links">
+              <li>Acreditación ISO 17025 vigente (INN)</li>
+              <li>Laboratorio de Verificación oficial SERNAPESCA y SAG</li>
+              <li>Equipo con más de 20 años de experiencia en inocuidad alimentaria</li>
+              <li>Protocolos de aseguramiento de calidad y cadena de custodia</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="resumen">
+        <div class="container">
+          <h2 class="section-title">Capacidades analíticas</h2>
+          <p class="section-subtitle">
+            Nuestros servicios cubren el control de residuos de medicamentos veterinarios, contaminantes químicos y la
+            validación de metodologías en matrices hidrobiológicas, pecuarias y productos derivados.
+          </p>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Equipamiento</h3>
+              <p>
+                Cromatografía líquida acoplada a espectrometría de masas (LC-MS/MS), cromatografía de gases con detector
+                de espectrometría de masas (GC-MS), HPLC, espectrofotometría de absorción atómica e inmunoensayos ELISA.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Cobertura</h3>
+              <p>
+                Productos hidrobiológicos (salmón, trucha, mariscos), carnes, leche, matrices ambientales (agua, plumas,
+                deyecciones) y alimentos balanceados.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Servicio integral</h3>
+              <p>
+                Asesoría técnica, instrucciones de muestreo, trazabilidad completa, informes técnicos bilingües y
+                acompañamiento en auditorías de clientes.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="tipos-analisis">
+        <div class="container" data-tabs>
+          <h2 class="section-title">Tipos de análisis</h2>
+          <p class="section-subtitle">
+            Organiza tu búsqueda por categorías temáticas para identificar las metodologías más adecuadas.
+          </p>
+          <div class="tab-list" role="tablist">
+            <button class="tab-button" type="button" role="tab" id="tab-residuos" aria-selected="true" aria-controls="panel-residuos">
+              Residuos de medicamentos veterinarios
+            </button>
+            <button class="tab-button" type="button" role="tab" id="tab-contaminantes" aria-selected="false" aria-controls="panel-contaminantes">
+              Contaminantes químicos
+            </button>
+            <button class="tab-button" type="button" role="tab" id="tab-matrices" aria-selected="false" aria-controls="panel-matrices">
+              Matrices analizadas
+            </button>
+            <button class="tab-button" type="button" role="tab" id="tab-metodos" aria-selected="false" aria-controls="panel-metodos">
+              Metodologías analíticas
+            </button>
+          </div>
+          <div class="tab-panel active" role="tabpanel" id="panel-residuos" aria-labelledby="tab-residuos">
+            <div class="list-grid">
+              <article class="list-card">
+                <h4>Antimicrobianos</h4>
+                <p>Tetraciclinas, fluoroquinolonas, sulfonamidas, macrólidos, aminoglucósidos, β-lactámicos.</p>
+              </article>
+              <article class="list-card">
+                <h4>Antiparasitarios</h4>
+                <p>Benzimidazoles, avermectinas, piretinas y otros tratamientos utilizados en acuicultura y producción animal.</p>
+              </article>
+              <article class="list-card">
+                <h4>Anabólicos</h4>
+                <p>Promotores de crecimiento y sustancias dopantes prohibidas en alimentos de origen animal.</p>
+              </article>
+              <article class="list-card">
+                <h4>Otros fármacos</h4>
+                <p>Analgésicos, antiinflamatorios y tranquilizantes sujetos a vigilancia por normativa internacional.</p>
+              </article>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-contaminantes" aria-labelledby="tab-contaminantes">
+            <div class="list-grid">
+              <article class="list-card">
+                <h4>Metales pesados</h4>
+                <p>Plomo, mercurio, cadmio, arsénico y otros elementos traza regulados en exportaciones.</p>
+              </article>
+              <article class="list-card">
+                <h4>Orgánicos persistentes</h4>
+                <p>Dioxinas, furanos, PCBs y contaminantes ambientales emergentes.</p>
+              </article>
+              <article class="list-card">
+                <h4>Pesticidas</h4>
+                <p>Organoclorados, organofosforados, carbamatos y nuevas generaciones de plaguicidas.</p>
+              </article>
+              <article class="list-card">
+                <h4>Otros contaminantes</h4>
+                <p>Micotoxinas, hidrocarburos aromáticos policíclicos y residuos industriales.</p>
+              </article>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-matrices" aria-labelledby="tab-matrices">
+            <div class="list-grid">
+              <article class="list-card">
+                <h4>Productos hidrobiológicos</h4>
+                <p>Salmón, trucha, peces de cultivo, mariscos y productos derivados.</p>
+              </article>
+              <article class="list-card">
+                <h4>Tejidos animales</h4>
+                <p>Músculo, hígado, riñón, grasa, sangre y matrices asociadas a producción pecuaria.</p>
+              </article>
+              <article class="list-card">
+                <h4>Productos pecuarios</h4>
+                <p>Carnes de ave, cerdo, bovino y productos listos para exportación.</p>
+              </article>
+              <article class="list-card">
+                <h4>Leche y lácteos</h4>
+                <p>Leche cruda, leche en polvo, quesos y sueros lácteos.</p>
+              </article>
+              <article class="list-card">
+                <h4>Matrices alternativas</h4>
+                <p>Plumas, deyecciones, alimento animal, agua, biofilms y matrices ambientales.</p>
+              </article>
+            </div>
+          </div>
+          <div class="tab-panel" role="tabpanel" id="panel-metodos" aria-labelledby="tab-metodos">
+            <div class="list-grid">
+              <article class="list-card">
+                <h4>LC-MS/MS</h4>
+                <p>Cromatografía líquida acoplada a espectrometría de masas en tándem para detección multirresiduo.</p>
+              </article>
+              <article class="list-card">
+                <h4>GC-MS</h4>
+                <p>Cromatografía de gases con espectrometría de masas para compuestos volátiles y semivolátiles.</p>
+              </article>
+              <article class="list-card">
+                <h4>HPLC</h4>
+                <p>Cromatografía líquida de alta resolución para cuantificación de fármacos.</p>
+              </article>
+              <article class="list-card">
+                <h4>Espectrofotometría</h4>
+                <p>Métodos ópticos para cuantificación de metales y otras especies químicas.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="servicios-adicionales">
+        <div class="container">
+          <h2 class="section-title">Servicios complementarios</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Validación de metodologías</h3>
+              <p>
+                Estudios completos de validación bajo guías internacionales (SANTE, CODEX, FDA) y elaboración de
+                protocolos de aseguramiento de calidad.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Estudios de depleción y bioequivalencia</h3>
+              <p>
+                Determinamos la cinética de residuos en matrices animales y validamos la equivalencia terapéutica de
+                medicamentos veterinarios.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Asesoría técnica</h3>
+              <p>
+                Acompañamos a empresas y organismos públicos en diseño de planes de monitoreo, interpretación de normas y
+                preparación de auditorías.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Capacitación</h3>
+              <p>
+                Talleres a medida en toma de muestras, control de calidad, gestión de residuos y buenas prácticas en uso
+                de fármacos.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="proceso">
+        <div class="container">
+          <h2 class="section-title">Proceso de solicitud</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">1. Contacto inicial</h3>
+              <p>
+                Escríbenos a través del formulario o por correo. Nuestro equipo te orientará sobre la metodología más
+                adecuada según tus necesidades.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">2. Asesoría técnica</h3>
+              <p>
+                Definimos matrices, límites de cuantificación, número de muestras y requisitos normativos aplicables.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">3. Toma y envío de muestras</h3>
+              <p>
+                Entregamos instrucciones y empaques. Contamos con cadena de custodia y control de temperatura.</p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">4. Análisis y entrega de informe</h3>
+              <p>
+                Procesamos las muestras en laboratorio acreditado y emitimos informes técnicos en español e inglés con
+                interpretación de resultados.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>Solicita una cotización personalizada</h3>
+            <p>
+              Indícanos matriz, tipo de análisis y número estimado de muestras. Responderemos en menos de 48 horas hábiles.
+            </p>
+            <a class="cta-button" href="{{ url_for('page', page='contacto') }}">Contactar laboratorio</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            Laboratorio de Farmacología Veterinaria, Universidad de Chile. Brindamos servicios analíticos acreditados y
+            asesoría científica al sector público y privado.
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">Servicios</h3>
+          <ul class="footer-links">
+            <li><a href="#tipos-analisis">Tipos de análisis</a></li>
+            <li><a href="#servicios-adicionales">Servicios complementarios</a></li>
+            <li><a href="#proceso">Proceso de solicitud</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}">Formulario de contacto</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">Contacto</h3>
+          <ul class="footer-links">
+            <li>Av. Santa Rosa 11735, La Pintana</li>
+            <li>Teléfono: +56 2 2978 XXXX</li>
+            <li>Email: farmavet@uchile.cl</li>
+            <li>Programas: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">Acreditaciones</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">Laboratorio Verificación SERNAPESCA</li>
+            <li class="badge">Laboratorio Verificación SAG</li>
+            <li class="badge">Centro Colaborador OMSA</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - Universidad de Chile.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ _('Docencia y Capacitación') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="Programas de docencia, postgrado y educación continua de FARMAVET: diplomados en buenas prácticas, cursos especializados y talleres para profesionales."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/docencia.html" />
+    <meta property="og:title" content="Docencia y Capacitación | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Programas de docencia, postgrado y educación continua de FARMAVET: diplomados en buenas prácticas, cursos especializados y talleres para profesionales." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/docencia.html" />
+    <meta name="twitter:title" content="Docencia y Capacitación | FARMAVET" />
+    <meta name="twitter:description" content="Programas de docencia, postgrado y educación continua de FARMAVET: diplomados en buenas prácticas y cursos especializados." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="docencia">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            {{ _('Menú') }}
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="pilar-docencia">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Formación continua') }}</p>
+            <h1 class="hero-title">{{ _('Docencia, postgrado y capacitación para el sector veterinario') }}</h1>
+            <p class="hero-description">
+              {{ _('FARMAVET integra la docencia universitaria con la práctica profesional. Ofrecemos programas para estudiantes, investigadores y profesionales del sector público y privado, con énfasis en inocuidad alimentaria y uso responsable de antimicrobianos.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Prácticas y pasantías') }}</span>
+              <span class="pill">{{ _('Diplomados y cursos') }}</span>
+              <span class="pill">{{ _('Programas a medida') }}</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              {{ _('Oferta formativa') }}
+            </h2>
+            <ul class="footer-links">
+              <li>{{ _('Programas de pregrado y postgrado de FAVET') }}</li>
+              <li>{{ _('Diplomados en gestión de antimicrobianos y buenas prácticas') }}</li>
+              <li>{{ _('Cursos certificados para industria acuícola y pecuaria') }}</li>
+              <li>{{ _('Talleres y seminarios temáticos') }}</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pregrado">
+        <div class="container">
+          <h2 class="section-title">{{ _('Formación de pregrado') }}</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Prácticas profesionales') }}</h3>
+              <p>
+                {{ _('Estudiantes de Medicina Veterinaria realizan prácticas en laboratorios acreditados, participando en el ciclo completo de análisis y aseguramiento de calidad.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Tutorías y proyectos') }}</h3>
+              <p>
+                {{ _('Acompañamiento en memorias de título y proyectos de investigación aplicada con acceso a equipamiento avanzado.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Pasantías') }}</h3>
+              <p>
+                {{ _('Programas intensivos en farmacología, inocuidad y gestión de laboratorios, abiertos a estudiantes nacionales e internacionales.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="postgrado">
+        <div class="container">
+          <h2 class="section-title">{{ _('Programas de postgrado') }}</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Doctorado en Ciencias Silvoagropecuarias y Veterinarias') }}</h3>
+              <p>
+                {{ _('Dirección de tesis en farmacología, inocuidad, RAM y metodologías analíticas. Acceso a redes internacionales y publicaciones indexadas.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Magíster en Ciencias Veterinarias y Pecuarias') }}</h3>
+              <p>
+                {{ _('Investigaciones aplicadas a monitoreo de residuos, validación metodológica y gestión de riesgos sanitarios.') }}
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">{{ _('Programas de especialidad') }}</h3>
+              <p>
+                {{ _('Supervisión de residencias profesionales y especializaciones en farmacología clínica veterinaria e inocuidad.') }}
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="educacion-continua">
+        <div class="container">
+          <h2 class="section-title">{{ _('Educación continua') }}</h2>
+          <div class="cards-grid">
+            {% if programas %}
+              {% for programa in programas %}
+              <article class="card">
+                <span class="badge">{{ get_translated_field(programa, 'tipo') or programa.tipo|title }}</span>
+                <h3 class="pillar-title">{{ get_translated_field(programa, 'titulo') }}</h3>
+                {% if get_translated_field(programa, 'descripcion') %}
+                <p>{{ get_translated_field(programa, 'descripcion') }}</p>
+                {% endif %}
+                {% if get_translated_field(programa, 'modalidad') or programa.modalidad %}
+                <p><strong>{{ _('Modalidad') }}:</strong> {{ get_translated_field(programa, 'modalidad') or programa.modalidad }}</p>
+                {% endif %}
+                {% if get_translated_field(programa, 'horario') or programa.horario %}
+                <p><strong>{{ _('Horario') }}:</strong> {{ get_translated_field(programa, 'horario') or programa.horario }}</p>
+                {% endif %}
+                {% if get_translated_field(programa, 'patrocinio') or programa.patrocinio or get_translated_field(programa, 'auspicio') or programa.auspicio %}
+                <p>
+                  {% if get_translated_field(programa, 'patrocinio') or programa.patrocinio %}<strong>{{ _('Patrocinio') }}:</strong> {{ get_translated_field(programa, 'patrocinio') or programa.patrocinio }}{% endif %}
+                  {% if (get_translated_field(programa, 'patrocinio') or programa.patrocinio) and (get_translated_field(programa, 'auspicio') or programa.auspicio) %} · {% endif %}
+                  {% if get_translated_field(programa, 'auspicio') or programa.auspicio %}<strong>{{ _('Auspicio') }}:</strong> {{ get_translated_field(programa, 'auspicio') or programa.auspicio }}{% endif %}
+                </p>
+                {% endif %}
+                <a class="cta-inline" href="mailto:{{ programa.email_contacto or 'postitulo@veterinaria.uchile.cl' }}">
+                  {{ get_translated_field(programa, 'texto_boton') or programa.texto_boton or _('Postular') }}
+                </a>
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Contenido por defecto si no hay programas -->
+              <article class="card">
+                <span class="badge">{{ _('Diplomado') }}</span>
+                <h3 class="pillar-title">{{ _('Buenas prácticas en uso de fármacos en salmonicultura') }}</h3>
+                <p>{{ _('Modalidad online (Zoom). Miércoles 17:30-19:45 y sábados 08:00-13:00. Contenidos: farmacocinética, normativas nacionales e internacionales, stewardship, casos prácticos.') }}</p>
+                <p>{{ _('Patrocinio') }}: SAG, SERNAPESCA, {{ _('Subsecretaría de Pesca') }} · {{ _('Auspicio') }}: INTESAL.</p>
+                <a class="cta-inline" href="mailto:postitulo@veterinaria.uchile.cl">{{ _('Postular') }}</a>
+              </article>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="testimonios">
+        <div class="container">
+          <h2 class="section-title">{{ _('Historias y testimonios') }}</h2>
+          <div class="news-feed">
+            {% if testimonios %}
+              {% for testimonio in testimonios %}
+              <article class="news-item" {% if testimonio.imagen %}style="display: flex !important; gap: 1.5rem; align-items: center;"{% endif %}>
+                {% if testimonio.imagen %}
+                <div style="flex-shrink: 0; width: 160px; height: 160px; min-height: 160px;">
+                  <img src="{{ testimonio.imagen }}" alt="{{ get_translated_field(testimonio, 'titulo') }}" style="width: 100%; height: 100%; border-radius: var(--radius-base); object-fit: cover; display: block;" onerror="this.style.display='none';" />
+                </div>
+                {% endif %}
+                <div style="flex: 1; display: grid; gap: 0.75rem;">
+                  <h3 class="pillar-title">"{{ get_translated_field(testimonio, 'titulo') }}"</h3>
+                  <p>{{ get_translated_field(testimonio, 'contenido') }}</p>
+                  {% if testimonio.autor %}
+                  <p class="text-muted small" style="margin-top: 0;"><em>— {{ testimonio.autor }}</em></p>
+                  {% endif %}
+                  {% if testimonio.tags %}
+                    {% set tags_list = testimonio.tags|from_json %}
+                    {% if tags_list %}
+                    <div class="news-tags">
+                      {% for tag in tags_list %}
+                      <span class="chip">{{ tag }}</span>
+                      {% endfor %}
+                    </div>
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </article>
+              {% endfor %}
+            {% else %}
+              <!-- Contenido por defecto si no hay testimonios -->
+              <article class="news-item">
+                <h3 class="pillar-title">"{{ _('FARMAVET impulsó mi tesis en inocuidad alimentaria') }}"</h3>
+                <p>{{ _('Camila, médico veterinario FAVET, desarrolló una metodología de control de residuos en mejillones con apoyo de profesionales y equipamiento del laboratorio.') }}</p>
+                <div class="news-tags">
+                  <span class="chip">{{ _('Pregrado') }}</span>
+                  <span class="chip">{{ _('Investigación aplicada') }}</span>
+                </div>
+              </article>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="cta-docencia">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿Quieres sumarte a nuestros programas?') }}</h3>
+            <p>
+              {{ _('Escríbenos para conocer requisitos, plazos de postulación y cupos disponibles en docencia, postgrado y capacitación.') }}
+            </p>
+            <a class="cta-button" href="mailto:postitulo@veterinaria.uchile.cl">{{ _('Contactar programas') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Vinculamos la investigación con la formación de profesionales en inocuidad alimentaria.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Programas') }}</h3>
+          <ul class="footer-links">
+            <li><a href="#pregrado">{{ _('Pregrado') }}</a></li>
+            <li><a href="#postgrado">{{ _('Postgrado') }}</a></li>
+            <li><a href="#educacion-continua">{{ _('Educación continua') }}</a></li>
+            <li><a href="#cta-docencia">{{ _('Postular') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>{{ _('Email') }}: docencia@farmavet.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>

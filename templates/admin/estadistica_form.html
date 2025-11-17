@@ -1,0 +1,118 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if estadistica %}Editar{% else %}Nueva{% endif %} Estadística{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if estadistica else 'plus-circle' }} me-2"></i>
+        {% if estadistica %}Editar{% else %}Nueva{% endif %} Estadística
+    </h2>
+    <a href="{{ url_for('admin_estadisticas') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="numero" class="form-label">Número <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="numero" name="numero" 
+                           value="{{ estadistica.numero if estadistica else '' }}" required min="0">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="sufijo" class="form-label">Sufijo</label>
+                    <input type="text" class="form-control" id="sufijo" name="sufijo" 
+                           value="{{ estadistica.sufijo if estadistica else '' }}" 
+                           placeholder="Ej: +, er, º">
+                    <small class="text-muted">Sufijo que aparece después del número (ej: 30+, 1er, 1º)</small>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ estadistica.orden if estadistica else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <label for="etiqueta" class="form-label">Etiqueta <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="etiqueta" name="etiqueta" 
+                           value="{{ estadistica.etiqueta if estadistica else '' }}" required
+                           placeholder="Ej: años de experiencia, metodologías acreditadas">
+                </div>
+                
+                <!-- Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas este campo, la etiqueta se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="etiqueta_en" class="form-label">Etiqueta (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="etiqueta_en" name="etiqueta_en" 
+                           value="{{ estadistica.etiqueta_en if estadistica and estadistica.etiqueta_en else '' }}" 
+                           placeholder="Label in English (e.g., years of experience, accredited methodologies)">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <strong>Vista previa:</strong> 
+                        <span class="fs-4">{{ estadistica.numero if estadistica else '0' }}{{ estadistica.sufijo if estadistica else '' }}</span>
+                        <span>{{ estadistica.etiqueta if estadistica else 'etiqueta' }}</span>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not estadistica or estadistica.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Estadística activa (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Estadística
+                        </button>
+                        <a href="{{ url_for('admin_estadisticas') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Actualizar vista previa en tiempo real
+    document.getElementById('numero')?.addEventListener('input', updatePreview);
+    document.getElementById('sufijo')?.addEventListener('input', updatePreview);
+    document.getElementById('etiqueta')?.addEventListener('input', updatePreview);
+    
+    function updatePreview() {
+        const numero = document.getElementById('numero')?.value || '0';
+        const sufijo = document.getElementById('sufijo')?.value || '';
+        const etiqueta = document.getElementById('etiqueta')?.value || 'etiqueta';
+        const preview = document.querySelector('.alert-info span.fs-4');
+        const previewLabel = document.querySelector('.alert-info span:last-child');
+        if (preview) preview.textContent = numero + sufijo + ' ';
+        if (previewLabel) previewLabel.textContent = etiqueta;
+    }
+</script>
+{% endblock %}

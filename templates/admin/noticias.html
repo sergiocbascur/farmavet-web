@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Noticias{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-newspaper me-2"></i>Gestión de Noticias</h2>
+    <a href="{{ url_for('admin_noticia_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva Noticia
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Fecha</th>
+                        <th>Destacada</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for noticia in noticias %}
+                    <tr>
+                        <td><strong>{{ noticia.titulo or 'Sin título' }}</strong></td>
+                        <td><span class="badge bg-info">{{ noticia.categoria or '—' }}</span></td>
+                        <td>{{ noticia.fecha or '—' }}</td>
+                        <td>
+                            {% if noticia.destacada == 1 or noticia.destacada == True %}
+                                <span class="badge bg-warning">⭐ Destacada</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if noticia.activa == 1 or noticia.activa == True %}
+                                <span class="badge bg-success">Activa</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_noticia_editar', noticia_id=noticia.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_noticia_eliminar', noticia_id=noticia.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta noticia?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No hay noticias registradas. <a href="{{ url_for('admin_noticia_nuevo') }}">Crear la primera</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Estadísticas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Gestión de Estadísticas</h2>
+    <a href="{{ url_for('admin_estadistica_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva Estadística
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Etiqueta</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for estadistica in estadisticas %}
+                    <tr>
+                        <td><strong>{{ estadistica.numero }}{{ estadistica.sufijo or '' }}</strong></td>
+                        <td>{{ estadistica.etiqueta or 'Sin etiqueta' }}</td>
+                        <td>{{ estadistica.orden }}</td>
+                        <td>
+                            {% if estadistica.activo == 1 or estadistica.activo == True %}
+                                <span class="badge bg-success">Activa</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_estadistica_editar', estadistica_id=estadistica.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_estadistica_eliminar', estadistica_id=estadistica.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta estadística?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No hay estadísticas registradas. <a href="{{ url_for('admin_estadistica_nuevo') }}">Crear la primera</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

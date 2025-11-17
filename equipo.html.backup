@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Equipo HUMANO | FARMAVET - Universidad de Chile</title>
+    <meta
+      name="description"
+      content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio."
+    />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/equipo.html" />
+    <meta property="og:title" content="Equipo HUMANO | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/equipo.html" />
+    <meta name="twitter:title" content="Equipo HUMANO | FARMAVET" />
+    <meta name="twitter:description" content="Conoce al equipo humano de FARMAVET: dirección, profesionales, técnicos y colaboradores que aseguran la excelencia del laboratorio." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-docencia.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="icon" type="image/png" href="logos/LOGO FARMAVET.png" />
+  </head>
+  <body data-page="equipo">
+    <header class="site-header" aria-label="Cabecera principal">
+      <a href="equipo-en.html" class="lang-switcher" aria-label="English" title="English">
+        <span class="lang-switcher-text">EN</span>
+      </a>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
+            Menú
+          </button>
+          <a class="logo-group" href="index.html" aria-label="FARMAVET - Universidad de Chile">
+            <img src="logos/LOGO FARMAVET.png" alt="Logotipo FARMAVET Universidad de Chile" />
+            <span class="sr-only">FARMAVET - Universidad de Chile</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="index.html" data-nav-link>Inicio</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="quienes-somos.html" data-nav-link>Quiénes Somos</a>
+              <ul class="dropdown-menu">
+                <li><a href="quienes-somos.html" data-nav-link>FARMAVET</a></li>
+                <li><a href="equipo.html" data-nav-link>Equipo</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="servicios.html" data-nav-link>Servicios</a>
+              <ul class="dropdown-menu">
+                <li><a href="servicios.html" data-nav-link>Análisis</a></li>
+                <li><a href="investigacion.html" data-nav-link>Investigación</a></li>
+                <li><a href="docencia.html" data-nav-link>Formación</a></li>
+              </ul>
+            </li>
+            <li><a href="casa-omsa.html" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="noticias.html" data-nav-link>Noticias</a></li>
+            <li><a href="contacto.html" class="cta-inline" data-nav-link>Contacto</a></li>
+            <li><a href="contacto.html" class="cta-button" data-nav-link>Solicitar Análisis</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">Equipo humano</p>
+            <h1 class="hero-title">Excelencia científica respaldada por personas comprometidas</h1>
+            <p class="hero-description">
+              La calidad de nuestros resultados descansa en un equipo multidisciplinario, altamente calificado y
+              comprometido con la salud pública y la inocuidad alimentaria. Conoce a quienes hacen posible el prestigio de FARMAVET.
+            </p>
+            <div class="pill-group">
+              <span class="pill">Dirección científica</span>
+              <span class="pill">Profesionales y técnicos</span>
+              <span class="pill">Colaboradores nacionales e internacionales</span>
+            </div>
+          </div>
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              Nuestra filosofía
+            </h2>
+            <p>
+              Fomentamos una cultura basada en la excelencia, la colaboración y la innovación. Promovemos el desarrollo
+              profesional continuo y la equidad de género en los equipos científicos.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="direccion">
+        <div class="container">
+          <h2 class="section-title">Dirección</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Dra. Javiera Cornejo Kelly</h3>
+              <p>
+                Directora FARMAVET e INOCUIVET. Directora Ejecutiva CASA-OMSA. Médico Veterinario y Doctora en Ciencias
+                Silvoagropecuarias y Veterinarias. Especialista en inocuidad alimentaria, gestión de antimicrobianos e
+                investigación aplicada.
+              </p>
+              <div class="news-tags">
+                <span class="chip">Inocuidad alimentaria</span>
+                <span class="chip">CASA-OMSA</span>
+              </div>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Dr. Aldo Maddaleno</h3>
+              <p>
+                Encargado del laboratorio FARMAVET. Médico Veterinario con trayectoria en farmacología, validación de
+                metodologías y aseguramiento de calidad en laboratorios acreditados.
+              </p>
+              <div class="news-tags">
+                <span class="chip">Farmacología</span>
+                <span class="chip">Gestión de calidad</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="organigrama">
+        <div class="container">
+          <h2 class="section-title">Organigrama institucional</h2>
+          <p class="section-subtitle">
+            Estructura organizacional de FARMAVET. Explora cada área para conocer al equipo que hace posible nuestra labor.
+          </p>
+          
+          <div class="org-chart">
+            <!-- DIRECCIÓN -->
+            <div class="org-accordion" data-org-level="1">
+              <button class="org-accordion-header" aria-expanded="false">
+                <span class="org-level-badge">DIRECCIÓN</span>
+                <h3>Dirección y Jefatura</h3>
+                <span class="org-accordion-icon">+</span>
+              </button>
+              <div class="org-accordion-content">
+                <div class="org-leadership-grid">
+                  <article class="org-member-card">
+                    <div class="org-member-photo">
+                      <div class="org-member-photo-placeholder">
+                        <span>Foto</span>
+                      </div>
+                    </div>
+                    <div class="org-member-info">
+                      <h4 class="org-member-name">Director</h4>
+                      <p class="org-member-role"></p>
+                    </div>
+                  </article>
+                  <article class="org-member-card">
+                    <div class="org-member-photo">
+                      <img src="assets/img/placeholder-person.svg" alt="Foto de subdirector" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                      <div class="org-member-photo-placeholder" style="display:none;">
+                        <span>Foto</span>
+                      </div>
+                    </div>
+                    <div class="org-member-info">
+                      <h4 class="org-member-name">Subdirector</h4>
+                      <p class="org-member-role">Jefe de laboratorio</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </div>
+
+            <!-- JEFE TECNICO -->
+            <div class="org-accordion" data-org-level="3">
+              <button class="org-accordion-header" aria-expanded="false">
+                <span class="org-level-badge">ÁREA TÉCNICA</span>
+                <h3>Jefe Técnico (Responsable Técnico)</h3>
+                <span class="org-accordion-icon">+</span>
+              </button>
+              <div class="org-accordion-content">
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Jefe Técnico</h4>
+                  <div class="org-single-member">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de jefe técnico" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Jefe Técnico</h4>
+                        <p class="org-member-role">Responsable Técnico</p>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Operaciones de Laboratorio</h4>
+                  <div class="org-members-grid">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de encargado recepción" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Encargado Recepción y Molienda</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de responsable residuos" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Responsable Área Residuos/Coordinador</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de responsable dioxinas" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Responsable Área Dioxinas/Coordinador</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                  </div>
+                  <div class="org-subsection">
+                    <h4 class="org-subsection-title">Analistas y Técnicos</h4>
+                    <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="false">
+                      <div class="carousel-wrapper">
+                        <div class="carousel-track-infinite" data-carousel-track-infinite>
+                          <article class="org-member-card">
+                            <div class="org-member-photo">
+                              <img src="assets/img/placeholder-person.svg" alt="Foto de molienda" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                              <div class="org-member-photo-placeholder" style="display:none;">
+                                <span>Foto</span>
+                              </div>
+                            </div>
+                            <div class="org-member-info">
+                              <h4 class="org-member-name">Molienda</h4>
+                              <p class="org-member-role"></p>
+                            </div>
+                          </article>
+                          <article class="org-member-card">
+                            <div class="org-member-photo">
+                              <img src="assets/img/placeholder-person.svg" alt="Foto de recepción" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                              <div class="org-member-photo-placeholder" style="display:none;">
+                                <span>Foto</span>
+                              </div>
+                            </div>
+                            <div class="org-member-info">
+                              <h4 class="org-member-name">Recepción de Muestras</h4>
+                              <p class="org-member-role"></p>
+                            </div>
+                          </article>
+                          <article class="org-member-card">
+                            <div class="org-member-photo">
+                              <img src="assets/img/placeholder-person.svg" alt="Foto de analista" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                              <div class="org-member-photo-placeholder" style="display:none;">
+                                <span>Foto</span>
+                              </div>
+                            </div>
+                            <div class="org-member-info">
+                              <h4 class="org-member-name">Analista Químico</h4>
+                              <p class="org-member-role"></p>
+                            </div>
+                          </article>
+                          <article class="org-member-card">
+                            <div class="org-member-photo">
+                              <img src="assets/img/placeholder-person.svg" alt="Foto de técnico" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                              <div class="org-member-photo-placeholder" style="display:none;">
+                                <span>Foto</span>
+                              </div>
+                            </div>
+                            <div class="org-member-info">
+                              <h4 class="org-member-name">Técnico Químico</h4>
+                              <p class="org-member-role"></p>
+                            </div>
+                          </article>
+                        </div>
+                      </div>
+                      <div class="carousel-nav-infinite">
+                        <button class="carousel-nav-btn" type="button" aria-label="Anterior" data-carousel-prev-infinite>‹</button>
+                        <button class="carousel-nav-btn" type="button" aria-label="Siguiente" data-carousel-next-infinite>›</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- JEFE DE CALIDAD -->
+            <div class="org-accordion" data-org-level="3">
+              <button class="org-accordion-header" aria-expanded="false">
+                <span class="org-level-badge">CALIDAD</span>
+                <h3>Jefe de Calidad (Responsable de Calidad)</h3>
+                <span class="org-accordion-icon">+</span>
+              </button>
+              <div class="org-accordion-content">
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Jefe de Calidad</h4>
+                  <div class="org-single-member">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de jefe de calidad" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Jefe de Calidad</h4>
+                        <p class="org-member-role">Responsable de Calidad</p>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Administración de Laboratorio</h4>
+                  <div class="org-members-grid">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de encargada compras" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Encargada de Compras y Adquisiciones</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de encargado informes" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Encargado Informes</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de encargado contabilidad" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Encargado Contabilidad</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                  </div>
+                  <div class="org-subsection">
+                    <h4 class="org-subsection-title">Apoyo Administrativo</h4>
+                    <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="false">
+                      <div class="carousel-wrapper">
+                        <div class="carousel-track-infinite" data-carousel-track-infinite>
+                          <article class="org-member-card">
+                            <div class="org-member-photo">
+                              <img src="assets/img/placeholder-person.svg" alt="Foto de apoyo administrativo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                              <div class="org-member-photo-placeholder" style="display:none;">
+                                <span>Foto</span>
+                              </div>
+                            </div>
+                            <div class="org-member-info">
+                              <h4 class="org-member-name">Apoyo Administrativo</h4>
+                              <p class="org-member-role"></p>
+                            </div>
+                          </article>
+                        </div>
+                      </div>
+                      <div class="carousel-nav-infinite">
+                        <button class="carousel-nav-btn" type="button" aria-label="Anterior" data-carousel-prev-infinite>‹</button>
+                        <button class="carousel-nav-btn" type="button" aria-label="Siguiente" data-carousel-next-infinite>›</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RESPONSABLE I+D -->
+            <div class="org-accordion" data-org-level="3">
+              <button class="org-accordion-header" aria-expanded="false">
+                <span class="org-level-badge">I+D</span>
+                <h3>Responsable Área I+D</h3>
+                <span class="org-accordion-icon">+</span>
+              </button>
+              <div class="org-accordion-content">
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Responsable Área I+D</h4>
+                  <div class="org-single-member">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de responsable I+D" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Responsable Área I+D</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="org-subsection">
+                  <h4 class="org-subsection-title">Coordinador de Proyecto</h4>
+                  <div class="org-members-grid">
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de coordinador" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Coordinador de Proyecto</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                    <article class="org-member-card">
+                      <div class="org-member-photo">
+                        <img src="assets/img/placeholder-person.svg" alt="Foto de profesional investigador" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                        <div class="org-member-photo-placeholder" style="display:none;">
+                          <span>Foto</span>
+                        </div>
+                      </div>
+                      <div class="org-member-info">
+                        <h4 class="org-member-name">Profesional Investigador</h4>
+                        <p class="org-member-role"></p>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="equipo-tecnico">
+        <div class="container">
+          <h2 class="section-title">Equipo técnico y profesional</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Químicos farmacéuticos</h3>
+              <p>
+                Especialistas en cromatografía de alta resolución, espectrometría de masas y validación de metodologías
+                multirresiduo.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Médicos veterinarios</h3>
+              <p>
+                Profesionales responsables de la interpretación normativa, manejo de matrices y vinculación con clientes del sector
+                pecuario y acuícola.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Tecnólogos médicos y bioquímicos</h3>
+              <p>
+                Ejecutan protocolos analíticos, controlan calidad instrumental y gestionan la cadena de custodia de muestras.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Analistas de datos</h3>
+              <p>
+                Procesan datos complejos, generan reportes automatizados y apoyan la toma de decisiones basada en evidencia.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="colaboradores">
+        <div class="container">
+          <h2 class="section-title">Colaboradores y asociados</h2>
+          <p class="section-subtitle">
+            Nuestra red se extiende a distintas facultades, centros de investigación y socios estratégicos que aportan
+            conocimiento y experiencia.
+          </p>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Universidad de Chile</h3>
+              <ul class="footer-links">
+                <li>INOCUIVET – Laboratorio de Inocuidad de los Alimentos</li>
+                <li>CRIA – Centro de Investigación e Innovación para la Acuicultura</li>
+                <li>INTA – Instituto de Nutrición y Tecnología de los Alimentos</li>
+                <li>Laboratorio de Genómica Acuícola</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Red internacional</h3>
+              <p>
+                Colaboraciones con universidades y centros OMSA de Noruega, Canadá, España, Reino Unido y Estados Unidos para
+                proyectos de investigación y transferencia.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Sector público y privado</h3>
+              <p>
+                Coordinación con SERNAPESCA, SAG, Subsecretaría de Pesca, INTESAL, SalmonChile y empresas exportadoras que confían en nuestros servicios.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="cultura">
+        <div class="container">
+          <h2 class="section-title">Nuestra cultura</h2>
+          <div class="cards-grid">
+            <article class="card">
+              <h3 class="pillar-title">Desarrollo profesional</h3>
+              <p>
+                Programas de capacitación continua, participación en congresos internacionales y acceso a redes de
+                investigación globales.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Igualdad y diversidad</h3>
+              <p>
+                Promovemos la equidad de género, la inclusión y ambientes de trabajo seguros, colaborativos y respetuosos.
+              </p>
+            </article>
+            <article class="card">
+              <h3 class="pillar-title">Innovación</h3>
+              <p>
+                Estimulamos la adopción de nuevas tecnologías, la mejora continua y la generación de soluciones para desafíos emergentes.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>¿Quieres trabajar con nosotros?</h3>
+            <p>
+              Escríbenos para conocer oportunidades de colaboración, pasantías o posiciones abiertas en FARMAVET.
+            </p>
+            <a class="cta-button" href="contacto.html">Postular o colaborar</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            Laboratorio de Farmacología Veterinaria, Universidad de Chile. Nuestro equipo es la base de la excelencia que
+            entregamos en servicios, investigación y docencia.
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">Secciones</h3>
+          <ul class="footer-links">
+            <li><a href="#direccion">Dirección</a></li>
+            <li><a href="#organigrama">Organigrama</a></li>
+            <li><a href="#equipo-tecnico">Equipo técnico</a></li>
+            <li><a href="#colaboradores">Colaboradores</a></li>
+            <li><a href="#cultura">Cultura</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">Contacto</h3>
+          <ul class="footer-links">
+            <li>Av. Santa Rosa 11735, La Pintana</li>
+            <li>Teléfono: +56 2 2978 XXXX</li>
+            <li>Email: equipo@farmavet.cl</li>
+            <li>Programas: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">Acreditaciones</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - Universidad de Chile.</div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="assets/js/main.js?v=2.4" defer></script>
+  </body>
+</html>
+

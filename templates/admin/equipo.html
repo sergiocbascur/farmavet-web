@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Equipo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-people me-2"></i>Gestión de Equipo</h2>
+    <a href="{{ url_for('admin_equipo_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Miembro
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Cargo</th>
+                        <th>Sección</th>
+                        <th>Email</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for miembro in equipo %}
+                    <tr>
+                        <td><strong>{{ miembro.nombre }}</strong></td>
+                        <td>{{ miembro.cargo_nombre or miembro.cargo or '—' }}</td>
+                        <td><span class="badge bg-info">{{ miembro.seccion|title if miembro.seccion else '—' }}</span></td>
+                        <td>{{ miembro.email or '—' }}</td>
+                        <td>{{ miembro.orden }}</td>
+                        <td>
+                            {% if miembro.activo == 1 or miembro.activo == True %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_equipo_editar', miembro_id=miembro.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_equipo_eliminar', miembro_id=miembro.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este miembro?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No hay miembros registrados. <a href="{{ url_for('admin_equipo_nuevo') }}">Agregar el primero</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
