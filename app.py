@@ -712,6 +712,130 @@ def index():
     else:
         return "Página no encontrada. El template debe existir en templates/index.html", 404
 
+@app.route('/equipo')
+@app.route('/equipo.html')
+def equipo_page():
+    """Ruta específica para página de equipo"""
+    lang = get_language()
+    locale = get_locale()
+    conn = get_db()
+    # Obtener organigrama con sus miembros asignados
+    organigrama_raw = conn.execute('''
+        SELECT o.*, 
+               o.subseccion_en, o.cargo_en, o.descripcion_en,
+               e.id as miembro_id,
+               e.nombre as miembro_nombre,
+               e.biografia as miembro_biografia,
+               e.email as miembro_email,
+               e.imagen as miembro_imagen,
+               e.imagen_zoom as miembro_imagen_zoom,
+               e.imagen_x as miembro_imagen_x,
+               e.imagen_y as miembro_imagen_y,
+               e.tags as miembro_tags,
+               e.redes_sociales as miembro_redes,
+               o.cargo as cargo_nombre
+        FROM organigrama o
+        LEFT JOIN equipo e ON o.id = e.cargo_id AND e.activo = 1
+        WHERE o.activo = 1
+        ORDER BY o.seccion, o.orden, o.id, e.orden
+    ''').fetchall()
+    
+    # Organizar organigrama por sección y subsección
+    organigrama_organizado = {}
+    for row in organigrama_raw:
+        seccion = row['seccion']
+        subseccion = row['subseccion'] or 'Sin subsección'
+        
+        if seccion not in organigrama_organizado:
+            organigrama_organizado[seccion] = {}
+        
+        if subseccion not in organigrama_organizado[seccion]:
+            organigrama_organizado[seccion][subseccion] = []
+        
+        # Agregar cargo con su miembro (si existe)
+        cargo_data = {
+            'id': row['id'],
+            'cargo': row['cargo'],
+            'descripcion': row['descripcion'],
+            'subseccion': row['subseccion'],
+            'subseccion_en': row['subseccion_en'] if 'subseccion_en' in row.keys() else None,
+            'cargo_en': row['cargo_en'] if 'cargo_en' in row.keys() else None,
+            'descripcion_en': row['descripcion_en'] if 'descripcion_en' in row.keys() else None,
+            'orden': row['orden'],
+            'miembro': None
+        }
+        
+        # Si hay miembro asignado
+        if row['miembro_id']:
+            # Parsear redes sociales si existen
+            redes_sociales = {}
+            if row['miembro_redes']:
+                try:
+                    redes_sociales = json.loads(row['miembro_redes'])
+                except:
+                    redes_sociales = {}
+            
+            cargo_data['miembro'] = {
+                'id': row['miembro_id'],
+                'nombre': row['miembro_nombre'],
+                'biografia': row['miembro_biografia'],
+                'email': row['miembro_email'],
+                'imagen': row['miembro_imagen'],
+                'imagen_zoom': row['miembro_imagen_zoom'],
+                'imagen_x': row['miembro_imagen_x'],
+                'imagen_y': row['miembro_imagen_y'],
+                'tags': row['miembro_tags'],
+                'redes_sociales': redes_sociales,
+                'cargo_nombre': row['cargo_nombre']
+            }
+            cargo_data['cargo_nombre'] = row['cargo_nombre']
+        else:
+            # Si no hay miembro, al menos mostrar el nombre del cargo
+            cargo_data['cargo_nombre'] = row['cargo']
+        
+        organigrama_organizado[seccion][subseccion].append(cargo_data)
+    
+    # Obtener también la sección de dirección (miembros destacados)
+    direccion_raw = conn.execute('''
+        SELECT e.*, o.cargo as cargo_nombre, o.cargo_en as cargo_nombre_en, 
+               o.seccion as cargo_seccion, o.descripcion as cargo_descripcion, o.descripcion_en as cargo_descripcion_en
+        FROM equipo e
+        INNER JOIN organigrama o ON e.cargo_id = o.id
+        WHERE e.activo = 1 AND o.seccion = 'direccion' AND o.activo = 1
+        ORDER BY e.orden, e.id
+    ''').fetchall()
+    
+    # Convertir Row objects a diccionarios y parsear redes sociales
+    direccion = []
+    for row in direccion_raw:
+        miembro = dict(row)
+        # Asegurar que cargo_nombre esté presente (debería venir de la query)
+        if not miembro.get('cargo_nombre'):
+            if miembro.get('cargo'):
+                miembro['cargo_nombre'] = miembro.get('cargo')
+            elif miembro.get('cargo_id'):
+                # Intentar obtenerlo del organigrama como último recurso
+                cargo_obj = conn.execute('SELECT cargo FROM organigrama WHERE id = ?', (miembro.get('cargo_id'),)).fetchone()
+                if cargo_obj:
+                    miembro['cargo_nombre'] = cargo_obj['cargo']
+        
+        # Parsear redes sociales
+        if miembro.get('redes_sociales'):
+            try:
+                miembro['redes_sociales'] = json.loads(miembro['redes_sociales'])
+            except:
+                miembro['redes_sociales'] = {}
+        else:
+            miembro['redes_sociales'] = {}
+        direccion.append(miembro)
+    
+    tarjetas_destacadas = conn.execute('''
+        SELECT * FROM tarjetas_destacadas WHERE pagina = 'equipo' AND activo = 1 
+        ORDER BY orden, id
+    ''').fetchall()
+    conn.close()
+    return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+
 @app.route('/<page>.html')
 def page(page):
     """Rutas dinámicas para páginas HTML - SIEMPRE prioriza templates"""
