@@ -420,11 +420,6 @@ def init_db():
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Migración: agregar campo etiqueta_en si no existe
-    try:
-        conn.execute('ALTER TABLE estadisticas ADD COLUMN etiqueta_en TEXT')
-    except:
-        pass
     
     # Tabla de hero_media (para sección de imágenes/tarjetas en hero de páginas)
     conn.execute('''
@@ -500,12 +495,18 @@ def init_db():
             numero INTEGER NOT NULL,
             sufijo TEXT,  -- '+', 'er', 'º', etc.
             etiqueta TEXT NOT NULL,
+            etiqueta_en TEXT,
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migración: agregar campo etiqueta_en si no existe (para bases de datos existentes)
+    try:
+        conn.execute('ALTER TABLE estadisticas ADD COLUMN etiqueta_en TEXT')
+    except:
+        pass  # La columna ya existe
     
     # Tabla de eventos
     conn.execute('''
