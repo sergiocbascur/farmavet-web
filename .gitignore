@@ -56,4 +56,18 @@ static/uploads/*
 
 # Backups
 backup_*/
+*.backup
+
+# Archivos temporales y de trabajo
+*-en-template.txt
+*.txt
+!requirements.txt
+!runtime.txt
+!babel.cfg
+
+# PDFs y documentos
+*.pdf
+
+# Archivos HTML duplicados en raíz (si existen)
+# Los templates están en templates/
 
