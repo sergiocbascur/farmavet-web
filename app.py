@@ -1055,9 +1055,6 @@ def page(page):
         return render_template(template_file, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
     
     # Si NO existe template, servir archivo estático (solo si no tiene Jinja2)
-    # EXCEPCIÓN: equipo.html siempre debe usar template
-    elif page == 'equipo':
-        return "Página equipo no encontrada. El template debe existir en templates/equipo.html", 404
     elif os.path.exists(f'{page}.html'):
         return send_from_directory('.', f'{page}.html')
     else:
