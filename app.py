@@ -113,10 +113,13 @@ os.makedirs('static/uploads/clientes', exist_ok=True)
 os.makedirs('static/uploads/hero-media', exist_ok=True)
 
 # Base de datos
-DATABASE = 'farmavet_web.db'
+# En producción, usar instance/ para que Flask lo maneje correctamente
+DATABASE = os.path.join('instance', 'database.db')
 
 def get_db():
     """Obtiene conexión a la base de datos"""
+    # Asegurar que la carpeta instance existe
+    os.makedirs('instance', exist_ok=True)
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
@@ -2238,8 +2241,19 @@ def admin_evento_eliminar(evento_id):
     flash('Evento eliminado', 'success')
     return redirect(url_for('admin_eventos'))
 
-if __name__ == '__main__':
+# Inicializar base de datos automáticamente (también para Gunicorn)
+# Solo inicializar si no existe la base de datos o si está vacía
+try:
+    conn = get_db()
+    # Intentar consultar una tabla para verificar si la BD está inicializada
+    conn.execute('SELECT 1 FROM admins LIMIT 1').fetchone()
+    conn.close()
+except (sqlite3.OperationalError, sqlite3.DatabaseError):
+    # La base de datos no existe o no está inicializada
     init_db()
+    print("✅ Base de datos inicializada automáticamente")
+
+if __name__ == '__main__':
     print("✅ Base de datos inicializada")
     print("🌐 Servidor iniciado en http://localhost:5000")
     print("🔐 Panel de administración: http://localhost:5000/admin/login")
