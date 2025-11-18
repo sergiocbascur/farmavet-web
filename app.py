@@ -308,12 +308,6 @@ def init_db():
     except:
         pass
     
-    # Campos de traducción para equipo
-    try:
-        conn.execute('ALTER TABLE equipo ADD COLUMN biografia_en TEXT')
-    except:
-        pass
-    
     # Tabla de organigrama (cargos/posiciones)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS organigrama (
@@ -353,12 +347,14 @@ def init_db():
             cargo_id INTEGER,  -- Referencia al organigrama
             cargo TEXT,  -- Mantener por compatibilidad, pero se usará cargo_id
             biografia TEXT,
+            biografia_en TEXT,
             email TEXT,
             imagen TEXT,
             imagen_zoom REAL DEFAULT 1.0,  -- Zoom de la imagen (0.5 a 5.0)
             imagen_x REAL DEFAULT 0.0,  -- Posición X de la imagen
             imagen_y REAL DEFAULT 0.0,  -- Posición Y de la imagen
             tags TEXT,  -- JSON array de tags
+            redes_sociales TEXT,  -- JSON object con redes sociales
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -366,6 +362,11 @@ def init_db():
             FOREIGN KEY (cargo_id) REFERENCES organigrama(id)
         )
     ''')
+    # Migración: agregar campos de traducción si no existen (para bases de datos existentes)
+    try:
+        conn.execute('ALTER TABLE equipo ADD COLUMN biografia_en TEXT')
+    except:
+        pass  # La columna ya existe
     
     # Agregar columnas si no existen (para bases de datos existentes)
     try:

@@ -40,6 +40,13 @@ def migrate_database():
                 ('cargo_en', 'TEXT'),
                 ('descripcion_en', 'TEXT')
             ]
+        },
+        # Tabla equipo
+        {
+            'table': 'equipo',
+            'columns': [
+                ('biografia_en', 'TEXT')
+            ]
         }
     ]
     
