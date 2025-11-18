@@ -669,6 +669,20 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Decorador para validar CSRF en rutas POST
+def csrf_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method == 'POST':
+            token = request.form.get('csrf_token', '')
+            if not validate_csrf_token(token):
+                flash('Token de seguridad inválido', 'error')
+                # Intentar redirigir a la página anterior o dashboard
+                referrer = request.referrer or url_for('admin_dashboard')
+                return redirect(referrer)
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Rutas para archivos estáticos
 @app.route('/assets/<path:filename>')
 def assets(filename):
@@ -1189,14 +1203,9 @@ def admin_dashboard():
 # Cambio de contraseña
 @app.route('/admin/cambiar-contrasena', methods=['GET', 'POST'])
 @login_required
+@csrf_required
 def admin_cambiar_contrasena():
     if request.method == 'POST':
-        # Validar CSRF token
-        token = request.form.get('csrf_token', '')
-        if not validate_csrf_token(token):
-            flash('Token de seguridad inválido', 'error')
-            return render_template('admin/cambiar_contrasena.html')
-        
         current_password = request.form.get('current_password', '')
         new_password = request.form.get('new_password', '')
         confirm_password = request.form.get('confirm_password', '')
@@ -1340,13 +1349,8 @@ def admin_programa_editar(programa_id):
 
 @app.route('/admin/programas/<int:programa_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_programa_eliminar(programa_id):
-    # Validar CSRF token
-    token = request.form.get('csrf_token', '')
-    if not validate_csrf_token(token):
-        flash('Token de seguridad inválido', 'error')
-        return redirect(url_for('admin_programas'))
-    
     conn = get_db()
     conn.execute('DELETE FROM programas WHERE id = ?', (programa_id,))
     conn.commit()
@@ -1441,6 +1445,7 @@ def admin_testimonio_editar(testimonio_id):
 
 @app.route('/admin/testimonios/<int:testimonio_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_testimonio_eliminar(testimonio_id):
     conn = get_db()
     conn.execute('DELETE FROM testimonios WHERE id = ?', (testimonio_id,))
@@ -1599,6 +1604,7 @@ def admin_noticia_editar(noticia_id):
 
 @app.route('/admin/noticias/<int:noticia_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_noticia_eliminar(noticia_id):
     conn = get_db()
     conn.execute('DELETE FROM noticias WHERE id = ?', (noticia_id,))
@@ -1693,6 +1699,7 @@ def admin_organigrama_editar(cargo_id):
 
 @app.route('/admin/organigrama/<int:cargo_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_organigrama_eliminar(cargo_id):
     conn = get_db()
     # Verificar si hay miembros asignados a este cargo
@@ -1873,6 +1880,7 @@ def admin_equipo_editar(miembro_id):
 
 @app.route('/admin/equipo/<int:miembro_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_equipo_eliminar(miembro_id):
     conn = get_db()
     conn.execute('DELETE FROM equipo WHERE id = ?', (miembro_id,))
@@ -1966,6 +1974,7 @@ def admin_cliente_editar(cliente_id):
 
 @app.route('/admin/clientes/<int:cliente_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_cliente_eliminar(cliente_id):
     conn = get_db()
     conn.execute('DELETE FROM clientes WHERE id = ?', (cliente_id,))
@@ -2051,6 +2060,7 @@ def admin_proyecto_editar(proyecto_id):
 
 @app.route('/admin/proyectos/<int:proyecto_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_proyecto_eliminar(proyecto_id):
     conn = get_db()
     conn.execute('DELETE FROM proyectos WHERE id = ?', (proyecto_id,))
@@ -2144,6 +2154,7 @@ def admin_publicacion_editar(publicacion_id):
 
 @app.route('/admin/publicaciones/<int:publicacion_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_publicacion_eliminar(publicacion_id):
     conn = get_db()
     conn.execute('DELETE FROM publicaciones WHERE id = ?', (publicacion_id,))
@@ -2229,6 +2240,7 @@ def admin_estadistica_editar(estadistica_id):
 
 @app.route('/admin/estadisticas/<int:estadistica_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_estadistica_eliminar(estadistica_id):
     conn = get_db()
     conn.execute('DELETE FROM estadisticas WHERE id = ?', (estadistica_id,))
@@ -2321,6 +2333,7 @@ def admin_tarjeta_destacada_editar(tarjeta_id):
 
 @app.route('/admin/tarjetas-destacadas/<int:tarjeta_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_tarjeta_destacada_eliminar(tarjeta_id):
     conn = get_db()
     conn.execute('DELETE FROM tarjetas_destacadas WHERE id = ?', (tarjeta_id,))
@@ -2418,6 +2431,7 @@ def admin_evento_editar(evento_id):
 
 @app.route('/admin/eventos/<int:evento_id>/eliminar', methods=['POST'])
 @login_required
+@csrf_required
 def admin_evento_eliminar(evento_id):
     conn = get_db()
     conn.execute('DELETE FROM eventos WHERE id = ?', (evento_id,))

@@ -41,6 +41,7 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form method="POST" action="{{ url_for('admin_proyecto_eliminar', proyecto_id=proyecto.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar este proyecto?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                     <i class="bi bi-trash"></i>
                                 </button>
