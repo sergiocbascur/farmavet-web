@@ -314,34 +314,36 @@ def init_db():
     except:
         pass
     
-    # Campos de traducción para organigrama
-    try:
-        conn.execute('ALTER TABLE organigrama ADD COLUMN subseccion_en TEXT')
-    except:
-        pass
-    try:
-        conn.execute('ALTER TABLE organigrama ADD COLUMN cargo_en TEXT')
-    except:
-        pass
-    try:
-        conn.execute('ALTER TABLE organigrama ADD COLUMN descripcion_en TEXT')
-    except:
-        pass
-    
     # Tabla de organigrama (cargos/posiciones)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS organigrama (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             seccion TEXT NOT NULL,  -- 'direccion', 'tecnico', 'calidad', 'administracion', 'investigacion'
             subseccion TEXT,  -- 'Jefe Técnico', 'Operaciones de Laboratorio', etc.
+            subseccion_en TEXT,
             cargo TEXT NOT NULL,  -- Nombre del cargo
+            cargo_en TEXT,
             descripcion TEXT,  -- Descripción del cargo
+            descripcion_en TEXT,
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migración: agregar campos de traducción si no existen (para bases de datos existentes)
+    try:
+        conn.execute('ALTER TABLE organigrama ADD COLUMN subseccion_en TEXT')
+    except:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE organigrama ADD COLUMN cargo_en TEXT')
+    except:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE organigrama ADD COLUMN descripcion_en TEXT')
+    except:
+        pass  # La columna ya existe
     
     # Tabla de miembros del equipo (ahora referencian cargos del organigrama)
     conn.execute('''
