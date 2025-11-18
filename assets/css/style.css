@@ -295,6 +295,10 @@ a {
   color: var(--color-primary);
 }
 
+.nav-links a.cta-button.active {
+  color: var(--color-white) !important;
+}
+
 /* Dropdown menu styles */
 .nav-item {
   position: relative;
