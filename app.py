@@ -719,26 +719,44 @@ def equipo_page():
     lang = get_language()
     locale = get_locale()
     conn = get_db()
+    # Verificar qué columnas de traducción existen
+    cursor = conn.execute("PRAGMA table_info(organigrama)")
+    columns = [col[1] for col in cursor.fetchall()]
+    has_subseccion_en = 'subseccion_en' in columns
+    has_cargo_en = 'cargo_en' in columns
+    has_descripcion_en = 'descripcion_en' in columns
+    
+    # Construir SELECT dinámicamente según columnas disponibles
+    select_cols = ['o.*']
+    if has_subseccion_en:
+        select_cols.append('o.subseccion_en')
+    if has_cargo_en:
+        select_cols.append('o.cargo_en')
+    if has_descripcion_en:
+        select_cols.append('o.descripcion_en')
+    select_cols.extend([
+        'e.id as miembro_id',
+        'e.nombre as miembro_nombre',
+        'e.biografia as miembro_biografia',
+        'e.email as miembro_email',
+        'e.imagen as miembro_imagen',
+        'e.imagen_zoom as miembro_imagen_zoom',
+        'e.imagen_x as miembro_imagen_x',
+        'e.imagen_y as miembro_imagen_y',
+        'e.tags as miembro_tags',
+        'e.redes_sociales as miembro_redes',
+        'o.cargo as cargo_nombre'
+    ])
+    
     # Obtener organigrama con sus miembros asignados
-    organigrama_raw = conn.execute('''
-        SELECT o.*, 
-               o.subseccion_en, o.cargo_en, o.descripcion_en,
-               e.id as miembro_id,
-               e.nombre as miembro_nombre,
-               e.biografia as miembro_biografia,
-               e.email as miembro_email,
-               e.imagen as miembro_imagen,
-               e.imagen_zoom as miembro_imagen_zoom,
-               e.imagen_x as miembro_imagen_x,
-               e.imagen_y as miembro_imagen_y,
-               e.tags as miembro_tags,
-               e.redes_sociales as miembro_redes,
-               o.cargo as cargo_nombre
+    query = f'''
+        SELECT {', '.join(select_cols)}
         FROM organigrama o
         LEFT JOIN equipo e ON o.id = e.cargo_id AND e.activo = 1
         WHERE o.activo = 1
         ORDER BY o.seccion, o.orden, o.id, e.orden
-    ''').fetchall()
+    '''
+    organigrama_raw = conn.execute(query).fetchall()
     
     # Organizar organigrama por sección y subsección
     organigrama_organizado = {}
@@ -796,14 +814,21 @@ def equipo_page():
         organigrama_organizado[seccion][subseccion].append(cargo_data)
     
     # Obtener también la sección de dirección (miembros destacados)
-    direccion_raw = conn.execute('''
-        SELECT e.*, o.cargo as cargo_nombre, o.cargo_en as cargo_nombre_en, 
-               o.seccion as cargo_seccion, o.descripcion as cargo_descripcion, o.descripcion_en as cargo_descripcion_en
+    select_direccion = ['e.*', 'o.cargo as cargo_nombre', 'o.seccion as cargo_seccion', 
+                       'o.descripcion as cargo_descripcion']
+    if has_cargo_en:
+        select_direccion.append('o.cargo_en as cargo_nombre_en')
+    if has_descripcion_en:
+        select_direccion.append('o.descripcion_en as cargo_descripcion_en')
+    
+    query_direccion = f'''
+        SELECT {', '.join(select_direccion)}
         FROM equipo e
         INNER JOIN organigrama o ON e.cargo_id = o.id
         WHERE e.activo = 1 AND o.seccion = 'direccion' AND o.activo = 1
         ORDER BY e.orden, e.id
-    ''').fetchall()
+    '''
+    direccion_raw = conn.execute(query_direccion).fetchall()
     
     # Convertir Row objects a diccionarios y parsear redes sociales
     direccion = []
