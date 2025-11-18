@@ -284,24 +284,6 @@ def init_db():
     except:
         pass
     
-    # Campos de traducción para eventos
-    try:
-        conn.execute('ALTER TABLE eventos ADD COLUMN titulo_en TEXT')
-    except:
-        pass
-    try:
-        conn.execute('ALTER TABLE eventos ADD COLUMN descripcion_en TEXT')
-    except:
-        pass
-    try:
-        conn.execute('ALTER TABLE eventos ADD COLUMN meta_en TEXT')
-    except:
-        pass
-    try:
-        conn.execute('ALTER TABLE eventos ADD COLUMN texto_boton_en TEXT')
-    except:
-        pass
-    
     # Campos de traducción para proyectos
     try:
         conn.execute('ALTER TABLE proyectos ADD COLUMN titulo_en TEXT')
