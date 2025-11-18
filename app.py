@@ -11,12 +11,20 @@ import sqlite3
 import os
 import json
 import time
+import secrets
 from datetime import datetime, timedelta
 from functools import wraps
 
 # Configuración
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'farmavet-web-secret-key-change-in-production')
+# SECRET_KEY: usar variable de entorno o generar una segura
+_secret_key = os.environ.get('SECRET_KEY', '').strip()
+if not _secret_key or _secret_key == 'farmavet-web-secret-key-change-in-production':
+    # Generar una clave segura si no está configurada
+    _secret_key = secrets.token_urlsafe(50)
+    print("⚠️  ADVERTENCIA: SECRET_KEY no configurada. Se generó una temporal.")
+    print("   Para producción, configura SECRET_KEY como variable de entorno.")
+app.secret_key = _secret_key
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
@@ -101,7 +109,11 @@ def get_translated_field(record, field_name, default=None):
 # Hacer la función disponible en templates
 @app.context_processor
 def inject_helpers():
-    return dict(get_translated_field=get_translated_field, _=_)
+    return dict(
+        get_translated_field=get_translated_field, 
+        _=_, 
+        csrf_token=generate_csrf_token()
+    )
 
 # Crear directorios necesarios
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -631,6 +643,20 @@ def validate_password_strength(password):
     if not any(c.isdigit() for c in password):
         return False, "La contraseña debe contener al menos un número"
     return True, None
+
+# Protección CSRF básica
+def generate_csrf_token():
+    """Genera un token CSRF y lo guarda en la sesión"""
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
+
+def validate_csrf_token(token):
+    """Valida un token CSRF"""
+    if 'csrf_token' not in session:
+        return False
+    return secrets.compare_digest(session['csrf_token'], token)
+
 
 # Decorador para requerir login
 def login_required(f):
