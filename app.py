@@ -525,17 +525,38 @@ def init_db():
         CREATE TABLE IF NOT EXISTS eventos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             titulo TEXT NOT NULL,
+            titulo_en TEXT,
             fecha TEXT NOT NULL,  -- Formato: "Abril 2025", "Mayo 2025", etc.
             meta TEXT,  -- Modalidad, ubicación, etc.
+            meta_en TEXT,
             descripcion TEXT,
+            descripcion_en TEXT,
             enlace TEXT,
             texto_boton TEXT DEFAULT 'Ver más',
+            texto_boton_en TEXT,
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migración: agregar campos de traducción si no existen (para bases de datos existentes)
+    try:
+        conn.execute('ALTER TABLE eventos ADD COLUMN titulo_en TEXT')
+    except:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE eventos ADD COLUMN descripcion_en TEXT')
+    except:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE eventos ADD COLUMN meta_en TEXT')
+    except:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE eventos ADD COLUMN texto_boton_en TEXT')
+    except:
+        pass  # La columna ya existe
     
     # Tabla de contenido editable (textos generales)
     conn.execute('''
