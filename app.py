@@ -1191,6 +1191,12 @@ def admin_dashboard():
 @login_required
 def admin_cambiar_contrasena():
     if request.method == 'POST':
+        # Validar CSRF token
+        token = request.form.get('csrf_token', '')
+        if not validate_csrf_token(token):
+            flash('Token de seguridad inválido', 'error')
+            return render_template('admin/cambiar_contrasena.html')
+        
         current_password = request.form.get('current_password', '')
         new_password = request.form.get('new_password', '')
         confirm_password = request.form.get('confirm_password', '')
@@ -1335,6 +1341,12 @@ def admin_programa_editar(programa_id):
 @app.route('/admin/programas/<int:programa_id>/eliminar', methods=['POST'])
 @login_required
 def admin_programa_eliminar(programa_id):
+    # Validar CSRF token
+    token = request.form.get('csrf_token', '')
+    if not validate_csrf_token(token):
+        flash('Token de seguridad inválido', 'error')
+        return redirect(url_for('admin_programas'))
+    
     conn = get_db()
     conn.execute('DELETE FROM programas WHERE id = ?', (programa_id,))
     conn.commit()
