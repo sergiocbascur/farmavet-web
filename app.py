@@ -2327,8 +2327,12 @@ Responde de manera natural, conversacional y amigable en español. Sé claro y d
         if len(system_message) > 4000:
             system_message = system_message[:4000] + "..."
         
+        # Modelos disponibles de Perplexity:
+        # - sonar-pro (más potente, con búsqueda web)
+        # - sonar (más rápido, con búsqueda web)
+        # - llama-3.1-sonar-small-128k-online (legacy)
         payload = {
-            "model": "llama-3.1-sonar-small-128k-online",
+            "model": "sonar",  # Modelo con capacidad de búsqueda web
             "messages": [
                 {
                     "role": "system",
