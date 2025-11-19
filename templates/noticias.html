@@ -111,10 +111,10 @@
               <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
                 <video
                   src="/static/uploads/galeria/{{ imagen.archivo }}"
-                  {% if loop.first %}autoplay{% endif %}
                   playsinline
                   controls
                   controlsList="nodownload"
+                  data-video-autoplay="{% if loop.first %}true{% else %}false{% endif %}"
                   style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
                 ></video>
               </div>
