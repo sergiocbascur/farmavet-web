@@ -151,10 +151,10 @@
   <body data-page="index">
     <header class="site-header" aria-label="Cabecera principal">
       <div class="header-actions">
-        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher desktop-only" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
           <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
         </a>
-        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+        <a href="{{ url_for('public_login') }}" class="login-switcher desktop-only" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
           <i class="bi bi-person-circle"></i>
         </a>
       </div>
@@ -189,6 +189,12 @@
             <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+            <li class="nav-mobile-actions">
+              <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher-mobile" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+                <i class="bi bi-translate"></i>
+                <span>{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}</span>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
@@ -204,9 +210,9 @@
               {{ _('Universidad de Chile') }} | {{ _('Más de 30 años liderando la inocuidad alimentaria en Latinoamérica, con acreditación ISO 17025 y designación como Centro Colaborador OMSA.') }}
             </p>
             <div class="pill-group" role="list">
-              <span class="pill" role="listitem">{{ _('Servicios acreditados ISO 17025') }}</span>
-              <span class="pill" role="listitem">{{ _('Centro Colaborador OMSA') }}</span>
-              <span class="pill" role="listitem">{{ _('Investigación y docencia de alto impacto') }}</span>
+              <a href="{{ url_for('page', page='servicios') }}" class="pill" role="listitem">{{ _('Servicios acreditados ISO 17025') }}</a>
+              <a href="{{ url_for('page', page='casa-omsa') }}" class="pill" role="listitem">{{ _('Centro Colaborador OMSA') }}</a>
+              <a href="{{ url_for('page', page='investigacion') }}" class="pill" role="listitem">{{ _('Investigación y docencia de alto impacto') }}</a>
             </div>
             <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center">
               <a href="{{ url_for('page', page='servicios') }}" class="cta-link-red">{{ _('Conocer Servicios') }}</a>

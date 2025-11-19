@@ -156,6 +156,17 @@ a {
   transition: box-shadow var(--transition-base), border-bottom-color var(--transition-base);
 }
 
+/* Asegurar que el header no tape el menú móvil */
+@media (max-width: 768px) {
+  .site-header {
+    z-index: 1001;
+  }
+  
+  .nav-links {
+    z-index: 10000 !important;
+  }
+}
+
 .site-header::before {
   content: "";
   position: absolute;
@@ -716,6 +727,16 @@ a {
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.85rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.pill:hover {
+  background-color: rgba(35, 115, 186, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(35, 115, 186, 0.1);
 }
 
 .hero-media {
@@ -2303,6 +2324,9 @@ a.logo-card:focus {
   font-size: 0.875rem;
   padding: 0.5rem 1rem;
   transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .site-footer .badge:hover {
@@ -3942,13 +3966,17 @@ input[type="button"],
     gap: 0;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    z-index: 1000;
+    z-index: 9999;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    visibility: hidden;
+    opacity: 0;
   }
   
   .nav-links.open {
     transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
   }
   
   .nav-links a {
@@ -3972,12 +4000,16 @@ input[type="button"],
     display: none;
   }
   
-  /* Header actions en móvil */
+  /* Header actions en móvil - ocultar login y mover idioma al menú */
   .header-actions {
     position: static;
     display: flex;
     gap: 0.5rem;
     align-items: center;
+  }
+  
+  .desktop-only {
+    display: none !important;
   }
   
   .lang-switcher,
@@ -3999,6 +4031,37 @@ input[type="button"],
   .login-switcher:active {
     transform: scale(0.95);
     background: rgba(35, 115, 186, 0.15);
+  }
+  
+  /* Selector de idioma en menú móvil */
+  .nav-mobile-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid rgba(35, 115, 186, 0.1);
+  }
+  
+  .lang-switcher-mobile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    font-size: 1rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    border-radius: 8px;
+    background: rgba(35, 115, 186, 0.05);
+    transition: all 0.2s ease;
+    min-height: 44px;
+  }
+  
+  .lang-switcher-mobile:hover,
+  .lang-switcher-mobile:active {
+    background: rgba(35, 115, 186, 0.1);
+    transform: translateX(4px);
+  }
+  
+  .lang-switcher-mobile i {
+    font-size: 1.25rem;
   }
 }
 
@@ -4099,6 +4162,21 @@ input[type="button"],
 
 /* Mejorar cards y tarjetas para touch */
 @media (max-width: 768px) {
+  /* Asegurar que todas las tarjetas sean visibles en móvil */
+  .card,
+  .list-card,
+  .proyecto-card,
+  .publicacion-item,
+  .pillar-card,
+  .stat-card,
+  .badge,
+  .pill {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+  
   .card,
   .list-card,
   .proyecto-card,
