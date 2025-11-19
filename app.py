@@ -2272,20 +2272,29 @@ def api_chatbot_search():
                 ''').fetchall()
                 
                 if metodologias:
-                    met_list = [f"{m['analito']} en {m['matriz']} ({m['tecnica'] or 'técnica variada'})" 
-                               for m in metodologias[:10]]
-                    local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list)
+                    met_list = []
+                    for m in metodologias[:10]:
+                        analito = m['analito'] if 'analito' in m.keys() else ''
+                        matriz = m['matriz'] if 'matriz' in m.keys() else ''
+                        tecnica = m['tecnica'] if 'tecnica' in m.keys() and m['tecnica'] else 'técnica variada'
+                        met_list.append(f"{analito} en {matriz} ({tecnica})")
+                    if met_list:
+                        local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list)
                 
                 # Obtener servicios principales
-                tarjetas = conn.execute('''
-                    SELECT titulo, descripcion FROM tarjetas_destacadas 
-                    WHERE activo = 1 
-                    LIMIT 5
-                ''').fetchall()
-                
-                if tarjetas:
-                    servicios = [t['titulo'] for t in tarjetas]
-                    local_context += f"\n\nServicios principales: {', '.join(servicios)}"
+                try:
+                    tarjetas = conn.execute('''
+                        SELECT titulo, descripcion FROM tarjetas_destacadas 
+                        WHERE activo = 1 
+                        LIMIT 5
+                    ''').fetchall()
+                    
+                    if tarjetas:
+                        servicios = [t['titulo'] if 'titulo' in t.keys() else '' for t in tarjetas if t['titulo']]
+                        if servicios:
+                            local_context += f"\n\nServicios principales: {', '.join(servicios)}"
+                except:
+                    pass
                 
                 conn.close()
             except Exception as e:
@@ -2332,8 +2341,16 @@ Responde de manera natural, conversacional y amigable en español. Sé claro y d
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
+        app.logger.debug(f'Chatbot Perplexity: Payload (sin API key): {json.dumps({k: v for k, v in payload.items() if k != "messages" or True})}')
         
-        response = requests.post(perplexity_url, headers=headers, json=payload, timeout=10)
+        try:
+            response = requests.post(perplexity_url, headers=headers, json=payload, timeout=15)
+        except requests.exceptions.RequestException as e:
+            app.logger.error(f'Chatbot Perplexity: Error de conexión: {str(e)}')
+            return jsonify({
+                'error': 'Error de conexión con Perplexity',
+                'details': str(e) if app.debug else 'No se pudo conectar al servicio'
+            }), 503
         
         if response.status_code == 200:
             result = response.json()
