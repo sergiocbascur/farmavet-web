@@ -18,6 +18,13 @@ from functools import wraps
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import logging
+
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 # Configuración
 app = Flask(__name__)
@@ -3577,13 +3584,37 @@ Para responder, use el email del remitente: {email}
     
     # Enviar correo
     try:
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"Intentando conectar a SMTP: {smtp_host}:{smtp_port}")
         server = smtplib.SMTP(smtp_host, smtp_port)
+        logger.info("Conexión SMTP establecida")
+        
         server.starttls()
+        logger.info("TLS iniciado")
+        
+        logger.info(f"Intentando login con usuario: {smtp_user}")
         server.login(smtp_user, smtp_password)
+        logger.info("Login SMTP exitoso")
+        
+        logger.info(f"Enviando correo a: {msg['To']}")
         server.send_message(msg)
+        logger.info("Correo enviado exitosamente")
+        
         server.quit()
         return True, "Correo enviado correctamente"
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"Error de autenticación SMTP: {str(e)}")
+        return False, f"Error de autenticación: Verifica usuario y contraseña SMTP"
+    except smtplib.SMTPConnectError as e:
+        logger.error(f"Error de conexión SMTP: {str(e)}")
+        return False, f"Error de conexión: No se pudo conectar al servidor SMTP"
+    except smtplib.SMTPException as e:
+        logger.error(f"Error SMTP: {str(e)}")
+        return False, f"Error SMTP: {str(e)}"
     except Exception as e:
+        logger.error(f"Error inesperado al enviar correo: {str(e)}")
         return False, f"Error al enviar correo: {str(e)}"
 
 @app.route('/contacto/enviar', methods=['POST'])
@@ -3610,6 +3641,20 @@ def contacto_enviar():
     # Enviar correo
     exito, mensaje_resultado = enviar_correo_contacto(nombre, email, telefono, tipo_consulta, mensaje, institucion)
     
+    # Si la petición es AJAX, retornar JSON
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        if exito:
+            return jsonify({
+                'success': True,
+                'message': 'Tu consulta ha sido enviada correctamente. Nos pondremos en contacto contigo pronto.'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'Hubo un error al enviar tu consulta. Por favor intenta nuevamente o contáctanos directamente. Error: {mensaje_resultado}'
+            }), 400
+    
+    # Si no es AJAX, usar flash y redirect (compatibilidad)
     if exito:
         flash('Tu consulta ha sido enviada correctamente. Nos pondremos en contacto contigo pronto.', 'success')
     else:

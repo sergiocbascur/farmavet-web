@@ -269,3 +269,24 @@ msgstr "Únete a nuestra comunidad profesional y mantente al día con las últim
 
 msgid "Ver todas las publicaciones"
 msgstr "Ver todas las publicaciones"
+
+msgid "¡Consulta enviada!"
+msgstr "¡Consulta enviada!"
+
+msgid "Error al enviar"
+msgstr "Error al enviar"
+
+msgid "Enviando..."
+msgstr "Enviando..."
+
+msgid "Entendido"
+msgstr "Entendido"
+
+msgid "Cerrar"
+msgstr "Cerrar"
+
+msgid "Error de conexión"
+msgstr "Error de conexión"
+
+msgid "No se pudo conectar al servidor. Por favor intenta nuevamente."
+msgstr "No se pudo conectar al servidor. Por favor intenta nuevamente."

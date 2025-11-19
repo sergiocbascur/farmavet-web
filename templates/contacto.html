@@ -346,6 +346,199 @@
     </footer>
 
     <div class="toast" role="status" aria-live="polite" data-toast></div>
+    
+    <!-- Modal de confirmación -->
+    <div id="contacto-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-overlay" data-modal-close></div>
+      <div class="modal-content">
+        <button class="modal-close" data-modal-close aria-label="{{ _('Cerrar') }}">
+          <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="modal-body">
+          <div class="modal-icon">
+            <i class="bi bi-check-circle-fill" style="color: var(--color-success, #6DBB3B); font-size: 4rem;"></i>
+          </div>
+          <h2 id="modal-title" class="modal-title">{{ _('¡Consulta enviada!') }}</h2>
+          <p id="modal-message" class="modal-message">
+            {{ _('Tu consulta ha sido enviada correctamente. Nos pondremos en contacto contigo pronto.') }}
+          </p>
+          <button class="cta-button" data-modal-close>{{ _('Entendido') }}</button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal.is-active {
+        display: flex;
+      }
+      .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+      }
+      .modal-content {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+        animation: modalSlideIn 0.3s ease-out;
+      }
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+      .modal-close:hover {
+        color: #000;
+      }
+      .modal-body {
+        text-align: center;
+        padding: 1rem 0;
+      }
+      .modal-icon {
+        margin-bottom: 1.5rem;
+      }
+      .modal-title {
+        font-family: var(--font-heading);
+        font-size: 1.75rem;
+        color: var(--color-primary);
+        margin-bottom: 1rem;
+      }
+      .modal-message {
+        color: #666;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+      .modal-content .cta-button {
+        margin: 0 auto;
+      }
+      .modal.error .modal-icon i {
+        color: var(--color-error, #D22730);
+      }
+    </style>
+
+    <script>
+      // Manejo del formulario de contacto con AJAX y modal
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('contacto-form');
+        const modal = document.getElementById('contacto-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalTitle = document.getElementById('modal-title');
+        const modalIcon = modal.querySelector('.modal-icon i');
+        const closeButtons = modal.querySelectorAll('[data-modal-close]');
+        
+        if (form) {
+          form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.textContent = '{{ _("Enviando...") }}';
+            
+            const formData = new FormData(form);
+            
+            try {
+              const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                  'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+              });
+              
+              const data = await response.json();
+              
+              if (data.success) {
+                // Éxito - mostrar modal
+                modalTitle.textContent = '{{ _("¡Consulta enviada!") }}';
+                modalMessage.textContent = data.message;
+                modalIcon.className = 'bi bi-check-circle-fill';
+                modalIcon.style.color = 'var(--color-success, #6DBB3B)';
+                modal.classList.remove('error');
+                modal.classList.add('is-active');
+                
+                // Limpiar formulario
+                form.reset();
+              } else {
+                // Error - mostrar modal con error
+                modalTitle.textContent = '{{ _("Error al enviar") }}';
+                modalMessage.textContent = data.message;
+                modalIcon.className = 'bi bi-exclamation-triangle-fill';
+                modalIcon.style.color = 'var(--color-error, #D22730)';
+                modal.classList.add('error');
+                modal.classList.add('is-active');
+              }
+            } catch (error) {
+              // Error de red
+              modalTitle.textContent = '{{ _("Error de conexión") }}';
+              modalMessage.textContent = '{{ _("No se pudo conectar al servidor. Por favor intenta nuevamente.") }}';
+              modalIcon.className = 'bi bi-exclamation-triangle-fill';
+              modalIcon.style.color = 'var(--color-error, #D22730)';
+              modal.classList.add('error');
+              modal.classList.add('is-active');
+            } finally {
+              submitButton.disabled = false;
+              submitButton.textContent = originalText;
+            }
+          });
+        }
+        
+        // Cerrar modal
+        closeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            modal.classList.remove('is-active');
+          });
+        });
+        
+        // Cerrar con ESC
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+            modal.classList.remove('is-active');
+          }
+        });
+      });
+    </script>
+    
     <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
   </body>
 </html>

@@ -669,6 +669,27 @@ msgstr "Let's schedule a technical meeting to review your requirements and defin
 msgid "Agendar reunión"
 msgstr "Schedule meeting"
 
+msgid "¡Consulta enviada!"
+msgstr "Inquiry sent!"
+
+msgid "Error al enviar"
+msgstr "Error sending"
+
+msgid "Enviando..."
+msgstr "Sending..."
+
+msgid "Entendido"
+msgstr "Got it"
+
+msgid "Cerrar"
+msgstr "Close"
+
+msgid "Error de conexión"
+msgstr "Connection error"
+
+msgid "No se pudo conectar al servidor. Por favor intenta nuevamente."
+msgstr "Could not connect to server. Please try again."
+
 msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Acompañamos al sector público y privado con servicios analíticos acreditados y asesoría técnica."
 msgstr "Veterinary Pharmacology Laboratory, University of Chile. We support the public and private sectors with accredited analytical services and technical advice."
 
