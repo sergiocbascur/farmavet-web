@@ -210,51 +210,103 @@ class MetodologiasChatbot {
         if (typing) typing.remove();
     }
 
-    searchMetodologias(query) {
-        const lowerQuery = query.toLowerCase();
+    normalizeText(text) {
+        // Normalizar texto: quitar acentos, convertir a minúsculas, quitar caracteres especiales
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Quitar acentos
+            .replace(/[^\w\s]/g, ' ') // Reemplazar caracteres especiales con espacios
+            .replace(/\s+/g, ' ') // Normalizar espacios
+            .trim();
+    }
+
+    extractKeywords(query) {
+        // Extraer palabras clave de la consulta, eliminando palabras comunes
+        const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'de', 'en', 'para', 'con', 'por', 
+                          'que', 'qué', 'hacen', 'hace', 'busca', 'buscar', 'metodos', 'metodologias',
+                          'metodología', 'metodologías', 'analisis', 'análisis', 'en', 'de', 'del'];
         
-        // Diccionario de sinónimos y términos relacionados
+        const normalized = this.normalizeText(query);
+        const words = normalized.split(/\s+/).filter(w => w.length > 2);
+        return words.filter(word => !stopWords.includes(word));
+    }
+
+    searchMetodologias(query) {
+        const normalizedQuery = this.normalizeText(query);
+        const keywords = this.extractKeywords(query);
+        
+        // Diccionario de sinónimos y términos relacionados (sin acentos)
         const synonyms = {
-            'antibiotico': ['antimicrobiano', 'antimicrobianos', 'antibiótico', 'antibióticos', 'fluoroquinolona', 'tetraciclina', 'sulfonamida'],
-            'micotoxina': ['micotoxinas', 'aflatoxina', 'aflatoxinas', 'ocratoxina'],
-            'pesticida': ['plaguicida', 'plaguicidas', 'pesticidas', 'organoclorado', 'organofosforado'],
-            'salmón': ['salmón', 'salmones', 'salmonidos', 'salmonídeos', 'trucha', 'truchas'],
-            'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina'],
-            'leche': ['lácteo', 'lácteos', 'dairy'],
-            'lc-ms/ms': ['lcmsms', 'lc-ms', 'cromatografía líquida', 'espectrometría de masas'],
-            'gc-ms': ['gcms', 'cromatografía de gases', 'gas chromatography'],
-            'hplc': ['cromatografía líquida', 'high performance liquid chromatography']
+            'antibiotico': ['antimicrobiano', 'antimicrobianos', 'fluoroquinolona', 'tetraciclina', 'sulfonamida', 'macrolido', 'aminoglucosido'],
+            'micotoxina': ['aflatoxina', 'ocratoxina', 'fumonisina', 'zearalenona'],
+            'pesticida': ['plaguicida', 'organoclorado', 'organofosforado', 'diquat', 'paraquat', 'glifosato'],
+            'salmon': ['salmones', 'salmonidos', 'salmonideos', 'trucha', 'truchas', 'pez', 'peces', 'hidrobiologico', 'hidrobiológico'],
+            'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina', 'ave', 'aves', 'pollo', 'pollos'],
+            'leche': ['lacteo', 'lacteos', 'dairy', 'producto lacteo'],
+            'lcmsms': ['lc-ms/ms', 'lc-ms', 'lcms', 'cromatografia liquida', 'espectrometria de masas', 'liquid chromatography'],
+            'gcms': ['gc-ms', 'cromatografia de gases', 'gas chromatography'],
+            'hplc': ['cromatografia liquida', 'high performance liquid chromatography'],
+            'metodo': ['metodologia', 'tecnica', 'analisis', 'ensayo'],
+            'diquat': ['diquat', 'paraquat', 'herbicida']
         };
 
         // Expandir búsqueda con sinónimos
-        const expandedTerms = [lowerQuery];
-        for (const [key, values] of Object.entries(synonyms)) {
-            if (lowerQuery.includes(key)) {
-                expandedTerms.push(...values);
-            }
-            for (const value of values) {
-                if (lowerQuery.includes(value)) {
-                    expandedTerms.push(key, ...values);
+        const expandedTerms = [normalizedQuery, ...keywords];
+        for (const keyword of keywords) {
+            for (const [key, values] of Object.entries(synonyms)) {
+                const normalizedKey = this.normalizeText(key);
+                if (keyword.includes(normalizedKey) || normalizedKey.includes(keyword)) {
+                    expandedTerms.push(...values.map(v => this.normalizeText(v)));
+                }
+                for (const value of values) {
+                    const normalizedValue = this.normalizeText(value);
+                    if (keyword.includes(normalizedValue) || normalizedValue.includes(keyword)) {
+                        expandedTerms.push(normalizedKey, ...values.map(v => this.normalizeText(v)));
+                    }
                 }
             }
         }
 
-        // Búsqueda semántica
+        // Búsqueda semántica mejorada
         const results = this.metodologias.filter(met => {
-            const searchText = `${met.nombre} ${met.analito} ${met.matriz} ${met.tecnica} ${met.categoria}`.toLowerCase();
+            const searchFields = [
+                this.normalizeText(met.nombre || ''),
+                this.normalizeText(met.nombre_en || ''),
+                this.normalizeText(met.analito || ''),
+                this.normalizeText(met.analito_en || ''),
+                this.normalizeText(met.matriz || ''),
+                this.normalizeText(met.matriz_en || ''),
+                this.normalizeText(met.tecnica || ''),
+                this.normalizeText(met.tecnica_en || ''),
+                this.normalizeText(met.categoria || '')
+            ].join(' ');
             
-            // Búsqueda exacta
-            if (searchText.includes(lowerQuery)) return true;
+            // Búsqueda exacta en texto normalizado
+            if (searchFields.includes(normalizedQuery)) return true;
             
-            // Búsqueda con sinónimos
+            // Búsqueda con sinónimos expandidos
             for (const term of expandedTerms) {
-                if (searchText.includes(term)) return true;
+                if (term.length > 2 && searchFields.includes(term)) return true;
             }
             
-            // Búsqueda por palabras individuales
-            const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2);
-            const matchCount = queryWords.filter(word => searchText.includes(word)).length;
-            if (matchCount >= queryWords.length * 0.5) return true; // Al menos 50% de palabras coinciden
+            // Búsqueda por palabras clave individuales
+            if (keywords.length > 0) {
+                const matchCount = keywords.filter(keyword => {
+                    if (keyword.length <= 2) return false;
+                    return searchFields.includes(keyword);
+                }).length;
+                
+                // Si al menos una palabra clave coincide, incluir el resultado
+                if (matchCount > 0) return true;
+            }
+            
+            // Búsqueda parcial (substring) para términos cortos importantes
+            for (const keyword of keywords) {
+                if (keyword.length >= 3) {
+                    if (searchFields.includes(keyword)) return true;
+                }
+            }
             
             return false;
         });
@@ -324,30 +376,50 @@ class MetodologiasChatbot {
     }
 
     generateSuggestions(query) {
-        const lowerQuery = query.toLowerCase();
+        const normalizedQuery = this.normalizeText(query);
+        const keywords = this.extractKeywords(query);
         const suggestions = new Set();
         
-        // Buscar términos relacionados en metodologías
+        // Buscar términos relacionados en metodologías (normalizados)
         this.metodologias.forEach(met => {
-            const fields = [met.nombre, met.analito, met.matriz, met.tecnica];
+            const fields = [
+                met.nombre, met.nombre_en,
+                met.analito, met.analito_en,
+                met.matriz, met.matriz_en,
+                met.tecnica, met.tecnica_en
+            ].filter(f => f);
+            
             fields.forEach(field => {
-                if (field && field.toLowerCase().includes(lowerQuery)) {
+                const normalizedField = this.normalizeText(field);
+                // Si el campo contiene alguna palabra clave, agregarlo
+                if (keywords.length > 0) {
+                    for (const keyword of keywords) {
+                        if (normalizedField.includes(keyword) || keyword.includes(normalizedField.substring(0, keyword.length))) {
+                            suggestions.add(field);
+                            break;
+                        }
+                    }
+                } else if (normalizedField.includes(normalizedQuery) || normalizedQuery.includes(normalizedField.substring(0, normalizedQuery.length))) {
                     suggestions.add(field);
                 }
             });
         });
 
-        // Sugerencias comunes
+        // Sugerencias comunes basadas en la consulta
         const commonQueries = [
             'Buscar metodologías para antibióticos',
             'Metodologías en salmón',
             'LC-MS/MS acreditadas',
             'Análisis en leche',
-            'Micotoxinas en alimentos'
+            'Micotoxinas en alimentos',
+            'Diquat en salmón',
+            'Metodologías para residuos',
+            'Análisis de contaminantes'
         ];
 
         commonQueries.forEach(cq => {
-            if (cq.toLowerCase().includes(lowerQuery)) {
+            const normalizedCq = this.normalizeText(cq);
+            if (normalizedCq.includes(normalizedQuery) || normalizedQuery.includes(normalizedCq.substring(0, normalizedQuery.length))) {
                 suggestions.add(cq);
             }
         });
