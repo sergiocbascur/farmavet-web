@@ -3905,6 +3905,6 @@ if __name__ == '__main__':
     print("🌐 Servidor iniciado en http://localhost:5000")
     print("🔐 Panel de administración: http://localhost:5000/admin/login")
     print("   Usuario: admin")
-    print("   Contraseña: admin123")
+    print("   ⚠️  Contraseña por defecto: admin123 - CAMBIAR INMEDIATAMENTE")
     app.run(debug=True, host='0.0.0.0', port=5000)
 

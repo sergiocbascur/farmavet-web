@@ -8,7 +8,9 @@ Group=www-data
 WorkingDirectory=/home/web/farmavet-web
 Environment="PATH=/home/web/farmavet-web/venv/bin"
 Environment="FLASK_ENV=production"
-Environment="SECRET_KEY=REEMPLAZAR_CON_TU_SECRET_KEY_AQUI"
+# Environment="SECRET_KEY=GENERAR_UNA_CLAVE_SECRETA_SEGURA"
+# NOTA: Descomenta y configura SECRET_KEY en producción
+# Generar con: python -c "import secrets; print(secrets.token_urlsafe(50))"
 
 # Comando para iniciar Gunicorn en puerto 5001 (diferente a farmavet-bodega)
 ExecStart=/home/web/farmavet-web/venv/bin/gunicorn \
