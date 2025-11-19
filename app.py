@@ -2301,22 +2301,26 @@ def api_chatbot_search():
                 app.logger.warning(f'Error al obtener contexto local: {str(e)}')
         
         # Construir el prompt contextual para Perplexity
-        context = f"""Eres un asistente del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025.
+        # IMPORTANTE: Solo usar información proporcionada, NO buscar en internet
+        context = f"""Eres un asistente del Laboratorio FARMAVET de la Universidad de Chile.
 
-INSTRUCCIONES IMPORTANTES:
-- Responde de manera CONCISA y DIRECTA
-- Si la pregunta es simple (ej: "hacen X?", "tienen Y?"), responde brevemente con SÍ o NO y la información esencial
-- NO des explicaciones largas ni información general a menos que se pida explícitamente
-- Máximo 2-3 oraciones para preguntas simples
-- Solo da contexto adicional si el usuario lo solicita
+REGLAS CRÍTICAS:
+1. SOLO usa la información que te proporciono a continuación
+2. NO busques información adicional en internet
+3. Si no tienes la información específica, di que deben contactar directamente con FARMAVET
+4. Responde de manera CONCISA (máximo 2-3 oraciones)
+5. NO des explicaciones generales a menos que se pida explícitamente
 
-CONTEXTO DE FARMAVET:
+INFORMACIÓN DISPONIBLE DE FARMAVET:
+- Laboratorio de Farmacología Veterinaria (FARMAVET) de la Universidad de Chile
 - Más de 70 metodologías analíticas acreditadas ISO 17025
-- Matrices: productos hidrobiológicos (salmón, trucha), pecuarios (carne, leche, huevos)
-- Técnicas: LC-MS/MS, GC-MS, HPLC-DAD/FL{local_context}
+- Análisis de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos
+- Matrices: productos hidrobiológicos (salmón, trucha, mariscos), pecuarios (carne, leche, huevos)
+- Técnicas: UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL
+{local_context}
 
-Ejemplo de respuesta corta: "Sí, tenemos metodología para [analito] en [matriz] mediante [técnica]."
-Ejemplo de pregunta compleja: Si preguntan "¿qué es X?", entonces sí puedes explicar brevemente."""
+Ejemplo: Si preguntan "hacen amprolio?" y tienes esa información en la lista, responde: "Sí, tenemos metodología para amprolio en [matriz] mediante [técnica]." Si NO tienes esa información, di: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
+"""
         
         system_message = context
         
@@ -2336,8 +2340,10 @@ Ejemplo de pregunta compleja: Si preguntan "¿qué es X?", entonces sí puedes e
         # - sonar-pro (más potente, con búsqueda web)
         # - sonar (más rápido, con búsqueda web)
         # - llama-3.1-sonar-small-128k-online (legacy)
+        # Usar modelo sin búsqueda web para que solo use el contexto local
         payload = {
-            "model": "sonar",  # Modelo con capacidad de búsqueda web
+            "model": "llama-3.1-sonar-large-128k-online",  # Modelo con búsqueda web (pero la deshabilitaremos)
+            # Alternativa: usar "llama-3.1-sonar-small-128k-online" si el anterior no funciona
             "messages": [
                 {
                     "role": "system",
@@ -2357,6 +2363,16 @@ Ejemplo de pregunta compleja: Si preguntan "¿qué es X?", entonces sí puedes e
         
         try:
             response = requests.post(perplexity_url, headers=headers, json=payload, timeout=15)
+            
+            # Si el modelo falla, intentar con uno alternativo
+            if response.status_code == 400:
+                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
+                if 'model' in str(error_data).lower() or 'invalid' in str(error_data).lower():
+                    app.logger.warning('Chatbot Perplexity: Modelo no disponible, intentando alternativo...')
+                    # Intentar con modelo alternativo
+                    payload["model"] = "llama-3.1-sonar-small-128k-online"
+                    response = requests.post(perplexity_url, headers=headers, json=payload, timeout=15)
+                    
         except requests.exceptions.RequestException as e:
             app.logger.error(f'Chatbot Perplexity: Error de conexión: {str(e)}')
             return jsonify({
