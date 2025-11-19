@@ -744,21 +744,40 @@ a {
 
 .pill {
   padding: 0.5rem 1rem;
-  background-color: rgba(35, 115, 186, 0.1);
+  background-color: transparent;
   color: var(--color-primary);
   border-radius: 999px;
   font-weight: 600;
   font-size: 0.85rem;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   transition: all 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+.pill::before {
+  content: "#";
+  color: var(--color-primary);
+  opacity: 0.6;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Si el pill es un enlace, mantener comportamiento de enlace */
+.pill[href] {
   cursor: pointer;
 }
 
-.pill:hover {
-  background-color: rgba(35, 115, 186, 0.15);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(35, 115, 186, 0.1);
+.pill[href]:hover {
+  color: var(--color-primary-dark);
+  opacity: 0.9;
+}
+
+.pill[href]:hover::before {
+  opacity: 0.8;
 }
 
 .hero-media {
