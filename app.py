@@ -2323,8 +2323,12 @@ Responde de manera natural, conversacional y amigable en español. Sé claro y d
             "Content-Type": "application/json"
         }
         
+        # Verificar que el system_message no sea demasiado largo
+        if len(system_message) > 4000:
+            system_message = system_message[:4000] + "..."
+        
         payload = {
-            "model": "llama-3.1-sonar-small-128k-online",  # Modelo con capacidad de búsqueda web
+            "model": "llama-3.1-sonar-small-128k-online",
             "messages": [
                 {
                     "role": "system",
@@ -2336,8 +2340,7 @@ Responde de manera natural, conversacional y amigable en español. Sé claro y d
                 }
             ],
             "temperature": 0.2,
-            "max_tokens": 500,
-            "top_p": 0.9
+            "max_tokens": 500
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
