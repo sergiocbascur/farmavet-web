@@ -4176,7 +4176,16 @@ input[type="button"],
   .nav-close-btn i {
     color: var(--color-primary);
   }
-  
+}
+
+/* Ocultar botón de cerrar en desktop */
+@media (min-width: 769px) {
+  .nav-close-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
   /* Header actions en móvil - ocultar login y mover idioma al menú */
   .header-actions {
     position: static;
