@@ -2532,7 +2532,7 @@ a.logo-card:focus {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--color-secondary);
+  color: var(--color-secondary) !important;
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
@@ -2541,8 +2541,21 @@ a.logo-card:focus {
 
 .cta-link-red:hover,
 .cta-link-red:focus {
-  color: #B01F28;
+  color: #B01F28 !important;
   text-decoration: underline;
+}
+
+/* Asegurar que los enlaces cta-link-red dentro de cards mantengan el color rojo */
+.card .cta-link-red,
+.card[data-hero-slide] .cta-link-red {
+  color: var(--color-secondary) !important;
+}
+
+.card .cta-link-red:hover,
+.card .cta-link-red:focus,
+.card[data-hero-slide] .cta-link-red:hover,
+.card[data-hero-slide] .cta-link-red:focus {
+  color: #B01F28 !important;
 }
 
 .toast {
