@@ -2236,6 +2236,78 @@ def api_metodologias():
             'type': error_type if app.debug else None
         }), 500
 
+# API para obtener contexto general del sitio (contacto, FAQ, etc.)
+@app.route('/api/chatbot/context', methods=['GET'])
+def api_chatbot_context():
+    """API endpoint para obtener información general del sitio para el chatbot"""
+    try:
+        conn = get_db()
+        context_info = {
+            'contacto': {
+                'direccion': 'Av. Santa Rosa 11735, La Pintana, Santiago, Chile',
+                'telefono': '+56 2 2978 XXXX',
+                'email': 'farmavet@uchile.cl',
+                'email_programas': 'postitulo@veterinaria.uchile.cl',
+                'horario': 'Lunes a viernes, 09:00 a 17:30 hrs',
+                'horario_atencion': 'Atención presencial con agendamiento previo'
+            },
+            'faqs': [],
+            'servicios': []
+        }
+        
+        # Obtener FAQ activas
+        try:
+            faqs = conn.execute('''
+                SELECT pregunta, respuesta, categoria 
+                FROM faq 
+                WHERE activo = 1 
+                ORDER BY categoria, orden
+                LIMIT 20
+            ''').fetchall()
+            
+            for faq in faqs:
+                pregunta = faq['pregunta'] if 'pregunta' in faq.keys() else ''
+                respuesta = faq['respuesta'] if 'respuesta' in faq.keys() else ''
+                categoria = faq['categoria'] if 'categoria' in faq.keys() else 'general'
+                if pregunta and respuesta:
+                    context_info['faqs'].append({
+                        'pregunta': pregunta,
+                        'respuesta': respuesta,
+                        'categoria': categoria
+                    })
+        except Exception as e:
+            app.logger.warning(f'Error al obtener FAQ: {str(e)}')
+        
+        # Obtener servicios principales
+        try:
+            tarjetas = conn.execute('''
+                SELECT titulo, contenido FROM tarjetas_destacadas 
+                WHERE activo = 1 
+                LIMIT 10
+            ''').fetchall()
+            
+            for tarjeta in tarjetas:
+                titulo = tarjeta['titulo'] if 'titulo' in tarjeta.keys() else ''
+                contenido = tarjeta['contenido'] if 'contenido' in tarjeta.keys() else ''
+                if titulo:
+                    context_info['servicios'].append({
+                        'titulo': titulo,
+                        'contenido': contenido[:200] if contenido else ''  # Limitar contenido
+                    })
+        except Exception as e:
+            app.logger.warning(f'Error al obtener servicios: {str(e)}')
+        
+        conn.close()
+        
+        return jsonify(context_info), 200
+        
+    except Exception as e:
+        app.logger.error(f'Error en API contexto: {str(e)}', exc_info=True)
+        return jsonify({
+            'error': 'Error al obtener contexto',
+            'details': str(e) if app.debug else 'Error interno del servidor'
+        }), 500
+
 # API de Perplexity para búsquedas inteligentes
 @app.route('/api/chatbot/search', methods=['POST'])
 def api_chatbot_search():
@@ -2257,7 +2329,7 @@ def api_chatbot_search():
                 'message': 'La funcionalidad de búsqueda inteligente no está disponible'
             }), 503
         
-        # Obtener información del contexto local (metodologías, servicios, etc.)
+        # Obtener información del contexto local (metodologías, servicios, contacto, FAQ, etc.)
         local_context = ""
         if include_local:
             try:
@@ -2284,16 +2356,55 @@ def api_chatbot_search():
                 # Obtener servicios principales
                 try:
                     tarjetas = conn.execute('''
-                        SELECT titulo, descripcion FROM tarjetas_destacadas 
+                        SELECT titulo, contenido FROM tarjetas_destacadas 
                         WHERE activo = 1 
                         LIMIT 5
                     ''').fetchall()
                     
                     if tarjetas:
-                        servicios = [t['titulo'] if 'titulo' in t.keys() else '' for t in tarjetas if t['titulo']]
+                        servicios = []
+                        for t in tarjetas:
+                            titulo = t['titulo'] if 'titulo' in t.keys() else ''
+                            if titulo:
+                                servicios.append(titulo)
                         if servicios:
                             local_context += f"\n\nServicios principales: {', '.join(servicios)}"
                 except:
+                    pass
+                
+                # Obtener información de contacto
+                local_context += "\n\nINFORMACIÓN DE CONTACTO DE FARMAVET:"
+                local_context += "\n- Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile"
+                local_context += "\n- Teléfono: +56 2 2978 XXXX"
+                local_context += "\n- Email general: farmavet@uchile.cl"
+                local_context += "\n- Email programas académicos: postitulo@veterinaria.uchile.cl"
+                local_context += "\n- Horario: Lunes a viernes, 09:00 a 17:30 hrs"
+                local_context += "\n- Atención presencial con agendamiento previo"
+                local_context += "\n- Para enviar consultas, usar el formulario de contacto en la página de contacto"
+                
+                # Obtener FAQ activas
+                try:
+                    faqs = conn.execute('''
+                        SELECT pregunta, respuesta 
+                        FROM faq 
+                        WHERE activo = 1 
+                        ORDER BY categoria, orden
+                        LIMIT 10
+                    ''').fetchall()
+                    
+                    if faqs:
+                        local_context += "\n\nPREGUNTAS FRECUENTES (FAQ):"
+                        for faq in faqs:
+                            pregunta = faq['pregunta'] if 'pregunta' in faq.keys() else ''
+                            respuesta = faq['respuesta'] if 'respuesta' in faq.keys() else ''
+                            # Limpiar HTML de la respuesta (remover tags)
+                            import re
+                            respuesta_limpia = re.sub(r'<[^>]+>', '', respuesta) if respuesta else ''
+                            if pregunta and respuesta_limpia:
+                                local_context += f"\n- P: {pregunta}"
+                                local_context += f"\n  R: {respuesta_limpia[:150]}..."  # Limitar longitud
+                except Exception as e:
+                    app.logger.warning(f'Error al obtener FAQ para contexto: {str(e)}')
                     pass
                 
                 conn.close()
@@ -2302,23 +2413,25 @@ def api_chatbot_search():
         
         # Construir el prompt contextual para Perplexity
         # CRÍTICO: Solo usar información proporcionada, NO buscar en internet ni dar información general
-        context = f"""Eres un asistente del Laboratorio FARMAVET de la Universidad de Chile.
+        context = f"""Eres FARMA, el asistente virtual del Laboratorio FARMAVET de la Universidad de Chile.
 
 REGLAS OBLIGATORIAS:
-1. SOLO responde usando la información que te proporciono a continuación
+1. SOLO responde usando la información que te proporciono a continuación sobre FARMAVET
 2. NO busques información en internet
 3. NO des explicaciones generales o educativas
-4. Si la pregunta no está en la información proporcionada, responde: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
-5. Responde de manera MUY CONCISA: máximo 1-2 oraciones
+4. Puedes responder preguntas sobre metodologías analíticas, contacto, ubicación, horarios, formulario de consultas, preguntas frecuentes y servicios
+5. Responde de manera CONCISA y natural: máximo 2-3 oraciones
 6. NO agregues información que no esté en la lista proporcionada
 7. NO incluyas referencias a citas, notas, fuentes o números entre corchetes como [1], [2], etc.
 8. NO uses formato de citas como <...> o [...]
 9. Responde en texto plano, sin referencias adicionales
+10. Para preguntas sobre cómo enviar consultas o usar el formulario, explica el proceso claramente
+11. Si la pregunta no está en la información proporcionada, responde: "Para consultas específicas, puedes contactarnos directamente al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web."
 
 INFORMACIÓN DISPONIBLE DE FARMAVET:
 {local_context}
 
-Si la información NO está en la lista anterior, responde SOLO: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
+Si la información NO está en la lista anterior, responde SOLO: "Para consultas específicas, puedes contactarnos directamente al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web."
 """
         
         system_message = context

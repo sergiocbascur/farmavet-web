@@ -37,8 +37,8 @@ class MetodologiasChatbot {
                 <div class="chatbot-header-content">
                     <i class="bi bi-robot"></i>
                     <div>
-                        <h3>Asistente de Metodologías</h3>
-                        <p class="chatbot-subtitle">Busca metodologías analíticas de forma inteligente</p>
+                        <h3>FARMA</h3>
+                        <p class="chatbot-subtitle">Asistente virtual de FARMAVET</p>
                     </div>
                 </div>
                 <button class="chatbot-close" id="chatbot-close" aria-label="Cerrar chatbot">
@@ -48,7 +48,7 @@ class MetodologiasChatbot {
             <div class="chatbot-messages" id="chatbot-messages">
                 <div class="chatbot-message bot-message">
                     <div class="message-content">
-                        <p>¡Hola! 👋 Soy tu asistente para buscar metodologías analíticas.</p>
+                        <p>¡Hola! Soy FARMA, tu asistente virtual de FARMAVET. Estoy aquí para ayudarte con tus consultas sobre metodologías analíticas, contacto, ubicación, horarios, formularios y más.</p>
                         <p>Puedes preguntarme cosas como:</p>
                         <ul class="chatbot-examples">
                             <li>"Busca metodologías para antibióticos en salmón"</li>
