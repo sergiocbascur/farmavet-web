@@ -2333,13 +2333,13 @@ Si la información NO está en la lista anterior, responde SOLO: "Para consultas
             system_message = system_message[:4000] + "..."
         
         # Modelos disponibles de Perplexity:
-        # - sonar-pro (más potente, con búsqueda web)
-        # - sonar (más rápido, con búsqueda web)
-        # - llama-3.1-sonar-small-128k-online (legacy)
-        # Usar modelo sin búsqueda web para que solo use el contexto local
+        # - sonar-pro (más potente, con búsqueda web automática)
+        # - sonar (más rápido, con búsqueda web automática)  
+        # - llama-3.1-sonar-small-128k-online (legacy, con búsqueda web)
+        # Usar modelo offline que NO busca en internet
+        # Si no hay modelo offline, usar llama-3.1-70b-instruct o similar
         payload = {
-            "model": "llama-3.1-sonar-large-128k-online",  # Modelo con búsqueda web (pero la deshabilitaremos)
-            # Alternativa: usar "llama-3.1-sonar-small-128k-online" si el anterior no funciona
+            "model": "llama-3.1-70b-instruct",  # Modelo sin búsqueda web automática
             "messages": [
                 {
                     "role": "system",
