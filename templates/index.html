@@ -546,10 +546,20 @@
                 {% endfor %}
                 {% for evento in eventos %}
                 <article class="news-card">
+                  {% if evento.imagen %}
+                  <div style="height: 200px; overflow: hidden; position: relative; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    <img
+                      src="{{ evento.imagen }}"
+                      alt="{{ get_translated_field(evento, 'titulo', evento.titulo) }}"
+                      style="width: 100%; height: 100%; object-fit: contain;"
+                    />
+                  </div>
+                  {% else %}
                   <img
                     src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}"
                     alt="{{ get_translated_field(evento, 'titulo', evento.titulo) }}"
                   />
+                  {% endif %}
                   <div class="news-body">
                     <span class="news-meta">
                       {% if evento.fecha %}{{ evento.fecha }}{% endif %}{% if evento.fecha and evento.meta %} · {% endif %}{% if evento.meta %}{{ get_translated_field(evento, 'meta', evento.meta) }}{% endif %}
