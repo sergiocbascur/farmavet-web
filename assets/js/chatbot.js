@@ -74,7 +74,6 @@ class MetodologiasChatbot {
                         <i class="bi bi-send-fill"></i>
                     </button>
                 </div>
-                <div class="chatbot-suggestions" id="chatbot-suggestions"></div>
             </div>
         `;
         document.body.appendChild(chatbotWindow);
@@ -219,7 +218,7 @@ class MetodologiasChatbot {
         });
 
         input?.addEventListener('input', (e) => {
-            this.showSuggestions(e.target.value);
+            // Sugerencias deshabilitadas - usando búsqueda inteligente
         });
     }
 
