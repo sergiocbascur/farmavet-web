@@ -19,7 +19,7 @@ except ImportError:
         HAS_OPENPYXL = True
         HAS_PANDAS = False
     except ImportError:
-        print("❌ Error: Necesitas instalar pandas o openpyxl")
+        print("[ERROR] Necesitas instalar pandas o openpyxl")
         print("   Instala con: pip install pandas openpyxl")
         sys.exit(1)
 
@@ -27,8 +27,8 @@ def get_db_path():
     """Obtiene la ruta de la base de datos"""
     # Buscar en varios lugares posibles
     possible_paths = [
+        'instance/database.db',  # Prioridad 1: estructura Flask estándar
         'farmavet_web.db',
-        'instance/database.db',
         'database.db'
     ]
     
@@ -37,12 +37,12 @@ def get_db_path():
             return path
     
     # Si no se encuentra, preguntar
-    print("⚠️  No se encontró la base de datos automáticamente.")
+    print("[AVISO] No se encontro la base de datos automaticamente.")
     db_path = input("Ingresa la ruta a la base de datos: ").strip()
     if os.path.exists(db_path):
         return db_path
     else:
-        print(f"❌ Error: No se encontró el archivo: {db_path}")
+        print(f"[ERROR] No se encontro el archivo: {db_path}")
         sys.exit(1)
 
 def normalize_text(text):
@@ -55,10 +55,10 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     """Importa metodologías desde Excel a la base de datos"""
     
     if not os.path.exists(excel_path):
-        print(f"❌ Error: No se encontró el archivo: {excel_path}")
+        print(f"[ERROR] No se encontro el archivo: {excel_path}")
         sys.exit(1)
     
-    print(f"📖 Leyendo archivo Excel: {excel_path}")
+    print(f"Leyendo archivo Excel: {excel_path}")
     
     # Leer Excel - Estructura: ITLF (método), MÉTODO, Analito, EQUIPO, LD, LC, MATRIZ, ACREDITADO
     # Los encabezados están en la fila 2 (índice 2)
@@ -149,11 +149,11 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             
             df = pd.DataFrame(data_rows)
         
-        print(f"✅ Archivo leído: {len(df)} analitos encontrados")
-        print(f"📊 Métodos únicos (ITLF): {df['itlf'].nunique() if 'itlf' in df.columns else 0}")
+        print(f"[OK] Archivo leido: {len(df)} analitos encontrados")
+        print(f"[INFO] Metodos unicos (ITLF): {df['itlf'].nunique() if 'itlf' in df.columns else 0}")
         
     except Exception as e:
-        print(f"❌ Error leyendo Excel: {str(e)}")
+        print(f"[ERROR] Error leyendo Excel: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
@@ -166,13 +166,13 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     # Verificar que la tabla existe
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metodologias'")
     if not cursor.fetchone():
-        print("❌ Error: La tabla 'metodologias' no existe en la base de datos")
+        print("[ERROR] La tabla 'metodologias' no existe en la base de datos")
         conn.close()
         sys.exit(1)
     
     # Las columnas ya están mapeadas en el DataFrame
     # Estructura: itlf, metodo, analito, equipo, ld, lc, matriz, acreditado
-    print(f"\n📊 Estructura detectada:")
+    print(f"\n[INFO] Estructura detectada:")
     print(f"   - ITLF (código método): Columna 'itlf'")
     print(f"   - MÉTODO (nombre): Columna 'metodo'")
     print(f"   - Analito: Columna 'analito'")
@@ -187,7 +187,7 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     missing_columns = [col for col in required_columns if col not in df.columns]
     
     if missing_columns:
-        print(f"\n❌ Error: Faltan columnas requeridas: {', '.join(missing_columns)}")
+        print(f"\n[ERROR] Faltan columnas requeridas: {', '.join(missing_columns)}")
         print(f"   Columnas disponibles: {', '.join(df.columns.tolist())}")
         conn.close()
         sys.exit(1)
@@ -200,7 +200,7 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     skipped = 0
     errors = []
     
-    print(f"\n🔄 Procesando {len(df)} filas...")
+    print(f"\nProcesando {len(df)} filas...")
     
     for idx, row in df.iterrows():
         try:
@@ -252,24 +252,6 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             vigencia = None
             orden = None
             
-            # Acreditada (puede ser texto como "Sí", "S", "1", True, etc.)
-            acreditada_val = row.get(field_mapping.get('acreditada', '')) if field_mapping.get('acreditada') else None
-            if acreditada_val is not None:
-                acreditada_str = str(acreditada_val).lower().strip()
-                acreditada = acreditada_str in ['si', 'sí', 's', 'yes', 'true', '1', 'acreditada', 'acreditado']
-            else:
-                acreditada = False
-            
-            # Orden
-            orden_val = row.get(field_mapping.get('orden', '')) if field_mapping.get('orden') else None
-            if orden_val is not None:
-                try:
-                    orden = int(float(orden_val))
-                except (ValueError, TypeError):
-                    orden = None
-            else:
-                orden = None
-            
             # Validar campos requeridos
             if not analito:
                 skipped += 1
@@ -297,9 +279,9 @@ def import_from_excel(excel_path, db_path, dry_run=False):
                     ''', (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en,
                           tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia,
                           vigencia, acreditada, orden, existing['id']))
-                    print(f"   ✓ Actualizado: {nombre} - {analito} en {matriz}")
+                    print(f"   [ACTUALIZADO] {nombre} - {analito} en {matriz}")
                 else:
-                    print(f"   [DRY RUN] Actualizaría: {nombre} - {analito} en {matriz}")
+                    print(f"   [DRY RUN] Actualizaria: {nombre} - {analito} en {matriz}")
             else:
                 if not dry_run:
                     # Insertar nuevo
@@ -312,28 +294,28 @@ def import_from_excel(excel_path, db_path, dry_run=False):
                     ''', (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en,
                           tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia,
                           vigencia, acreditada, orden))
-                    print(f"   + Insertado: {nombre} - {analito} en {matriz}")
+                    print(f"   [INSERTADO] {nombre} - {analito} en {matriz}")
                 else:
-                    print(f"   [DRY RUN] Insertaría: {nombre} - {analito} en {matriz}")
+                    print(f"   [DRY RUN] Insertaria: {nombre} - {analito} en {matriz}")
             
             imported += 1
             
         except Exception as e:
             skipped += 1
             errors.append(f"Fila {idx+2}: {str(e)}")
-            print(f"   ❌ Error en fila {idx+2}: {str(e)}")
+            print(f"   [ERROR] Error en fila {idx+2}: {str(e)}")
     
     if not dry_run:
         conn.commit()
-        print(f"\n✅ Importación completada!")
+        print(f"\n[OK] Importacion completada!")
     else:
-        print(f"\n🔍 [DRY RUN] Simulación completada (no se modificó la base de datos)")
+        print(f"\n[DRY RUN] Simulacion completada (no se modifico la base de datos)")
     
-    print(f"   ✓ Importadas/Actualizadas: {imported}")
-    print(f"   ⚠️  Omitidas: {skipped}")
+    print(f"   [OK] Importadas/Actualizadas: {imported}")
+    print(f"   [AVISO] Omitidas: {skipped}")
     
     if errors:
-        print(f"\n⚠️  Errores encontrados ({len(errors)}):")
+        print(f"\n[AVISO] Errores encontrados ({len(errors)}):")
         for error in errors[:10]:  # Mostrar solo los primeros 10
             print(f"   - {error}")
         if len(errors) > 10:
@@ -352,19 +334,21 @@ if __name__ == '__main__':
     
     excel_path = sys.argv[1]
     dry_run = '--dry-run' in sys.argv or '-n' in sys.argv
+    skip_confirm = '--yes' in sys.argv or '-y' in sys.argv or dry_run
     
     if dry_run:
-        print("🔍 MODO DRY RUN: No se modificará la base de datos\n")
+        print("[DRY RUN] No se modificara la base de datos\n")
     
     db_path = get_db_path()
     
-    print(f"📁 Base de datos: {db_path}")
-    print(f"📊 Archivo Excel: {excel_path}\n")
+    print(f"Base de datos: {db_path}")
+    print(f"Archivo Excel: {excel_path}\n")
     
-    confirm = input("¿Continuar con la importación? (s/n): ").strip().lower()
-    if confirm not in ['s', 'si', 'sí', 'y', 'yes']:
-        print("❌ Importación cancelada")
-        sys.exit(0)
+    if not skip_confirm:
+        confirm = input("Continuar con la importacion? (s/n): ").strip().lower()
+        if confirm not in ['s', 'si', 'sí', 'y', 'yes']:
+            print("[CANCELADO] Importacion cancelada")
+            sys.exit(0)
     
     import_from_excel(excel_path, db_path, dry_run=dry_run)
 
