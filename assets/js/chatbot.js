@@ -256,7 +256,7 @@ class MetodologiasChatbot {
             
             // Detectar si la consulta es sobre metodologías o información general
             const queryLower = query.toLowerCase();
-            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|contacto|email|correo|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion|solicitar|solicitud)\b/i.test(query);
+            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|ubicados|ubicadas|donde|dónde|se encuentran|contacto|email|correo|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion|solicitar|solicitud|informe|informes|ingles|english|idioma|lang)\b/i.test(query);
             
             // Si es una consulta general (no sobre metodologías), ir directamente a Perplexity
             if (isGeneralQuery) {
@@ -371,12 +371,13 @@ class MetodologiasChatbot {
             'micotoxina': ['aflatoxina', 'ocratoxina', 'fumonisina', 'zearalenona'],
             'pesticida': ['plaguicida', 'organoclorado', 'organofosforado', 'diquat', 'paraquat', 'glifosato'],
             'salmon': ['salmones', 'salmonidos', 'salmonideos', 'trucha', 'truchas', 'pez', 'peces', 'hidrobiologico', 'hidrobiológico'],
-            'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina', 'ave', 'aves', 'pollo', 'pollos'],
+            'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina', 'cerdo', 'cerdos', 'ave', 'aves', 'pollo', 'pollos', 'productos pecuarios', 'pecuarios', 'producto animal'],
             'leche': ['lacteo', 'lacteos', 'dairy', 'producto lacteo'],
             'lcmsms': ['lc-ms/ms', 'lc-ms', 'lcms', 'cromatografia liquida', 'espectrometria de masas', 'liquid chromatography'],
             'gcms': ['gc-ms', 'cromatografia de gases', 'gas chromatography'],
             'hplc': ['cromatografia liquida', 'high performance liquid chromatography'],
-            'metodo': ['metodologia', 'tecnica', 'analisis', 'ensayo'],
+            'metodo': ['metodologia', 'metodologias', 'tecnica', 'tecnicas', 'analisis', 'ensayo', 'ensayos', 'metodos'],
+            'productos pecuarios': ['producto pecuario', 'pecuarios', 'carne', 'carnes', 'leche', 'huevos', 'huevo', 'productos de origen animal'],
             'diquat': ['diquat', 'paraquat', 'herbicida', 'bipiridilo'],
             'amprolio': ['amprolio', 'amprolium', 'anticoccidiano', 'antiparasitario']
         };
