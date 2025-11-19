@@ -911,21 +911,31 @@ def logos(filename):
     logo_path = os.path.join('logos', decoded_filename)
     
     # Verificar que el archivo existe
-    if not os.path.exists(logo_path):
-        # Si no existe, intentar buscar el archivo real (puede tener espacios codificados diferente)
-        import glob
-        # Buscar archivos que coincidan con el patrón
-        base_name = os.path.basename(decoded_filename)
-        pattern = os.path.join('logos', base_name.replace(' ', '*'))
+    if os.path.exists(logo_path):
+        return send_from_directory('logos', decoded_filename)
+    
+    # Si no existe, intentar buscar el archivo real (puede tener espacios codificados diferente)
+    import glob
+    base_name = os.path.basename(decoded_filename)
+    
+    # Buscar variaciones del nombre (con espacios, sin espacios, con guiones bajos)
+    patterns = [
+        os.path.join('logos', base_name),  # Nombre exacto
+        os.path.join('logos', base_name.replace('_', ' ')),  # Guiones bajos a espacios
+        os.path.join('logos', base_name.replace(' ', '_')),  # Espacios a guiones bajos
+        os.path.join('logos', base_name.replace('_', '*')),  # Patrón con wildcard
+        os.path.join('logos', base_name.replace(' ', '*')),  # Patrón con wildcard
+    ]
+    
+    for pattern in patterns:
         matches = glob.glob(pattern)
         if matches:
             # Usar el primer match encontrado
             actual_filename = os.path.basename(matches[0])
             return send_from_directory('logos', actual_filename)
-        # Si no se encuentra, devolver 404
-        return "Logo no encontrado", 404
     
-    return send_from_directory('logos', decoded_filename)
+    # Si no se encuentra, devolver 404
+    return "Logo no encontrado", 404
 
 # Sistema de idioma con Flask-Babel
 # En Flask-Babel 4.0.0, se registra la función directamente
@@ -1177,7 +1187,7 @@ def page(page):
             # Cargar imágenes de la galería para el hero slider
             imagenes_hero = conn.execute('''
                 SELECT * FROM galeria_imagenes 
-                WHERE activo = 1 AND pagina = 'docencia'
+                WHERE activo = 1 AND (pagina = 'docencia' OR pagina IS NULL OR pagina = '')
                 ORDER BY orden, id DESC
                 LIMIT 10
             ''').fetchall()
@@ -1349,7 +1359,7 @@ def page(page):
             # Cargar imágenes de la galería para el hero slider
             imagenes_hero = conn.execute('''
                 SELECT * FROM galeria_imagenes 
-                WHERE activo = 1 AND pagina = 'equipo'
+                WHERE activo = 1 AND (pagina = 'equipo' OR pagina IS NULL OR pagina = '')
                 ORDER BY orden, id DESC
                 LIMIT 10
             ''').fetchall()
