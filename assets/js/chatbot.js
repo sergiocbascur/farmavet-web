@@ -520,9 +520,18 @@ class MetodologiasChatbot {
         if (results.length === 0) {
             // Detectar si es una consulta sobre metodologías específicamente
             const queryLower = query.toLowerCase();
-            const isMethodologyQuery = /\b(metodología|metodologia|análisis|analisis|analito|matriz|técnica|tecnica|hacen|tienen|realizan|detectan|analizan|cuantifican|determinan|diquat|amprolio|antibiotico|antibiótico|micotoxina|residuo|plaguicida|herbicida)\b/i.test(query);
+            // Consultas generales sobre métodos disponibles (no buscan una metodología específica)
+            const isGeneralMethodsQuery = /\b(que|qué|cuantos|cuántos|cuantas|cuántas|tienen|tiene|disponible|disponibles|metodos|métodos|metodologias|metodologías|tecnicas|técnicas)\s*(metodo|metodo|metodologias|metodologías|tecnicas|técnicas|tienen|tiene|hay|disponible|disponibles)\b/i.test(query);
             
-            // Solo mostrar mensaje de "no encontré metodologías" si la consulta es claramente sobre metodologías
+            // Si pregunta "qué métodos tienen" o similar, ir directamente a Perplexity sin mensaje
+            if (isGeneralMethodsQuery) {
+                await this.searchWithPerplexity(query, false, false);
+                return;
+            }
+            
+            // Solo mostrar mensaje de "no encontré metodologías" si la consulta es claramente sobre una metodología específica
+            const isMethodologyQuery = /\b(metodología|metodologia|análisis|analisis|analito|matriz|técnica|tecnica|hacen|realizan|detectan|analizan|cuantifican|determinan|diquat|amprolio|antibiotico|antibiótico|micotoxina|residuo|plaguicida|herbicida|en\s+(salmon|cerdo|carne|leche|huevo))\b/i.test(query);
+            
             if (isMethodologyQuery) {
                 this.addMessage(`
                     <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>" en nuestra base de datos.</p>
