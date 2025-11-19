@@ -3440,10 +3440,11 @@ def admin_evento_nuevo():
         try:
             conn = get_db()
             activo = 1 if request.form.get('activo') == 'on' or request.form.get('activo') == '' else 0
+            destacada = 1 if request.form.get('destacada') == 'on' else 0
             
             conn.execute('''
-                INSERT INTO eventos (titulo, fecha, meta, descripcion, enlace, texto_boton, orden, activo, titulo_en, descripcion_en, meta_en, texto_boton_en)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO eventos (titulo, fecha, meta, descripcion, enlace, texto_boton, orden, destacada, activo, titulo_en, descripcion_en, meta_en, texto_boton_en)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 request.form.get('titulo', '').strip(),
                 request.form.get('fecha', '').strip(),
@@ -3452,6 +3453,7 @@ def admin_evento_nuevo():
                 request.form.get('enlace', '').strip(),
                 request.form.get('texto_boton', 'Ver más').strip(),
                 int(request.form.get('orden', 0) or 0),
+                destacada,
                 activo,
                 request.form.get('titulo_en', '').strip() or None,
                 request.form.get('descripcion_en', '').strip() or None,
