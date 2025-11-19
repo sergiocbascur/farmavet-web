@@ -2106,43 +2106,66 @@ def api_metodologias():
                 conn.close()
             return jsonify({'error': 'Error al verificar la base de datos'}), 500
         
+        # Verificar qué columnas existen en la tabla
+        try:
+            cursor = conn.execute("PRAGMA table_info(metodologias)")
+            columns = [row[1] for row in cursor.fetchall()]
+            has_orden = 'orden' in columns
+            has_activo = 'activo' in columns
+            has_categoria = 'categoria' in columns
+            has_nombre = 'nombre' in columns
+            
+            app.logger.info(f'API metodologias: Columnas disponibles: {columns}')
+        except Exception as e:
+            app.logger.error(f'API metodologias: Error al verificar columnas: {str(e)}')
+            if conn:
+                conn.close()
+            return jsonify({'error': 'Error al verificar estructura de la tabla'}), 500
+        
         # Contar total de metodologías (incluyendo inactivas para debug)
         try:
             total_count = conn.execute('SELECT COUNT(*) as count FROM metodologias').fetchone()['count']
-            active_count = conn.execute('SELECT COUNT(*) as count FROM metodologias WHERE activo = 1').fetchone()['count']
+            if has_activo:
+                active_count = conn.execute('SELECT COUNT(*) as count FROM metodologias WHERE activo = 1').fetchone()['count']
+            else:
+                active_count = total_count
             app.logger.info(f'API metodologias: Total metodologías: {total_count}, Activas: {active_count}')
         except Exception as e:
             app.logger.warning(f'API metodologias: Error al contar metodologías: {str(e)}')
         
-        # Verificar qué columnas existen en la tabla
-        cursor = conn.execute("PRAGMA table_info(metodologias)")
-        columns = [row[1] for row in cursor.fetchall()]
-        has_orden = 'orden' in columns
-        has_activo = 'activo' in columns
-        
-        app.logger.info(f'API metodologias: Columnas disponibles: {columns}')
-        
         # Construir WHERE según columnas disponibles
-        where_clause = 'WHERE 1=1'  # Por defecto, todas
+        where_clause = ''
         if has_activo:
             where_clause = 'WHERE activo = 1'
         
         # Construir ORDER BY según columnas disponibles
-        order_by = 'ORDER BY categoria, nombre'
-        if has_orden:
-            order_by = 'ORDER BY categoria, orden, nombre'
+        order_by = ''
+        if has_categoria and has_nombre:
+            if has_orden:
+                order_by = 'ORDER BY categoria, orden, nombre'
+            else:
+                order_by = 'ORDER BY categoria, nombre'
+        elif has_nombre:
+            order_by = 'ORDER BY nombre'
         
         # Obtener metodologías activas
-        query = f'''
+        query = '''
             SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
                    tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
             FROM metodologias 
-            {where_clause}
-            {order_by}
-        '''
+        ''' + where_clause + ' ' + order_by
         
         app.logger.info(f'API metodologias: Ejecutando query: {query}')
-        metodologias = conn.execute(query).fetchall()
+        try:
+            metodologias = conn.execute(query).fetchall()
+        except sqlite3.OperationalError as e:
+            app.logger.error(f'API metodologias: Error SQL: {str(e)}')
+            if conn:
+                conn.close()
+            return jsonify({
+                'error': 'Error en la consulta SQL',
+                'details': str(e) if app.debug else 'Error al consultar metodologías'
+            }), 500
         
         # Convertir a lista de diccionarios
         result = []
