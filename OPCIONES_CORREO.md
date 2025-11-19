@@ -54,7 +54,7 @@
 SMTP_HOST=smtp.uchile.cl
 SMTP_PORT=587
 SMTP_USER=farmavet@uchile.cl
-SMTP_PASSWORD=contraseña-asignada
+SMTP_PASSWORD=xxxxxxxxxxxxxxxx
 SMTP_FROM=farmavet@uchile.cl
 ```
 
@@ -74,7 +74,7 @@ SMTP_FROM=farmavet@uchile.cl
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
 SMTP_USER=apikey
-SMTP_PASSWORD=SG.tu-api-key-aqui
+SMTP_PASSWORD=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 SMTP_FROM=noreply@laboratoriofarmavet.cl
 ```
 
@@ -88,7 +88,7 @@ SMTP_FROM=noreply@laboratoriofarmavet.cl
 SMTP_HOST=smtp.mailgun.org
 SMTP_PORT=587
 SMTP_USER=postmaster@tu-dominio.mailgun.org
-SMTP_PASSWORD=contraseña-de-mailgun
+SMTP_PASSWORD=xxxxxxxxxxxxxxxx
 SMTP_FROM=noreply@laboratoriofarmavet.cl
 ```
 
@@ -122,7 +122,7 @@ Si tienes el dominio `laboratoriofarmavet.cl`:
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=contacto@laboratoriofarmavet.cl
-SMTP_PASSWORD=app-password-generada
+SMTP_PASSWORD=xxxxxxxxxxxxxxxx
 SMTP_FROM=contacto@laboratoriofarmavet.cl
 ```
 
@@ -172,7 +172,7 @@ SMTP_FROM=contacto@laboratoriofarmavet.cl
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_USER=tu-email@gmail.com
-   SMTP_PASSWORD=xxxx xxxx xxxx xxxx  # App Password
+   SMTP_PASSWORD=xxxxxxxxxxxxxxxx  # App Password (16 caracteres)
    ```
 
 ### Si usas correo institucional:
@@ -209,7 +209,7 @@ SMTP_FROM=contacto@laboratoriofarmavet.cl
    SMTP_HOST=smtp.sendgrid.net
    SMTP_PORT=587
    SMTP_USER=apikey
-   SMTP_PASSWORD=SG.tu-api-key-aqui
+   SMTP_PASSWORD=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    SMTP_FROM=noreply@laboratoriofarmavet.cl
    ```
 

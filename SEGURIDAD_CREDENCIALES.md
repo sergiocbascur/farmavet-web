@@ -126,8 +126,10 @@ Environment="SECRET_KEY=clave-generada-segura"
 Environment="SMTP_HOST=smtp.gmail.com"
 Environment="SMTP_PORT=587"
 Environment="SMTP_USER=tu-email@gmail.com"
-Environment="SMTP_PASSWORD=tu-app-password"
+Environment="SMTP_PASSWORD=xxxxxxxxxxxxxxxx"
 ```
+
+**⚠️ IMPORTANTE:** Reemplaza `xxxxxxxxxxxxxxxx` con tu App Password real. Nunca subas este archivo con credenciales reales a Git.
 
 ### 2. Permisos del archivo de servicio
 
