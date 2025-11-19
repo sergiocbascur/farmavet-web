@@ -2114,29 +2114,35 @@ def api_metodologias():
         except Exception as e:
             app.logger.warning(f'API metodologias: Error al contar metodologías: {str(e)}')
         
-        # Obtener metodologías activas (verificar si existe columna orden)
-        try:
-            # Intentar con orden primero
-            metodologias = conn.execute('''
-                SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                       tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
-                FROM metodologias 
-                WHERE activo = 1
-                ORDER BY categoria, orden, nombre
-            ''').fetchall()
-        except sqlite3.OperationalError as e:
-            if 'no such column: orden' in str(e).lower():
-                # Si no existe la columna orden, usar solo categoria y nombre
-                app.logger.warning('API metodologias: Columna orden no existe, usando orden alternativo')
-                metodologias = conn.execute('''
-                    SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                           tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
-                    FROM metodologias 
-                    WHERE activo = 1
-                    ORDER BY categoria, nombre
-                ''').fetchall()
-            else:
-                raise
+        # Verificar qué columnas existen en la tabla
+        cursor = conn.execute("PRAGMA table_info(metodologias)")
+        columns = [row[1] for row in cursor.fetchall()]
+        has_orden = 'orden' in columns
+        has_activo = 'activo' in columns
+        
+        app.logger.info(f'API metodologias: Columnas disponibles: {columns}')
+        
+        # Construir WHERE según columnas disponibles
+        where_clause = 'WHERE 1=1'  # Por defecto, todas
+        if has_activo:
+            where_clause = 'WHERE activo = 1'
+        
+        # Construir ORDER BY según columnas disponibles
+        order_by = 'ORDER BY categoria, nombre'
+        if has_orden:
+            order_by = 'ORDER BY categoria, orden, nombre'
+        
+        # Obtener metodologías activas
+        query = f'''
+            SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                   tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
+            FROM metodologias 
+            {where_clause}
+            {order_by}
+        '''
+        
+        app.logger.info(f'API metodologias: Ejecutando query: {query}')
+        metodologias = conn.execute(query).fetchall()
         
         # Convertir a lista de diccionarios
         result = []
@@ -2172,8 +2178,8 @@ def api_metodologias():
             app.logger.warning('API metodologias: No hay metodologías activas en la base de datos')
         
         return response
-    except Exception as e:
-        error_msg = f'Error en API metodologias: {str(e)}'
+    except sqlite3.OperationalError as e:
+        error_msg = f'Error SQL en API metodologias: {str(e)}'
         app.logger.error(error_msg, exc_info=True)
         if conn:
             try:
@@ -2181,8 +2187,24 @@ def api_metodologias():
             except:
                 pass
         return jsonify({
+            'error': 'Error en la base de datos',
+            'details': str(e) if app.debug else 'Error al acceder a la base de datos'
+        }), 500
+    except Exception as e:
+        error_msg = f'Error en API metodologias: {str(e)}'
+        error_type = type(e).__name__
+        app.logger.error(f'{error_msg} (Tipo: {error_type})', exc_info=True)
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+        # En desarrollo, devolver detalles del error; en producción, mensaje genérico
+        error_details = str(e) if app.debug else 'Error interno del servidor'
+        return jsonify({
             'error': 'Error al cargar metodologías',
-            'details': str(e) if app.debug else 'Error interno del servidor'
+            'details': error_details,
+            'type': error_type if app.debug else None
         }), 500
 
 # API de Perplexity para búsquedas inteligentes
