@@ -99,6 +99,47 @@
               <span class="pill">{{ _('Transferencia a la industria') }}</span>
             </div>
           </div>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% else %}
+          {# Fallback a tarjeta si no hay imágenes #}
           <div class="card">
             <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
               {{ _('Áreas clave') }}
@@ -110,6 +151,7 @@
               <li>{{ _('Monitoreo de matrices alternativas y ambientales') }}</li>
             </ul>
           </div>
+          {% endif %}
         </div>
       </section>
 
@@ -156,48 +198,6 @@
               <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
             </div>
           </div>
-          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
-          {% if imagenes_hero %}
-          <div class="hero-media-wrapper">
-            <div
-              class="hero-media"
-              aria-hidden="true"
-              data-hero-slider
-              data-hero-interval="6000"
-            >
-              {% for imagen in imagenes_hero %}
-              {% if imagen.es_video %}
-              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
-                <video
-                  src="/static/uploads/galeria/{{ imagen.archivo }}"
-                  {% if loop.first %}autoplay{% endif %}
-                  loop
-                  playsinline
-                  controls
-                  controlsList="nodownload"
-                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
-                ></video>
-              </div>
-              {% else %}
-              <img
-                src="/static/uploads/galeria/{{ imagen.archivo }}"
-                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
-                loading="lazy"
-                data-hero-slide
-                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
-                data-hero-order="{{ loop.index0 }}"
-                {% if loop.first %}class="is-active"{% endif %}
-              />
-              {% endif %}
-              {% endfor %}
-            </div>
-            {% if imagenes_hero|length > 1 %}
-            <div class="hero-dots" role="presentation" data-hero-dots></div>
-            {% endif %}
-          </div>
-          {% elif tarjetas_destacadas %}
-          {# Fallback a tarjetas destacadas si no hay imágenes #}
-          {% endif %}
         </div>
       </section>
 
