@@ -513,53 +513,6 @@ class MetodologiasChatbot {
             await this.searchWithPerplexity(query, false);
             return;
         }
-                
-                this.hideTyping(typingId);
-                
-                console.log(`📡 Chatbot Perplexity: Status ${perplexityResponse.status}`);
-                
-                if (perplexityResponse.ok) {
-                    const data = await perplexityResponse.json();
-                    console.log('✅ Chatbot Perplexity: Respuesta recibida', data);
-                    
-                    if (data.answer) {
-                        let message = `
-                            <div class="chatbot-results-text">
-                                ${this.formatPerplexityAnswer(data.answer)}
-                            </div>
-                        `;
-                        
-                        if (data.sources && data.sources.length > 0) {
-                            message += `<p><small>📚 Fuente${data.sources.length > 1 ? 's' : ''}: ${data.sources.length}</small></p>`;
-                        }
-                        
-                        message += `<p><small>⚠️ <strong>Nota:</strong> Esta información es general. Para metodologías específicas de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
-                        
-                        this.addMessage(message);
-                    } else {
-                        console.warn('⚠️ Chatbot Perplexity: Respuesta sin answer');
-                        this.showNoResultsHelp(query);
-                    }
-                } else {
-                    // Si Perplexity falla, mostrar información útil
-                    const errorData = await perplexityResponse.json().catch(() => ({}));
-                    console.error('❌ Chatbot Perplexity: Error', perplexityResponse.status, errorData);
-                    
-                    if (perplexityResponse.status === 503 && errorData.error === 'API de Perplexity no configurada') {
-                        // API no configurada, no mostrar mensaje de error al usuario
-                        this.showNoResultsHelp(query);
-                    } else {
-                        // Otro error, mostrar ayuda estándar
-                        this.showNoResultsHelp(query);
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Chatbot Perplexity: Error de red', error);
-                this.hideTyping(typingId);
-                this.showNoResultsHelp(query);
-            }
-            return;
-        }
 
         // Generar respuesta en formato de frase legible
         let message = '';
