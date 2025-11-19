@@ -258,11 +258,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Si solo hay un slide, no necesitamos dots ni autoplay
     if (slides.length === 1) {
       slides[0].classList.add("is-active");
-      // Reproducir video si es video
-      if (slides[0] && slides[0].tagName === 'VIDEO') {
-        slides[0].play().catch(e => {
-          console.log('Autoplay bloqueado:', e);
-        });
+      // Reproducir video si es video (solo la primera vez)
+      const video = slides[0].querySelector('video');
+      if (video) {
+        const videoKey = `video_played_${window.location.pathname}_${video.src}`;
+        const hasPlayed = sessionStorage.getItem(videoKey);
+        if (!hasPlayed && video.hasAttribute('autoplay')) {
+          video.play().catch(e => {
+            console.log('Autoplay bloqueado:', e);
+          });
+          // Marcar como reproducido cuando termine
+          video.addEventListener('ended', () => {
+            sessionStorage.setItem(videoKey, 'true');
+          }, { once: true });
+        }
       }
       return;
     }
@@ -284,9 +293,10 @@ document.addEventListener("DOMContentLoaded", () => {
     slides.forEach((slide) => {
       slide.classList.remove("is-active");
       // Pausar videos que no están activos
-      if (slide.tagName === 'VIDEO') {
-        slide.pause();
-        slide.currentTime = 0;
+      const video = slide.querySelector('video');
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
       }
       // Solo insertar antes de dotsContainer si está dentro del track
       if (dotsContainer.parentElement === track) {
@@ -294,11 +304,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     slides[0].classList.add("is-active");
-    // Reproducir el primer video si es video
-    if (slides[0] && slides[0].tagName === 'VIDEO') {
-      slides[0].play().catch(e => {
-        console.log('Autoplay bloqueado en primer video:', e);
-      });
+    // Reproducir el primer video si es video (solo la primera vez)
+    const firstVideo = slides[0].querySelector('video');
+    if (firstVideo && firstVideo.hasAttribute('autoplay')) {
+      const videoKey = `video_played_${window.location.pathname}_${firstVideo.src}`;
+      const hasPlayed = sessionStorage.getItem(videoKey);
+      if (!hasPlayed) {
+        firstVideo.play().catch(e => {
+          console.log('Autoplay bloqueado en primer video:', e);
+        });
+        // Marcar como reproducido cuando termine
+        firstVideo.addEventListener('ended', () => {
+          sessionStorage.setItem(videoKey, 'true');
+        }, { once: true });
+      }
     }
 
     dotsContainer.innerHTML = "";
@@ -320,9 +339,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const setActiveSlide = (nextIndex) => {
       // Pausar video anterior si existe
       const prevSlide = slides[index];
-      if (prevSlide && prevSlide.tagName === 'VIDEO') {
-        prevSlide.pause();
-        prevSlide.currentTime = 0;
+      const prevVideo = prevSlide?.querySelector('video');
+      if (prevVideo) {
+        prevVideo.pause();
+        prevVideo.currentTime = 0;
       }
       
       slides[index].classList.remove("is-active");
@@ -331,13 +351,12 @@ document.addEventListener("DOMContentLoaded", () => {
       slides[index].classList.add("is-active");
       dots[index].classList.add("is-active");
       
-      // Reproducir video nuevo si existe
-      const nextSlide = slides[index];
-      if (nextSlide && nextSlide.tagName === 'VIDEO') {
-        nextSlide.play().catch(e => {
-          // Si falla el autoplay (políticas del navegador), al menos intentar
-          console.log('Autoplay bloqueado:', e);
-        });
+      // Reproducir video nuevo si existe (solo si el usuario lo activa manualmente)
+      const nextVideo = slides[index].querySelector('video');
+      if (nextVideo) {
+        // Solo reproducir si el usuario cambió manualmente (no en autoplay del slider)
+        // Los videos se reproducirán cuando el usuario haga click en play
+        // No forzamos autoplay en cambios de slide
       }
     };
 
@@ -363,6 +382,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     heroSlider.addEventListener("mouseenter", stopAutoPlay);
     heroSlider.addEventListener("mouseleave", startAutoPlay);
+    
+    // Controlar videos cuando cambia la visibilidad de la pestaña
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Pausar todos los videos cuando la pestaña no está visible
+        slides.forEach(slide => {
+          const video = slide.querySelector('video');
+          if (video && !video.paused) {
+            video.pause();
+          }
+        });
+      }
+      // No reproducir automáticamente cuando vuelves a la pestaña
+      // El usuario debe darle play manualmente
+    });
+    
     startAutoPlay();
   });
 
