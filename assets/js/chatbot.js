@@ -575,13 +575,13 @@ class MetodologiasChatbot {
             
             // Agregar información adicional si está disponible
             if (met.lod || met.loq) {
-                message += '<p><small>💡 ';
+                message += '<p><small>';
                 if (met.lod && met.loq) {
-                    message += `Límites: LOD ${met.lod}, LOQ ${met.loq}`;
+                    message += `Límites: LOD ${this.escapeHtml(String(met.lod))}, LOQ ${this.escapeHtml(String(met.loq))}`;
                 } else if (met.lod) {
-                    message += `Límite de detección: ${met.lod}`;
+                    message += `Límite de detección: ${this.escapeHtml(String(met.lod))}`;
                 } else if (met.loq) {
-                    message += `Límite de cuantificación: ${met.loq}`;
+                    message += `Límite de cuantificación: ${this.escapeHtml(String(met.loq))}`;
                 }
                 message += '</small></p>';
             }
@@ -638,12 +638,10 @@ class MetodologiasChatbot {
                         </div>
                     `;
                     
-                    if (data.sources && data.sources.length > 0) {
-                        message += `<p><small>📚 Fuente${data.sources.length > 1 ? 's' : ''}: ${data.sources.length}</small></p>`;
-                    }
+                    // No mostrar información de fuentes para simplificar la respuesta
                     
                     if (!includeLocal) {
-                        message += `<p><small>💡 Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
+                        message += '<p><small>Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio.</small></p>';
                     }
                     
                     this.addMessage(message);
