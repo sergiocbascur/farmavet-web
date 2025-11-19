@@ -255,18 +255,17 @@ class MetodologiasChatbot {
         setTimeout(async () => {
             this.hideTyping(typingId);
             
-            // Para consultas más complejas o conversacionales, usar Perplexity directamente
-            const isComplexQuery = query.length > 30 || 
-                                   /^(qué|qué|cómo|cuál|cuáles|cuando|donde|dónde|por qué|porque)/i.test(query) ||
-                                   /\?/.test(query);
+            // Siempre buscar localmente primero, usar Perplexity solo si no encuentra
+            const results = await this.searchMetodologias(query);
             
-            if (isComplexQuery && this.metodologias.length > 0) {
-                // Usar Perplexity para consultas más naturales/complejas
-                await this.searchWithPerplexity(query, true);
-            } else {
-                // Búsqueda local primero
-                const results = await this.searchMetodologias(query);
+            // Si encuentra resultados locales, mostrarlos
+            if (results.length > 0) {
                 await this.showResults(query, results);
+            } else {
+                // Solo si NO encuentra localmente, usar Perplexity
+                // Para consultas simples (ej: "hacen X?"), buscar local primero y luego Perplexity como complemento
+                await this.showResults(query, results);
+                // showResults ya llama a searchWithPerplexity si no hay resultados
             }
         }, 500);
     }
