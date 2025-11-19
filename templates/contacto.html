@@ -124,20 +124,6 @@
               <span class="pill">{{ _('Universidades y centros de investigación') }}</span>
             </div>
           </div>
-          <div class="card">
-            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
-              {{ _('Horario de atención') }}
-            </h2>
-            <p>
-              {{ _('Lunes a viernes, 09:00 a 17:30 hrs.') }}<br />
-              {{ _('Atención presencial con agendamiento previo.') }}
-            </p>
-            <ul class="footer-links">
-              <li>{{ _('Teléfono') }} {{ _('central') }}: +56 2 2978 XXXX</li>
-              <li>{{ _('Email') }} {{ _('general') }}: farmavet@uchile.cl</li>
-              <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
-            </ul>
-          </div>
           {# Carrusel de imágenes del hero - usando imágenes de la galería #}
           {% if imagenes_hero %}
           <div class="hero-media-wrapper">
@@ -177,9 +163,22 @@
             <div class="hero-dots" role="presentation" data-hero-dots></div>
             {% endif %}
           </div>
-          {% elif tarjetas_destacadas %}
-          {# Fallback a tarjetas destacadas si no hay imágenes #}
           {% endif %}
+          {# Cuadro de contacto - siempre visible #}
+          <div class="card">
+            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+              {{ _('Horario de atención') }}
+            </h2>
+            <p>
+              {{ _('Lunes a viernes, 09:00 a 17:30 hrs.') }}<br />
+              {{ _('Atención presencial con agendamiento previo.') }}
+            </p>
+            <ul class="footer-links">
+              <li>{{ _('Teléfono') }} {{ _('central') }}: +56 2 2978 XXXX</li>
+              <li>{{ _('Email') }} {{ _('general') }}: farmavet@uchile.cl</li>
+              <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+            </ul>
+          </div>
         </div>
       </section>
 
