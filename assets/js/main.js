@@ -413,20 +413,34 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
       } else {
-        // Cuando vuelves a la pestaña, prevenir autoplay inmediatamente
+        // Cuando vuelves a la pestaña, prevenir autoplay solo si el video ya se reprodujo
+        // Esperar un momento para ver si el usuario está interactuando
         setTimeout(() => {
-          document.querySelectorAll('video').forEach(video => {
-            if (video.dataset.videoAutoplay === 'true') {
-              const videoKey = `video_played_${window.location.pathname}_${video.src}`;
-              const hasPlayed = sessionStorage.getItem(videoKey);
-              // Si ya se reprodujo, pausarlo inmediatamente
-              if (hasPlayed) {
+          document.querySelectorAll('video[data-video-autoplay="true"]').forEach(video => {
+            const videoKey = `video_played_${window.location.pathname}_${video.src}`;
+            const hasPlayed = sessionStorage.getItem(videoKey);
+            // Solo pausar si ya se reprodujo Y el video comenzó a reproducirse automáticamente
+            // Si el usuario le dio play manualmente después de volver, no interferir
+            if (hasPlayed) {
+              // Verificar si el video estaba reproduciéndose antes de cambiar de pestaña
+              const wasPlayingBeforeHidden = video.dataset.wasPlaying === 'true';
+              // Si NO estaba reproduciéndose antes y ahora está reproduciéndose, es autoplay no deseado
+              if (!wasPlayingBeforeHidden && !video.paused) {
                 video.pause();
                 video.currentTime = 0;
               }
             }
           });
-        }, 100);
+        }, 200);
+      }
+    });
+    
+    // Marcar videos que estaban reproduciéndose antes de cambiar de pestaña
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        document.querySelectorAll('video').forEach(video => {
+          video.dataset.wasPlaying = video.paused ? 'false' : 'true';
+        });
       }
     });
     
@@ -441,31 +455,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const hasPlayed = sessionStorage.getItem(videoKey);
       
       if (hasPlayed) {
-        // Si ya se reprodujo, prevenir cualquier reproducción automática
-        video.pause();
-        video.currentTime = 0;
-        
-        // Interceptar cualquier intento de reproducción automática (pero permitir reproducción manual)
-        let lastUserInteraction = 0;
-        video.addEventListener('click', () => {
-          lastUserInteraction = Date.now();
-        });
-        video.addEventListener('touchstart', () => {
-          lastUserInteraction = Date.now();
-        });
-        
-        const playHandler = (e) => {
-          const currentHasPlayed = sessionStorage.getItem(videoKey);
-          if (currentHasPlayed) {
-            // Si ya se reprodujo, solo permitir si fue acción del usuario reciente (últimos 500ms)
-            const timeSinceInteraction = Date.now() - lastUserInteraction;
-            if (timeSinceInteraction > 500) {
-              // No fue acción del usuario, pausar
-              video.pause();
-            }
-          }
-        };
-        video.addEventListener('play', playHandler);
+        // Si ya se reprodujo, solo asegurar que esté pausado al inicio
+        // No bloquear reproducción manual del usuario
+        if (!video.paused) {
+          video.pause();
+          video.currentTime = 0;
+        }
       }
     });
   }, 500);
