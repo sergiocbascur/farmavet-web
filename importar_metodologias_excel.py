@@ -223,6 +223,21 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             codigo = itlf if itlf else None
             nombre = metodo if metodo else analito
             
+            # Mapear abreviaciones de matriz a nombres completos
+            matriz_mapping = {
+                'pp': 'Productos pecuarios',
+                'phb': 'Productos hidrobiológicos',
+                'PHB': 'Productos hidrobiológicos',
+                'PP': 'Productos pecuarios'
+            }
+            
+            # Aplicar mapeo si existe
+            if matriz and matriz.lower() in matriz_mapping:
+                matriz = matriz_mapping[matriz.lower()]
+            elif matriz:
+                # Normalizar: primera letra mayúscula, resto minúsculas
+                matriz = matriz.strip()
+            
             # Si no hay matriz, usar un valor por defecto
             if not matriz:
                 matriz = 'No especificada'
@@ -258,9 +273,11 @@ def import_from_excel(excel_path, db_path, dry_run=False):
                 errors.append(f"Fila {idx+2}: Falta campo requerido (analito/método)")
                 continue
             
-            # Verificar si ya existe (por código o por nombre+analito+matriz)
+            # Verificar si ya existe (por código+analito+matriz para permitir múltiples analitos por método)
+            # IMPORTANTE: Buscar por código+analito+matriz para que cada analito sea una fila separada
             if codigo:
-                cursor.execute("SELECT id FROM metodologias WHERE codigo = ?", (codigo,))
+                cursor.execute("SELECT id FROM metodologias WHERE codigo = ? AND analito = ? AND matriz = ?", 
+                             (codigo, analito, matriz))
             else:
                 cursor.execute("SELECT id FROM metodologias WHERE nombre = ? AND analito = ? AND matriz = ?", 
                              (nombre, analito, matriz))
