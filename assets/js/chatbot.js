@@ -49,12 +49,13 @@ class MetodologiasChatbot {
                 <div class="chatbot-message bot-message">
                     <div class="message-content">
                         <p>¡Hola! Soy FARMA, tu asistente virtual de FARMAVET. Estoy aquí para ayudarte con tus consultas sobre metodologías analíticas, contacto, ubicación, horarios, formularios y más.</p>
-                        <p>Puedes preguntarme cosas como:</p>
+                        <p>Puedes preguntarme sobre:</p>
                         <ul class="chatbot-examples">
-                            <li>"Busca metodologías para antibióticos en salmón"</li>
-                            <li>"¿Qué técnicas usan para micotoxinas?"</li>
-                            <li>"Metodologías acreditadas para leche"</li>
-                            <li>"LC-MS/MS en carne"</li>
+                            <li>Metodologías analíticas (ej: "¿hacen análisis de diquat?")</li>
+                            <li>Contacto y ubicación (ej: "¿cuál es la dirección?")</li>
+                            <li>Horarios de atención</li>
+                            <li>Formulario de consultas (ej: "¿cómo envío una consulta?")</li>
+                            <li>Preguntas frecuentes</li>
                         </ul>
                         <p>¿En qué puedo ayudarte?</p>
                     </div>
