@@ -2088,6 +2088,7 @@ def admin_certificado_eliminar(certificado_id):
 @app.route('/api/metodologias')
 def api_metodologias():
     """API endpoint para obtener todas las metodologías activas (para el chatbot)"""
+    conn = None
     try:
         conn = get_db()
         
@@ -2096,11 +2097,13 @@ def api_metodologias():
             table_check = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metodologias'").fetchone()
             if not table_check:
                 app.logger.warning('API metodologias: La tabla metodologias no existe')
-                conn.close()
+                if conn:
+                    conn.close()
                 return jsonify({'error': 'La tabla de metodologías no existe'}), 500
         except Exception as e:
             app.logger.error(f'API metodologias: Error al verificar tabla: {str(e)}')
-            conn.close()
+            if conn:
+                conn.close()
             return jsonify({'error': 'Error al verificar la base de datos'}), 500
         
         # Contar total de metodologías (incluyendo inactivas para debug)
@@ -2111,14 +2114,29 @@ def api_metodologias():
         except Exception as e:
             app.logger.warning(f'API metodologias: Error al contar metodologías: {str(e)}')
         
-        # Obtener metodologías activas
-        metodologias = conn.execute('''
-            SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                   tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
-            FROM metodologias 
-            WHERE activo = 1
-            ORDER BY categoria, orden, nombre
-        ''').fetchall()
+        # Obtener metodologías activas (verificar si existe columna orden)
+        try:
+            # Intentar con orden primero
+            metodologias = conn.execute('''
+                SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                       tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
+                FROM metodologias 
+                WHERE activo = 1
+                ORDER BY categoria, orden, nombre
+            ''').fetchall()
+        except sqlite3.OperationalError as e:
+            if 'no such column: orden' in str(e).lower():
+                # Si no existe la columna orden, usar solo categoria y nombre
+                app.logger.warning('API metodologias: Columna orden no existe, usando orden alternativo')
+                metodologias = conn.execute('''
+                    SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                           tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
+                    FROM metodologias 
+                    WHERE activo = 1
+                    ORDER BY categoria, nombre
+                ''').fetchall()
+            else:
+                raise
         
         # Convertir a lista de diccionarios
         result = []
@@ -2138,6 +2156,10 @@ def api_metodologias():
                 'acreditada': bool(met.get('acreditada', 0))
             })
         
+        # Cerrar conexión antes de retornar
+        if conn:
+            conn.close()
+        
         # Respuesta con headers para caché
         response = jsonify(result)
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -2153,6 +2175,11 @@ def api_metodologias():
     except Exception as e:
         error_msg = f'Error en API metodologias: {str(e)}'
         app.logger.error(error_msg, exc_info=True)
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
         return jsonify({
             'error': 'Error al cargar metodologías',
             'details': str(e) if app.debug else 'Error interno del servidor'
