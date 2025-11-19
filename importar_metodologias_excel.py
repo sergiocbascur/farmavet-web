@@ -60,10 +60,37 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     
     print(f"📖 Leyendo archivo Excel: {excel_path}")
     
-    # Leer Excel
+    # Leer Excel - El archivo tiene encabezados en la fila 2 (índice 2)
     try:
         if HAS_PANDAS:
-            df = pd.read_excel(excel_path, engine='openpyxl')
+            # Leer sin header primero para inspeccionar
+            df_raw = pd.read_excel(excel_path, engine='openpyxl', header=None)
+            
+            # Buscar la fila de encabezados (debería estar en la fila 2)
+            header_row = 2
+            headers = []
+            for j in range(len(df_raw.columns)):
+                val = df_raw.iloc[header_row, j]
+                if pd.notna(val):
+                    headers.append(str(val).strip())
+                else:
+                    headers.append(f"Col_{j}")
+            
+            # Leer de nuevo con los encabezados correctos, saltando las primeras filas
+            df = pd.read_excel(excel_path, engine='openpyxl', header=header_row, names=headers)
+            
+            # Los datos empiezan en la fila 4 (después del header en fila 2 y una fila vacía)
+            # Eliminar la primera fila si está vacía o es otra fila de encabezados
+            if len(df) > 0:
+                first_row = df.iloc[0]
+                # Si la primera fila parece ser otra fila de encabezados o está vacía, eliminarla
+                first_row_str = ' '.join([str(v).lower() for v in first_row.values if pd.notna(v)])
+                if 'metodo' in first_row_str.lower() or 'equipo' in first_row_str.lower() or first_row_str.strip() == '':
+                    df = df.drop(df.index[0]).reset_index(drop=True)
+            
+            # Eliminar filas completamente vacías
+            df = df.dropna(how='all').reset_index(drop=True)
+            
         else:
             # Usar openpyxl directamente
             from openpyxl import load_workbook
@@ -71,18 +98,23 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             ws = wb.active
             
             # Convertir a DataFrame manualmente
+            # Encabezados en fila 3 (índice 2 en 0-based)
+            headers = [str(cell.value).strip() if cell.value else f"Col_{i}" 
+                      for i, cell in enumerate(ws[3], 1)]
+            
             data = []
-            headers = [cell.value for cell in ws[1]]
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                if any(cell for cell in row):  # Saltar filas vacías
+            for row in ws.iter_rows(min_row=4, values_only=True):
+                if any(cell for cell in row if cell):  # Saltar filas vacías
                     data.append(dict(zip(headers, row)))
             df = pd.DataFrame(data)
         
         print(f"✅ Archivo leído: {len(df)} filas encontradas")
-        print(f"📋 Columnas: {', '.join(df.columns.tolist())}")
+        print(f"📋 Columnas detectadas: {', '.join(df.columns.tolist())}")
         
     except Exception as e:
         print(f"❌ Error leyendo Excel: {str(e)}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
     
     # Conectar a la base de datos
@@ -98,24 +130,15 @@ def import_from_excel(excel_path, db_path, dry_run=False):
         sys.exit(1)
     
     # Mapeo de columnas del Excel a campos de la BD
-    # Ajusta estos nombres según las columnas de tu Excel
+    # Basado en la estructura real del archivo "RESUMEN CLIENTES-LAB.xlsx"
     column_mapping = {
-        'codigo': ['codigo', 'código', 'cod', 'id'],
-        'nombre': ['nombre', 'metodologia', 'metodología', 'nombre metodologia'],
-        'nombre_en': ['nombre_en', 'nombre en', 'name', 'name_en'],
-        'categoria': ['categoria', 'categoría', 'categoria', 'tipo'],
-        'analito': ['analito', 'analito', 'sustancia', 'compuesto'],
-        'analito_en': ['analito_en', 'analito en', 'analyte', 'analyte_en'],
-        'matriz': ['matriz', 'matriz', 'muestra', 'tipo muestra'],
-        'matriz_en': ['matriz_en', 'matriz en', 'matrix', 'matrix_en'],
-        'tecnica': ['tecnica', 'técnica', 'tecnica analitica', 'método analítico'],
-        'tecnica_en': ['tecnica_en', 'tecnica en', 'technique', 'technique_en'],
-        'limite_deteccion': ['lod', 'limite deteccion', 'límite detección', 'limite_deteccion'],
-        'limite_cuantificacion': ['loq', 'limite cuantificacion', 'límite cuantificación', 'limite_cuantificacion'],
-        'norma_referencia': ['norma', 'norma referencia', 'referencia', 'estándar'],
-        'vigencia': ['vigencia', 'fecha vigencia', 'validez'],
-        'acreditada': ['acreditada', 'acreditado', 'acreditacion', 'acreditación'],
-        'orden': ['orden', 'order', 'prioridad']
+        'codigo': ['it lf n', 'it lf', 'codigo', 'código', 'cod', 'id', 'unnamed: 1', 'col_1'],
+        'analito': ['método', 'metodo', 'mtodo', 'analito', 'analito', 'sustancia', 'compuesto', 'unnamed: 2', 'col_2'],
+        'tecnica': ['equipo', 'tecnica', 'técnica', 'tecnica analitica', 'método analítico', 'unnamed: 3', 'col_3'],
+        'limite_deteccion': ['ld', 'lod', 'limite deteccion', 'límite detección', 'limite_deteccion', 'unnamed: 4', 'col_4'],
+        'limite_cuantificacion': ['lc', 'loq', 'limite cuantificacion', 'límite cuantificación', 'limite_cuantificacion', 'unnamed: 5', 'col_5'],
+        'matriz': ['matriz', 'muestra', 'tipo muestra', 'unnamed: 6', 'col_6'],
+        'acreditada': ['acreditado\ninn', 'acreditado inn', 'acreditada', 'acreditado', 'acreditacion', 'acreditación', 'unnamed: 7', 'col_7']
     }
     
     # Encontrar las columnas del Excel que coinciden
@@ -125,21 +148,34 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     for db_field, possible_names in column_mapping.items():
         for name in possible_names:
             name_lower = name.lower().strip()
-            if name_lower in excel_columns:
-                field_mapping[db_field] = excel_columns[name_lower]
+            # Buscar coincidencia exacta o parcial
+            for excel_col in excel_columns.keys():
+                if name_lower == excel_col or excel_col.startswith(name_lower) or name_lower in excel_col:
+                    field_mapping[db_field] = df.columns[list(excel_columns.keys()).index(excel_col)]
+                    break
+            if db_field in field_mapping:
                 break
     
     print(f"\n📊 Mapeo de columnas detectado:")
     for db_field, excel_col in field_mapping.items():
         print(f"   {db_field} ← {excel_col}")
     
-    # Campos requeridos
-    required_fields = ['nombre', 'categoria', 'analito', 'matriz']
+    # Campos requeridos (analito es obligatorio, los demás pueden tener valores por defecto)
+    required_fields = ['analito']
     missing_fields = [f for f in required_fields if f not in field_mapping]
     
     if missing_fields:
-        print(f"\n⚠️  Advertencia: Faltan campos requeridos: {', '.join(missing_fields)}")
-        print("   El script intentará continuar, pero algunos campos pueden quedar vacíos")
+        print(f"\n❌ Error: Faltan campos requeridos: {', '.join(missing_fields)}")
+        print("   No se puede continuar sin estos campos")
+        conn.close()
+        sys.exit(1)
+    
+    # Si falta matriz, usar un valor por defecto o intentar inferir
+    if 'matriz' not in field_mapping:
+        print(f"\n⚠️  Advertencia: No se encontró columna 'matriz', se intentará usar un valor por defecto")
+    
+    # Categoría por defecto si no existe
+    categoria_default = 'residuos'  # Se puede ajustar según necesites
     
     # Procesar cada fila
     imported = 0
@@ -150,21 +186,67 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     
     for idx, row in df.iterrows():
         try:
-            # Extraer valores
-            codigo = normalize_text(row.get(field_mapping.get('codigo', ''))) if field_mapping.get('codigo') else None
-            nombre = normalize_text(row.get(field_mapping.get('nombre', ''))) if field_mapping.get('nombre') else None
-            nombre_en = normalize_text(row.get(field_mapping.get('nombre_en', ''))) if field_mapping.get('nombre_en') else None
-            categoria = normalize_text(row.get(field_mapping.get('categoria', ''))) if field_mapping.get('categoria') else None
-            analito = normalize_text(row.get(field_mapping.get('analito', ''))) if field_mapping.get('analito') else None
-            analito_en = normalize_text(row.get(field_mapping.get('analito_en', ''))) if field_mapping.get('analito_en') else None
-            matriz = normalize_text(row.get(field_mapping.get('matriz', ''))) if field_mapping.get('matriz') else None
-            matriz_en = normalize_text(row.get(field_mapping.get('matriz_en', ''))) if field_mapping.get('matriz_en') else None
-            tecnica = normalize_text(row.get(field_mapping.get('tecnica', ''))) if field_mapping.get('tecnica') else None
-            tecnica_en = normalize_text(row.get(field_mapping.get('tecnica_en', ''))) if field_mapping.get('tecnica_en') else None
-            limite_deteccion = normalize_text(row.get(field_mapping.get('limite_deteccion', ''))) if field_mapping.get('limite_deteccion') else None
-            limite_cuantificacion = normalize_text(row.get(field_mapping.get('limite_cuantificacion', ''))) if field_mapping.get('limite_cuantificacion') else None
-            norma_referencia = normalize_text(row.get(field_mapping.get('norma_referencia', ''))) if field_mapping.get('norma_referencia') else None
-            vigencia = normalize_text(row.get(field_mapping.get('vigencia', ''))) if field_mapping.get('vigencia') else None
+            # Extraer valores con manejo mejorado
+            codigo = None
+            if field_mapping.get('codigo'):
+                codigo_val = row.get(field_mapping['codigo'])
+                if pd.notna(codigo_val):
+                    codigo = str(codigo_val).strip()
+            
+            # Analito es el campo principal (columna "MÉTODO")
+            analito = None
+            if field_mapping.get('analito'):
+                analito_val = row.get(field_mapping['analito'])
+                if pd.notna(analito_val):
+                    analito = str(analito_val).strip()
+            
+            # Si no hay analito, saltar esta fila
+            if not analito:
+                skipped += 1
+                continue
+            
+            # Usar analito como nombre también (si no hay nombre separado)
+            nombre = analito
+            
+            # Matriz
+            matriz = None
+            if field_mapping.get('matriz'):
+                matriz_val = row.get(field_mapping['matriz'])
+                if pd.notna(matriz_val):
+                    matriz = str(matriz_val).strip()
+            if not matriz:
+                matriz = 'No especificada'  # Valor por defecto
+            
+            # Categoría (por defecto)
+            categoria = categoria_default
+            
+            # Técnica (EQUIPO)
+            tecnica = None
+            if field_mapping.get('tecnica'):
+                tecnica_val = row.get(field_mapping['tecnica'])
+                if pd.notna(tecnica_val):
+                    tecnica = str(tecnica_val).strip()
+            
+            # Límites
+            limite_deteccion = None
+            if field_mapping.get('limite_deteccion'):
+                lod_val = row.get(field_mapping['limite_deteccion'])
+                if pd.notna(lod_val):
+                    limite_deteccion = str(lod_val).strip()
+            
+            limite_cuantificacion = None
+            if field_mapping.get('limite_cuantificacion'):
+                loq_val = row.get(field_mapping['limite_cuantificacion'])
+                if pd.notna(loq_val):
+                    limite_cuantificacion = str(loq_val).strip()
+            
+            # Otros campos opcionales
+            nombre_en = None
+            analito_en = None
+            matriz_en = None
+            tecnica_en = None
+            norma_referencia = None
+            vigencia = None
             
             # Acreditada (puede ser texto como "Sí", "S", "1", True, etc.)
             acreditada_val = row.get(field_mapping.get('acreditada', '')) if field_mapping.get('acreditada') else None
@@ -185,9 +267,9 @@ def import_from_excel(excel_path, db_path, dry_run=False):
                 orden = None
             
             # Validar campos requeridos
-            if not nombre or not categoria or not analito or not matriz:
+            if not analito:
                 skipped += 1
-                errors.append(f"Fila {idx+2}: Faltan campos requeridos (nombre, categoria, analito, matriz)")
+                errors.append(f"Fila {idx+2}: Falta campo requerido (analito/método)")
                 continue
             
             # Verificar si ya existe (por código o por nombre+analito+matriz)
