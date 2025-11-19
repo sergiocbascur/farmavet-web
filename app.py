@@ -907,12 +907,17 @@ def assets(filename):
 def logos(filename):
     # Decodificar espacios y caracteres especiales en el nombre del archivo
     decoded_filename = unquote(filename)
+    
+    # Obtener la ruta base del proyecto (donde está app.py)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    logos_dir = os.path.join(base_dir, 'logos')
+    
     # Normalizar la ruta para manejar espacios correctamente
-    logo_path = os.path.join('logos', decoded_filename)
+    logo_path = os.path.join(logos_dir, decoded_filename)
     
     # Verificar que el archivo existe
-    if os.path.exists(logo_path):
-        return send_from_directory('logos', decoded_filename)
+    if os.path.exists(logo_path) and os.path.isfile(logo_path):
+        return send_from_directory(logos_dir, decoded_filename)
     
     # Si no existe, intentar buscar el archivo real (puede tener espacios codificados diferente)
     import glob
@@ -920,11 +925,11 @@ def logos(filename):
     
     # Buscar variaciones del nombre (con espacios, sin espacios, con guiones bajos)
     patterns = [
-        os.path.join('logos', base_name),  # Nombre exacto
-        os.path.join('logos', base_name.replace('_', ' ')),  # Guiones bajos a espacios
-        os.path.join('logos', base_name.replace(' ', '_')),  # Espacios a guiones bajos
-        os.path.join('logos', base_name.replace('_', '*')),  # Patrón con wildcard
-        os.path.join('logos', base_name.replace(' ', '*')),  # Patrón con wildcard
+        os.path.join(logos_dir, base_name),  # Nombre exacto
+        os.path.join(logos_dir, base_name.replace('_', ' ')),  # Guiones bajos a espacios
+        os.path.join(logos_dir, base_name.replace(' ', '_')),  # Espacios a guiones bajos
+        os.path.join(logos_dir, base_name.replace('_', '*')),  # Patrón con wildcard
+        os.path.join(logos_dir, base_name.replace(' ', '*')),  # Patrón con wildcard
     ]
     
     for pattern in patterns:
@@ -932,10 +937,10 @@ def logos(filename):
         if matches:
             # Usar el primer match encontrado
             actual_filename = os.path.basename(matches[0])
-            return send_from_directory('logos', actual_filename)
+            return send_from_directory(logos_dir, actual_filename)
     
-    # Si no se encuentra, devolver 404
-    return "Logo no encontrado", 404
+    # Si no se encuentra, devolver 404 con más información para debugging
+    return f"Logo no encontrado: {decoded_filename} en {logos_dir}", 404
 
 # Sistema de idioma con Flask-Babel
 # En Flask-Babel 4.0.0, se registra la función directamente
