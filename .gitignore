@@ -68,6 +68,10 @@ backup_*/
 # PDFs y documentos
 *.pdf
 
+# Archivos Excel
+*.xlsx
+*.xls
+
 # Archivos HTML duplicados en raíz (si existen)
 # Los templates están en templates/
 
