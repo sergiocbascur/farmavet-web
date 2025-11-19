@@ -135,40 +135,51 @@
             <div class="hero-dots" role="presentation" data-hero-dots></div>
             {% endif %}
           </div>
-          {% else %}
-          {# Fallback a tarjeta si no hay imágenes #}
+          {% elif tarjetas_destacadas %}
+          {# Mostrar tarjetas destacadas si no hay imágenes pero sí hay tarjetas #}
           <div class="hero-media-wrapper">
-            <div class="card" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
-              <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
-                {{ _('Oferta formativa') }}
-              </h2>
-              <ul class="footer-links">
-                <li>{{ _('Programas de pregrado y postgrado de FAVET') }}</li>
-                <li>{{ _('Diplomados en gestión de antimicrobianos y buenas prácticas') }}</li>
-                <li>{{ _('Cursos certificados para industria acuícola y pecuaria') }}</li>
-                <li>{{ _('Talleres y seminarios temáticos') }}</li>
-              </ul>
-            </div>
-          </div>
-          {% endif %}
-        </div>
-      </section>
-
-      {# Sección de tarjetas destacadas - se muestra siempre si existen #}
-      {% if tarjetas_destacadas %}
-      <section class="section" style="background-color: var(--color-light);">
-        <div class="container">
-          {% if tarjetas_destacadas|length > 1 %}
-            {# Carrusel si hay múltiples tarjetas #}
-            <div
-              class="hero-media"
-              aria-hidden="true"
-              data-hero-slider
-              data-hero-interval="6000"
-              style="position: relative; overflow: hidden; min-height: 300px; max-width: 900px; margin: 0 auto;"
-            >
-              {% for tarjeta in tarjetas_destacadas %}
-              <div class="card{% if loop.first %} is-active{% endif %}" data-hero-slide data-hero-order="{{ loop.index0 }}" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
+            {% if tarjetas_destacadas|length > 1 %}
+              {# Carrusel si hay múltiples tarjetas #}
+              <div
+                class="hero-media"
+                aria-hidden="true"
+                data-hero-slider
+                data-hero-interval="6000"
+              >
+                {% for tarjeta in tarjetas_destacadas %}
+                <div class="card{% if loop.first %} is-active{% endif %}" data-hero-slide data-hero-order="{{ loop.index0 }}" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
+                  <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--color-primary)">
+                    {{ get_translated_field(tarjeta, 'titulo') or tarjeta.titulo }}
+                  </h2>
+                  {% set contenido_raw = get_translated_field(tarjeta, 'contenido') or tarjeta.contenido %}
+                  {% if '\n' in contenido_raw %}
+                    {# Si tiene saltos de línea, mostrar como lista #}
+                    <ul class="footer-links">
+                      {% for linea in contenido_raw.split('\n') %}
+                        {% set linea_trim = linea|trim %}
+                        {% if linea_trim %}
+                          <li>{{ linea_trim }}</li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    {# Si es texto simple, mostrar como párrafo #}
+                    <p>{{ contenido_raw }}</p>
+                  {% endif %}
+                  {% if tarjeta.enlace %}
+                    {% set enlace_url = tarjeta.enlace %}
+                    <a href="{{ enlace_url }}" class="btn btn-primary mt-3" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                      {{ get_translated_field(tarjeta, 'texto_enlace') or tarjeta.texto_enlace or _('Ver más') }}
+                    </a>
+                  {% endif %}
+                </div>
+                {% endfor %}
+                <div class="hero-dots" role="presentation" data-hero-dots></div>
+              </div>
+            {% else %}
+              {# Una sola tarjeta #}
+              {% set tarjeta = tarjetas_destacadas[0] %}
+              <div class="card" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
                 <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--color-primary)">
                   {{ get_translated_field(tarjeta, 'titulo') or tarjeta.titulo }}
                 </h2>
@@ -194,42 +205,26 @@
                   </a>
                 {% endif %}
               </div>
-              {% endfor %}
-              <div class="hero-dots" role="presentation" data-hero-dots style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10;"></div>
-            </div>
+            {% endif %}
+          </div>
           {% else %}
-            {# Una sola tarjeta #}
-            {% set tarjeta = tarjetas_destacadas[0] %}
-            <div class="card" style="max-width: 900px; margin: 0 auto; padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
-              <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--color-primary)">
-                {{ get_translated_field(tarjeta, 'titulo') or tarjeta.titulo }}
+          {# Fallback a tarjeta si no hay imágenes NI tarjetas #}
+          <div class="hero-media-wrapper">
+            <div class="card" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
+              <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+                {{ _('Oferta formativa') }}
               </h2>
-              {% set contenido_raw = get_translated_field(tarjeta, 'contenido') or tarjeta.contenido %}
-              {% if '\n' in contenido_raw %}
-                {# Si tiene saltos de línea, mostrar como lista #}
-                <ul class="footer-links">
-                  {% for linea in contenido_raw.split('\n') %}
-                    {% set linea_trim = linea|trim %}
-                    {% if linea_trim %}
-                      <li>{{ linea_trim }}</li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
-              {% else %}
-                {# Si es texto simple, mostrar como párrafo #}
-                <p>{{ contenido_raw }}</p>
-              {% endif %}
-              {% if tarjeta.enlace %}
-                {% set enlace_url = tarjeta.enlace %}
-                <a href="{{ enlace_url }}" class="btn btn-primary mt-3" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                  {{ get_translated_field(tarjeta, 'texto_enlace') or tarjeta.texto_enlace or _('Ver más') }}
-                </a>
-              {% endif %}
+              <ul class="footer-links">
+                <li>{{ _('Programas de pregrado y postgrado de FAVET') }}</li>
+                <li>{{ _('Diplomados en gestión de antimicrobianos y buenas prácticas') }}</li>
+                <li>{{ _('Cursos certificados para industria acuícola y pecuaria') }}</li>
+                <li>{{ _('Talleres y seminarios temáticos') }}</li>
+              </ul>
             </div>
+          </div>
           {% endif %}
         </div>
       </section>
-      {% endif %}
 
       <section class="section" id="pregrado">
         <div class="container">
