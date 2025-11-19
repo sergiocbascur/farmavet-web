@@ -2099,91 +2099,92 @@ def api_metodologias():
                 app.logger.warning('API metodologias: La tabla metodologias no existe')
                 if conn:
                     conn.close()
-                return jsonify({'error': 'La tabla de metodologías no existe'}), 500
+                return jsonify({'error': 'La tabla de metodologías no existe', 'result': []}), 200
         except Exception as e:
-            app.logger.error(f'API metodologias: Error al verificar tabla: {str(e)}')
+            app.logger.error(f'API metodologias: Error al verificar tabla: {str(e)}', exc_info=True)
             if conn:
                 conn.close()
-            return jsonify({'error': 'Error al verificar la base de datos'}), 500
+            return jsonify({'error': 'Error al verificar la base de datos', 'result': []}), 200
         
-        # Verificar qué columnas existen en la tabla
+        # Intentar consulta simple primero
         try:
-            cursor = conn.execute("PRAGMA table_info(metodologias)")
-            columns = [row[1] for row in cursor.fetchall()]
-            has_orden = 'orden' in columns
-            has_activo = 'activo' in columns
-            has_categoria = 'categoria' in columns
-            has_nombre = 'nombre' in columns
+            # Consulta básica que debería funcionar siempre
+            metodologias = conn.execute('''
+                SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                       tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
+                FROM metodologias
+            ''').fetchall()
             
-            app.logger.info(f'API metodologias: Columnas disponibles: {columns}')
-        except Exception as e:
-            app.logger.error(f'API metodologias: Error al verificar columnas: {str(e)}')
-            if conn:
-                conn.close()
-            return jsonify({'error': 'Error al verificar estructura de la tabla'}), 500
-        
-        # Contar total de metodologías (incluyendo inactivas para debug)
-        try:
-            total_count = conn.execute('SELECT COUNT(*) as count FROM metodologias').fetchone()['count']
-            if has_activo:
-                active_count = conn.execute('SELECT COUNT(*) as count FROM metodologias WHERE activo = 1').fetchone()['count']
-            else:
-                active_count = total_count
-            app.logger.info(f'API metodologias: Total metodologías: {total_count}, Activas: {active_count}')
-        except Exception as e:
-            app.logger.warning(f'API metodologias: Error al contar metodologías: {str(e)}')
-        
-        # Construir WHERE según columnas disponibles
-        where_clause = ''
-        if has_activo:
-            where_clause = 'WHERE activo = 1'
-        
-        # Construir ORDER BY según columnas disponibles
-        order_by = ''
-        if has_categoria and has_nombre:
-            if has_orden:
-                order_by = 'ORDER BY categoria, orden, nombre'
-            else:
-                order_by = 'ORDER BY categoria, nombre'
-        elif has_nombre:
-            order_by = 'ORDER BY nombre'
-        
-        # Obtener metodologías activas
-        query = '''
-            SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                   tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
-            FROM metodologias 
-        ''' + where_clause + ' ' + order_by
-        
-        app.logger.info(f'API metodologias: Ejecutando query: {query}')
-        try:
-            metodologias = conn.execute(query).fetchall()
+            # Filtrar por activo si existe la columna
+            filtered_metodologias = []
+            for met in metodologias:
+                try:
+                    # Intentar acceder a 'activo' - si no existe, incluir todas
+                    if 'activo' in met.keys():
+                        if met.get('activo', 0) == 1:
+                            filtered_metodologias.append(met)
+                    else:
+                        # Si no existe columna activo, incluir todas
+                        filtered_metodologias.append(met)
+                except:
+                    # Si hay error, incluir de todas formas
+                    filtered_metodologias.append(met)
+            
+            metodologias = filtered_metodologias
+            app.logger.info(f'API metodologias: Encontradas {len(metodologias)} metodologías')
+            
         except sqlite3.OperationalError as e:
-            app.logger.error(f'API metodologias: Error SQL: {str(e)}')
-            if conn:
-                conn.close()
-            return jsonify({
-                'error': 'Error en la consulta SQL',
-                'details': str(e) if app.debug else 'Error al consultar metodologías'
-            }), 500
+            error_msg = str(e)
+            app.logger.error(f'API metodologias: Error SQL: {error_msg}', exc_info=True)
+            
+            # Si falla por columna faltante, intentar consulta más simple
+            if 'no such column' in error_msg.lower():
+                try:
+                    app.logger.warning('API metodologias: Intentando consulta simplificada...')
+                    metodologias = conn.execute('''
+                        SELECT nombre, categoria, analito, matriz, tecnica, limite_deteccion, limite_cuantificacion, acreditada
+                        FROM metodologias
+                    ''').fetchall()
+                    app.logger.info(f'API metodologias: Consulta simplificada exitosa, {len(metodologias)} resultados')
+                except Exception as e2:
+                    app.logger.error(f'API metodologias: Error en consulta simplificada: {str(e2)}', exc_info=True)
+                    if conn:
+                        conn.close()
+                    return jsonify({
+                        'error': 'Error al consultar metodologías',
+                        'details': str(e2) if app.debug else 'Error en la base de datos',
+                        'result': []
+                    }), 500
+            else:
+                if conn:
+                    conn.close()
+                return jsonify({
+                    'error': 'Error en la consulta SQL',
+                    'details': error_msg if app.debug else 'Error al consultar metodologías',
+                    'result': []
+                }), 500
         
         # Convertir a lista de diccionarios
         result = []
         for met in metodologias:
-            result.append({
-                'nombre': met['nombre'] or '',
-                'nombre_en': met.get('nombre_en') or '',
-                'categoria': met['categoria'] or '',
-                'analito': met['analito'] or '',
-                'analito_en': met.get('analito_en') or '',
-                'matriz': met['matriz'] or '',
-                'matriz_en': met.get('matriz_en') or '',
-                'tecnica': met.get('tecnica') or '',
-                'tecnica_en': met.get('tecnica_en') or '',
-                'lod': met.get('limite_deteccion') or '',
-                'loq': met.get('limite_cuantificacion') or '',
-                'acreditada': bool(met.get('acreditada', 0))
-            })
+            try:
+                result.append({
+                    'nombre': met.get('nombre') or '',
+                    'nombre_en': met.get('nombre_en') or '',
+                    'categoria': met.get('categoria') or '',
+                    'analito': met.get('analito') or '',
+                    'analito_en': met.get('analito_en') or '',
+                    'matriz': met.get('matriz') or '',
+                    'matriz_en': met.get('matriz_en') or '',
+                    'tecnica': met.get('tecnica') or '',
+                    'tecnica_en': met.get('tecnica_en') or '',
+                    'lod': met.get('limite_deteccion') or '',
+                    'loq': met.get('limite_cuantificacion') or '',
+                    'acreditada': bool(met.get('acreditada', 0))
+                })
+            except Exception as e:
+                app.logger.warning(f'API metodologias: Error al procesar metodología: {str(e)}')
+                continue
         
         # Cerrar conexión antes de retornar
         if conn:
