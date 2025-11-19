@@ -2532,7 +2532,7 @@ a.logo-card:focus {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--color-secondary) !important;
+  color: #ec302f !important;
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
@@ -2553,7 +2553,7 @@ div.card .cta-link-red,
 div[data-hero-slide].card .cta-link-red,
 .hero-media .card .cta-link-red,
 .hero-media-wrapper .card .cta-link-red {
-  color: var(--color-secondary) !important;
+  color: #ec302f !important;
   text-decoration: none !important;
 }
 
