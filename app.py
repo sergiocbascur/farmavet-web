@@ -2148,6 +2148,7 @@ def admin_galeria():
 
 @app.route('/admin/galeria/nuevo', methods=['GET', 'POST'])
 @login_required
+@csrf_required
 def admin_galeria_nuevo():
     if request.method == 'POST':
         conn = get_db()
@@ -2155,7 +2156,7 @@ def admin_galeria_nuevo():
         
         if not file or file.filename == '':
             flash('Debes seleccionar un archivo', 'error')
-            return render_template('admin/galeria_form.html')
+            return render_template('admin/galeria_form.html', csrf_token=generate_csrf_token())
         
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -2194,12 +2195,13 @@ def admin_galeria_nuevo():
             return redirect(url_for('admin_galeria'))
         else:
             flash('Tipo de archivo no permitido', 'error')
-            return render_template('admin/galeria_form.html')
+            return render_template('admin/galeria_form.html', csrf_token=generate_csrf_token())
     
-    return render_template('admin/galeria_form.html')
+    return render_template('admin/galeria_form.html', csrf_token=generate_csrf_token())
 
 @app.route('/admin/galeria/<int:imagen_id>/editar', methods=['GET', 'POST'])
 @login_required
+@csrf_required
 def admin_galeria_editar(imagen_id):
     conn = get_db()
     
@@ -2272,7 +2274,7 @@ def admin_galeria_editar(imagen_id):
         flash('Imagen no encontrada', 'error')
         return redirect(url_for('admin_galeria'))
     
-    return render_template('admin/galeria_form.html', imagen=dict(imagen))
+    return render_template('admin/galeria_form.html', imagen=dict(imagen), csrf_token=generate_csrf_token())
 
 @app.route('/admin/galeria/<int:imagen_id>/eliminar', methods=['POST'])
 @login_required

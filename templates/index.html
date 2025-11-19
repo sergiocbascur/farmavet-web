@@ -3,12 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FARMAVET | {{ _('Laboratorio de Farmacología Veterinaria') }} - {{ _('Universidad de Chile') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>FARMAVET - Laboratorio de Farmacología Veterinaria Acreditado ISO 17025 | Universidad de Chile</title>
     <meta
       name="description"
-      content="Laboratorio acreditado ISO 17025 | Centro Colaborador OMSA | Más de 70 metodologías analíticas | 30+ años de excelencia en inocuidad alimentaria"
+      content="Laboratorio FARMAVET: Acreditado ISO 17025 desde 2004. Centro Colaborador OMSA único en Latinoamérica. +70 metodologías analíticas para residuos, antibióticos y micotoxinas en alimentos de origen animal. 30+ años de excelencia."
     />
+    <meta name="keywords" content="laboratorio veterinario Chile, análisis residuos antibióticos, ISO 17025 veterinaria, OMSA Centro Colaborador, inocuidad alimentos origen animal, análisis micotoxinas, farmacocinética veterinaria, laboratorio acreditado SAG SERNAPESCA, análisis residuos químicos carne, detección micotoxinas alimentos" />
+    <meta name="author" content="FARMAVET - Universidad de Chile" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://www.laboratoriofarmavet.cl/" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -33,9 +37,9 @@
       "@type": "Laboratory",
       "name": "FARMAVET - Laboratorio de Farmacología Veterinaria",
       "alternateName": "FARMAVET",
-      "description": "Laboratorio de excelencia con más de 30 años de trayectoria, acreditado ISO 17025 y Centro Colaborador OMSA para Gestión de Antimicrobianos en Acuicultura",
+      "description": "Laboratorio de excelencia con más de 30 años de trayectoria, acreditado ISO 17025 desde 2004 y Centro Colaborador OMSA único en Latinoamérica para Gestión de Antimicrobianos en Acuicultura",
       "url": "https://www.laboratoriofarmavet.cl",
-      "logo": "https://www.laboratoriofarmavet.cl/logos/LOGO FARMAVET.png",
+      "logo": "https://www.laboratoriofarmavet.cl/logos/LOGO FARMAVET_sf.png",
       "image": "https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg",
       "address": {
         "@type": "PostalAddress",
@@ -45,16 +49,70 @@
         "postalCode": "",
         "addressCountry": "CL"
       },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "farmavet@uchile.cl",
-        "contactType": "Servicio al Cliente",
-        "availableLanguage": ["Spanish", "English"]
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "-33.5833",
+        "longitude": "-70.6333"
       },
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "email": "farmavet@uchile.cl",
+          "contactType": "Servicio al Cliente",
+          "availableLanguage": ["Spanish", "English"]
+        },
+        {
+          "@type": "ContactPoint",
+          "contactType": "Investigación",
+          "availableLanguage": ["Spanish", "English"]
+        }
+      ],
       "parentOrganization": {
         "@type": "Organization",
         "name": "Universidad de Chile",
         "url": "https://www.uchile.cl"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Chile"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios Analíticos FARMAVET",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Análisis de Residuos Químicos",
+              "description": "Detección y cuantificación de residuos de plaguicidas, herbicidas y contaminantes orgánicos en alimentos de origen animal"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Análisis de Antibióticos y Antimicrobianos",
+              "description": "Cuantificación de residuos de antibióticos en productos de origen animal mediante LC-MS/MS"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Análisis de Micotoxinas",
+              "description": "Detección de aflatoxinas, ocratoxina y otras micotoxinas en alimentos para animales"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Estudios de Farmacocinética",
+              "description": "Determinación de concentraciones plasmáticas de fármacos en animales"
+            }
+          }
+        ]
       },
       "accreditation": [
         {
@@ -63,7 +121,8 @@
           "recognizedBy": {
             "@type": "Organization",
             "name": "Instituto Nacional de Normalización (INN)"
-          }
+          },
+          "validFrom": "2004"
         },
         {
           "@type": "EducationalOccupationalCredential",
@@ -101,11 +160,11 @@
       </div>
       <div class="container nav-container">
         <nav class="main-nav" aria-label="Navegación principal">
-          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
-            {{ _('Menú') }}
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
           </button>
           <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - Universidad de Chile">
-            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET Universidad de Chile" />
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET_sf.png') }}" alt="Logotipo FARMAVET Universidad de Chile" />
             <span class="sr-only">FARMAVET - Universidad de Chile</span>
           </a>
           <ul class="nav-links" id="nav-links" data-nav-links>
@@ -127,6 +186,7 @@
             </li>
             <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
             <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
           </ul>
@@ -148,53 +208,96 @@
               <span class="pill" role="listitem">{{ _('Centro Colaborador OMSA') }}</span>
               <span class="pill" role="listitem">{{ _('Investigación y docencia de alto impacto') }}</span>
             </div>
-            <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1rem">
-              <a href="{{ url_for('page', page='servicios') }}" class="cta-button">{{ _('Conocer Servicios') }}</a>
-              <a href="{{ url_for('page', page='contacto') }}" class="cta-inline">{{ _('Solicitar Análisis') }}</a>
+            <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center">
+              <a href="{{ url_for('page', page='servicios') }}" class="cta-link-red">{{ _('Conocer Servicios') }}</a>
+              <a href="{{ url_for('page', page='contacto') }}" class="cta-button">{{ _('Solicitar Análisis') }}</a>
             </div>
           </div>
-          {# Carrusel de imágenes - siempre visible #}
-          <div
-            class="hero-media"
-            aria-hidden="true"
-            data-hero-slider
-            data-hero-interval="6000"
-          >
-            <img
-              src="assets/images/hero-servicio-analisis.jpg"
-              alt=""
-              loading="lazy"
-              data-hero-slide
-              data-hero-label="Servicio de análisis"
-              data-hero-order="0"
-              class="is-active"
-            />
-            <img
-              src="assets/images/hero-investigacion.jpg"
-              alt=""
-              loading="lazy"
-              data-hero-slide
-              data-hero-label="Investigación"
-              data-hero-order="1"
-            />
-            <img
-              src="assets/images/hero-acreditacion.jpg"
-              alt=""
-              loading="lazy"
-              data-hero-slide
-              data-hero-label="Acreditación"
-              data-hero-order="2"
-            />
-            <img
-              src="assets/images/hero-docencia.jpg"
-              alt=""
-              loading="lazy"
-              data-hero-slide
-              data-hero-label="Formación"
-              data-hero-order="3"
-            />
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% else %}
+          {# Fallback a imágenes estáticas si no hay imágenes en la galería #}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              <img
+                src="assets/images/hero-servicio-analisis.jpg"
+                alt=""
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="Servicio de análisis"
+                data-hero-order="0"
+                class="is-active"
+              />
+              <img
+                src="assets/images/hero-investigacion.jpg"
+                alt=""
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="Investigación"
+                data-hero-order="1"
+              />
+              <img
+                src="assets/images/hero-acreditacion.jpg"
+                alt=""
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="Acreditación"
+                data-hero-order="2"
+              />
+              <img
+                src="assets/images/hero-docencia.jpg"
+                alt=""
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="Formación"
+                data-hero-order="3"
+              />
+            </div>
             <div class="hero-dots" role="presentation" data-hero-dots></div>
           </div>
+          {% endif %}
         </div>
       </section>
 
@@ -489,7 +592,7 @@
               </div>
             {% else %}
               <!-- Carrusel infinito para 5+ clientes -->
-              <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="5000">
+              <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="2000">
                 <div class="carousel-wrapper">
                   <div class="carousel-track-infinite" data-carousel-track-infinite>
                     {% for cliente in clientes %}
@@ -552,6 +655,7 @@
             <li><a href="{{ url_for('page', page='servicios') }}">{{ _('Servicios analíticos') }}</a></li>
             <li><a href="{{ url_for('page', page='investigacion') }}">{{ _('Investigación') }}</a></li>
             <li><a href="{{ url_for('page', page='docencia') }}">{{ _('Formación y capacitación') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}">{{ _('Preguntas Frecuentes') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}">{{ _('Formulario de contacto') }}</a></li>
           </ul>
         </div>

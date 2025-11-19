@@ -1,0 +1,416 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if imagen %}Editar{% else %}Nueva{% endif %} Imagen/Infografía{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if imagen else 'plus-circle' }} me-2"></i>
+        {% if imagen %}Editar{% else %}Nueva{% endif %} Imagen/Infografía
+    </h2>
+    <a href="{{ url_for('admin_galeria') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ imagen.titulo if imagen else '' }}" required
+                           placeholder="Ej: Laboratorio - Área de Análisis">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tipo" class="form-label">Tipo <span class="text-danger">*</span></label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="imagen" {% if not imagen or imagen.tipo == 'imagen' %}selected{% endif %}>Imagen</option>
+                        <option value="infografia" {% if imagen and imagen.tipo == 'infografia' %}selected{% endif %}>Infografía</option>
+                    </select>
+                    <small class="text-muted">Las infografías se guardan en una carpeta separada</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" name="categoria">
+                        <option value="">Seleccionar...</option>
+                        <option value="laboratorio" {% if imagen and imagen.categoria == 'laboratorio' %}selected{% endif %}>Laboratorio</option>
+                        <option value="equipamiento" {% if imagen and imagen.categoria == 'equipamiento' %}selected{% endif %}>Equipamiento</option>
+                        <option value="personal" {% if imagen and imagen.categoria == 'personal' %}selected{% endif %}>Personal</option>
+                        <option value="proceso" {% if imagen and imagen.categoria == 'proceso' %}selected{% endif %}>Proceso Analítico</option>
+                        <option value="instalaciones" {% if imagen and imagen.categoria == 'instalaciones' %}selected{% endif %}>Instalaciones</option>
+                        <option value="infografia" {% if imagen and imagen.categoria == 'infografia' %}selected{% endif %}>Infografía</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="pagina" class="form-label">Página donde se mostrará</label>
+                    <select class="form-select" id="pagina" name="pagina">
+                        <option value="">Todas las páginas (por defecto)</option>
+                        <option value="index" {% if imagen and imagen.pagina == 'index' %}selected{% endif %}>Inicio</option>
+                        <option value="quienes-somos" {% if imagen and imagen.pagina == 'quienes-somos' %}selected{% endif %}>Quiénes Somos</option>
+                        <option value="servicios" {% if imagen and imagen.pagina == 'servicios' %}selected{% endif %}>Servicios</option>
+                        <option value="investigacion" {% if imagen and imagen.pagina == 'investigacion' %}selected{% endif %}>Investigación</option>
+                        <option value="contacto" {% if imagen and imagen.pagina == 'contacto' %}selected{% endif %}>Contacto</option>
+                        <option value="docencia" {% if imagen and imagen.pagina == 'docencia' %}selected{% endif %}>Docencia</option>
+                        <option value="equipo" {% if imagen and imagen.pagina == 'equipo' %}selected{% endif %}>Equipo</option>
+                        <option value="noticias" {% if imagen and imagen.pagina == 'noticias' %}selected{% endif %}>Noticias</option>
+                    </select>
+                    <small class="text-muted">Selecciona en qué página aparecerá esta imagen en el hero slider. Si dejas vacío, aparecerá en todas.</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3" 
+                              placeholder="Descripción opcional de la imagen o infografía">{{ imagen.descripcion if imagen and imagen.descripcion else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <label for="archivo" class="form-label">
+                        {% if imagen %}Reemplazar Archivo{% else %}Archivo{% endif %} <span class="text-danger">*</span>
+                    </label>
+                    <input type="file" class="form-control" id="archivo" name="archivo" 
+                           accept="image/*,video/mp4,video/webm,video/quicktime" {% if not imagen %}required{% endif %}>
+                    <small class="text-muted">
+                        Formatos permitidos: JPG, PNG, GIF, WebP, MP4, WebM, MOV (videos). 
+                        {% if imagen %}
+                            <br>Si no seleccionas un archivo, se mantendrá el actual.
+                            <br><strong>Archivo actual:</strong> {{ imagen.archivo }}
+                        {% endif %}
+                    </small>
+                    
+                    {# Información del formato Hero Slider #}
+                    <div class="mt-3" id="format-info" style="display: none;">
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Formato Hero Slider (4:3):</strong> Las imágenes se recortarán automáticamente al formato del carrusel. 
+                            Ajusta la zona visible para que el contenido importante quede centrado. La vista previa muestra exactamente cómo se verá en la página.
+                        </div>
+                    </div>
+                    
+                    {# Preview de cómo se verá en el hero slider #}
+                    <div class="mt-3" id="hero-preview-container" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <strong>Vista previa en Hero Slider</strong>
+                                <small class="text-muted ms-2">(Así se verá en la página)</small>
+                            </div>
+                            <div class="card-body">
+                                <div style="width: 100%; max-width: 600px; margin: 0 auto; aspect-ratio: 4/3; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 45px rgba(35, 115, 186, 0.08); background: #f0f0f0; position: relative;">
+                                    <img id="hero-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block;">
+                                </div>
+                                <small class="text-muted d-block mt-2 text-center">
+                                    <i class="bi bi-info-circle"></i> Esta es la vista exacta que verán los usuarios. Ajusta el recorte para que el contenido importante quede visible.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Contenedor para preview de video #}
+                    <div class="mt-3" id="video-preview-container" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Vista previa de video</strong>
+                            </div>
+                            <div class="card-body">
+                                <div style="max-width: 100%; max-height: 500px; overflow: auto; background: #f8f9fa; padding: 10px;">
+                                    <video id="video-preview" controls style="max-width: 100%; display: block;">
+                                        Tu navegador no soporta la reproducción de video.
+                                    </video>
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> Los videos se mostrarán directamente en el hero slider sin recorte.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Contenedor para preview y crop de imágenes #}
+                    <div class="mt-3" id="image-preview-container" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Vista previa y ajuste</strong>
+                                <button type="button" class="btn btn-sm btn-outline-secondary float-end" id="reset-crop">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div style="max-width: 100%; max-height: 500px; overflow: auto; background: #f8f9fa; padding: 10px;">
+                                    <img id="image-preview" style="max-width: 100%; display: block;">
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> Arrastra para mover la zona visible. Usa las esquinas para ajustar el tamaño.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Preview de archivo actual (si existe) #}
+                    {% if imagen %}
+                    <div class="mt-2">
+                        <label class="form-label">Archivo actual:</label>
+                        {% set archivo_path = '/static/uploads/infografias/' if imagen.tipo == 'infografia' else '/static/uploads/galeria/' %}
+                        {% set es_video = imagen.es_video if imagen.es_video else (imagen.archivo.lower().endswith(('.mp4', '.webm', '.mov')) if imagen.archivo else False) %}
+                        {% if es_video %}
+                            <video src="{{ archivo_path }}{{ imagen.archivo }}" 
+                                   controls 
+                                   class="img-thumbnail" 
+                                   style="max-width: 300px; max-height: 200px; display: block;">
+                                Tu navegador no soporta la reproducción de video.
+                            </video>
+                            <small class="text-muted d-block mt-1">
+                                <i class="bi bi-play-circle"></i> Video ({{ imagen.archivo.split('.')[-1].upper() }})
+                            </small>
+                        {% else %}
+                            <img src="{{ archivo_path }}{{ imagen.archivo }}" 
+                                 alt="{{ imagen.titulo }}" 
+                                 class="img-thumbnail" 
+                                 style="max-width: 300px; max-height: 200px;">
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {# Input oculto para datos del crop #}
+                    <input type="hidden" id="crop-data" name="crop_data">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ imagen.orden if imagen else 0 }}" min="0">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not imagen or imagen.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Imagen activa (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar
+                        </button>
+                        <a href="{{ url_for('admin_galeria') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# Cropper.js CSS y JS #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+let cropper = null;
+const fileInput = document.getElementById('archivo');
+const previewContainer = document.getElementById('image-preview-container');
+const previewImage = document.getElementById('image-preview');
+const formatInfo = document.getElementById('format-info');
+const cropDataInput = document.getElementById('crop-data');
+const resetCropBtn = document.getElementById('reset-crop');
+const heroPreviewContainer = document.getElementById('hero-preview-container');
+const heroPreview = document.getElementById('hero-preview');
+
+// Detectar si un archivo es video
+function isVideoFile(filename) {
+    const videoExtensions = ['.mp4', '.webm', '.mov'];
+    const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+    return videoExtensions.includes(ext);
+}
+
+// Cuando se selecciona un archivo
+fileInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const isVideo = isVideoFile(file.name);
+        const videoPreviewContainer = document.getElementById('video-preview-container');
+        const videoPreview = document.getElementById('video-preview');
+        
+        // Ocultar todos los previews primero
+        previewContainer.style.display = 'none';
+        videoPreviewContainer.style.display = 'none';
+        formatInfo.style.display = 'none';
+        heroPreviewContainer.style.display = 'none';
+        
+        // Destruir cropper anterior si existe
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        
+        if (isVideo) {
+            // Manejar video
+            const url = URL.createObjectURL(file);
+            videoPreview.src = url;
+            videoPreviewContainer.style.display = 'block';
+            // Los videos no necesitan crop, se muestran completos
+        } else {
+            // Manejar imagen
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                formatInfo.style.display = 'block';
+                heroPreviewContainer.style.display = 'block';
+                
+                // Inicializar cropper con formato Hero Slider (4:3)
+                cropper = new Cropper(previewImage, {
+                    aspectRatio: 4/3, // Hero slider siempre usa 4:3
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.8,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    responsive: true,
+                    ready: function() {
+                        updateHeroPreview();
+                    },
+                    crop: function() {
+                        // Actualizar preview del hero cuando se mueve el crop
+                        updateHeroPreview();
+                    }
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    } else {
+        previewContainer.style.display = 'none';
+        videoPreviewContainer.style.display = 'none';
+        formatInfo.style.display = 'none';
+        heroPreviewContainer.style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+});
+
+// Actualizar preview del hero slider
+function updateHeroPreview() {
+    if (!cropper || !heroPreview) return;
+    
+    const canvas = cropper.getCroppedCanvas({
+        width: 800,
+        height: 600,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+        fillColor: '#fff'
+    });
+    
+    if (canvas) {
+        heroPreview.src = canvas.toDataURL('image/jpeg', 0.9);
+    }
+}
+
+// Botón reset
+resetCropBtn.addEventListener('click', function() {
+    if (cropper) {
+        cropper.reset();
+        updateHeroPreview();
+    }
+});
+
+// Antes de enviar el formulario, guardar datos del crop (solo para imágenes)
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Si hay un archivo seleccionado, verificar si es video
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const isVideo = isVideoFile(file.name);
+        
+        // Si es video, enviar directamente sin crop
+        if (isVideo) {
+            // Limpiar crop_data para videos
+            if (cropDataInput) {
+                cropDataInput.value = '';
+            }
+            return; // Permitir envío normal
+        }
+    }
+    
+    // Para imágenes, hacer el crop
+    if (cropper && fileInput.files.length > 0) {
+        e.preventDefault();
+        
+        // Hero slider siempre usa 1920x1440 (4:3) para máxima calidad
+        const canvas = cropper.getCroppedCanvas({
+            width: 1920,
+            height: 1440,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+            fillColor: '#fff'
+        });
+        
+        if (canvas) {
+            // Convertir canvas a blob y reemplazar el archivo
+            canvas.toBlob(function(blob) {
+                if (!blob) {
+                    // Si falla el crop, enviar sin modificar
+                    e.target.submit();
+                    return;
+                }
+                
+                const file = new File([blob], fileInput.files[0].name, {
+                    type: fileInput.files[0].type || 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                
+                // Crear un nuevo DataTransfer y asignar el archivo
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                
+                // Guardar datos del crop para referencia
+                const cropData = cropper.getData();
+                cropDataInput.value = JSON.stringify(cropData);
+                
+                // Enviar el formulario
+                e.target.submit();
+            }, fileInput.files[0].type || 'image/jpeg', 0.95);
+        } else {
+            // Si no hay canvas, enviar sin modificar
+            e.target.submit();
+        }
+    }
+    // Si no hay cropper o no hay archivo, enviar normalmente
+});
+</script>
+
+<style>
+.cropper-container {
+    direction: ltr;
+}
+.cropper-view-box {
+    outline: 2px solid #2373BA;
+    outline-offset: -2px;
+}
+.cropper-face {
+    background-color: rgba(35, 115, 186, 0.1);
+}
+</style>
+{% endblock %}
+
