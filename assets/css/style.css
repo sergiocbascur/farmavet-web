@@ -3950,6 +3950,26 @@ input[type="button"],
     transform: rotate(-45deg);
   }
   
+  /* Overlay oscuro cuando el menú está abierto */
+  body.no-scroll::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  body.no-scroll::before {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
   .nav-links {
     position: fixed;
     top: 0;
@@ -3962,15 +3982,17 @@ input[type="button"],
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    padding: 5rem 1.5rem 2rem;
-    gap: 0;
+    padding: 5rem 1.25rem 2rem;
+    gap: 0.5rem;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 9999;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     visibility: hidden;
     opacity: 0;
+    max-width: 320px;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   }
   
   .nav-links.open {
@@ -3979,25 +4001,157 @@ input[type="button"],
     opacity: 1;
   }
   
+  .nav-links > li {
+    margin: 0;
+    padding: 0;
+  }
+  
   .nav-links a {
-    padding: 1rem 0;
-    font-size: 1.1rem;
-    border-bottom: 1px solid rgba(35, 115, 186, 0.1);
-    min-height: 44px;
+    padding: 1.25rem 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(35, 115, 186, 0.08);
+    min-height: 56px;
     display: flex;
     align-items: center;
+    color: var(--color-primary);
+    text-decoration: none;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.5);
+    -webkit-tap-highlight-color: rgba(35, 115, 186, 0.15);
+    touch-action: manipulation;
+    position: relative;
+  }
+  
+  .nav-links a::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: var(--color-primary);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.2s ease;
+  }
+  
+  .nav-links a:active,
+  .nav-links a:hover {
+    background: rgba(35, 115, 186, 0.1);
+    transform: translateX(4px);
+    padding-left: 1.5rem;
+  }
+  
+  .nav-links a:active::before,
+  .nav-links a:hover::before {
+    height: 60%;
+  }
+  
+  .nav-links a.cta-inline {
+    color: var(--color-secondary);
+    font-weight: 600;
   }
   
   .nav-links a.cta-button {
     margin-top: 1rem;
+    margin-bottom: 0.5rem;
     justify-content: center;
     border-radius: 12px;
-    padding: 1rem 2rem;
-    font-size: 1rem;
+    padding: 1.25rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--color-accent), #fdbd40);
+    color: var(--color-white);
+    border: none;
+    box-shadow: 0 4px 12px rgba(253, 205, 94, 0.3);
+  }
+  
+  .nav-links a.cta-button:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 8px rgba(253, 205, 94, 0.3);
   }
   
   .nav-links a::after {
     display: none;
+  }
+  
+  /* Mejorar dropdowns en móvil */
+  .nav-links .dropdown-menu {
+    margin: 0.5rem 0 0 0;
+    padding: 0;
+    background: rgba(35, 115, 186, 0.03);
+    border-radius: 8px;
+    border: none;
+    box-shadow: none;
+  }
+  
+  .nav-links .dropdown-menu a {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    color: rgba(35, 115, 186, 0.8);
+    border-bottom: 1px solid rgba(35, 115, 186, 0.05);
+    min-height: 48px;
+  }
+  
+  .nav-links .dropdown-menu a:last-child {
+    border-bottom: none;
+  }
+  
+  /* Indicador visual para items con dropdown */
+  .nav-links .nav-item.has-dropdown > a::after {
+    content: "▶";
+    margin-left: auto;
+    font-size: 0.875rem;
+    color: rgba(35, 115, 186, 0.6);
+    transition: transform 0.2s ease;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .nav-links .nav-item.has-dropdown[aria-expanded="true"] > a::after {
+    transform: rotate(90deg);
+    color: var(--color-primary);
+  }
+  
+  /* Botón de cerrar menú móvil */
+  .nav-close-mobile {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10000;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .nav-close-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+    background: rgba(35, 115, 186, 0.1);
+    border: 2px solid rgba(35, 115, 186, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  .nav-close-btn:active,
+  .nav-close-btn:hover {
+    background: rgba(35, 115, 186, 0.2);
+    border-color: rgba(35, 115, 186, 0.3);
+    transform: scale(0.9);
+  }
+  
+  .nav-close-btn i {
+    color: var(--color-primary);
   }
   
   /* Header actions en móvil - ocultar login y mover idioma al menú */
@@ -4033,35 +4187,46 @@ input[type="button"],
     background: rgba(35, 115, 186, 0.15);
   }
   
-  /* Selector de idioma en menú móvil */
+  /* Selector de idioma en menú móvil - solo visible en móvil */
   .nav-mobile-actions {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid rgba(35, 115, 186, 0.1);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid rgba(35, 115, 186, 0.15);
   }
   
   .lang-switcher-mobile {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 1rem 1.25rem;
     font-size: 1rem;
+    font-weight: 600;
     color: var(--color-primary);
     text-decoration: none;
-    border-radius: 8px;
-    background: rgba(35, 115, 186, 0.05);
+    border-radius: 12px;
+    background: rgba(35, 115, 186, 0.08);
     transition: all 0.2s ease;
-    min-height: 44px;
+    min-height: 56px;
+    border: 2px solid rgba(35, 115, 186, 0.15);
   }
   
   .lang-switcher-mobile:hover,
   .lang-switcher-mobile:active {
-    background: rgba(35, 115, 186, 0.1);
+    background: rgba(35, 115, 186, 0.15);
+    border-color: rgba(35, 115, 186, 0.3);
     transform: translateX(4px);
   }
   
   .lang-switcher-mobile i {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+  }
+}
+
+/* Ocultar selector de idioma móvil en desktop */
+@media (min-width: 769px) {
+  .nav-mobile-actions {
+    display: none !important;
   }
 }
 

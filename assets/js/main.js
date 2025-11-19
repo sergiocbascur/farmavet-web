@@ -4,11 +4,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const navLinkItems = document.querySelectorAll("[data-nav-link]");
 
   if (navToggle && navLinks) {
+    // Toggle del botón hamburguesa
     navToggle.addEventListener("click", () => {
       const expanded = navToggle.getAttribute("aria-expanded") === "true";
       navToggle.setAttribute("aria-expanded", String(!expanded));
       navLinks.classList.toggle("open");
       document.body.classList.toggle("no-scroll", !expanded);
+    });
+    
+    // Función para cerrar el menú
+    const closeMenu = () => {
+      navLinks.classList.remove("open");
+      navToggle.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("no-scroll");
+    };
+    
+    // Cerrar con botón de cerrar
+    const closeBtn = document.querySelector("[data-nav-close]");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", closeMenu);
+    }
+    
+    // Cerrar al hacer click fuera del menú (en el overlay)
+    document.addEventListener("click", (e) => {
+      if (navLinks.classList.contains("open") && 
+          !navLinks.contains(e.target) && 
+          !navToggle.contains(e.target) &&
+          window.innerWidth <= 768) {
+        closeMenu();
+      }
+    });
+    
+    // Cerrar con tecla Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && navLinks.classList.contains("open")) {
+        closeMenu();
+      }
     });
 
     navLinkItems.forEach((link) => {
