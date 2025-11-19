@@ -2331,6 +2331,17 @@ def api_chatbot_search():
         
         # Obtener información del contexto local (metodologías, servicios, contacto, FAQ, etc.)
         local_context = ""
+        
+        # SIEMPRE incluir información de contacto (necesaria para consultas generales)
+        local_context += "\n\nINFORMACIÓN DE CONTACTO DE FARMAVET:"
+        local_context += "\n- Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile"
+        local_context += "\n- Teléfono: +56 2 2978 XXXX"
+        local_context += "\n- Email general: farmavet@uchile.cl"
+        local_context += "\n- Email programas académicos: postitulo@veterinaria.uchile.cl"
+        local_context += "\n- Horario: Lunes a viernes, 09:00 a 17:30 hrs"
+        local_context += "\n- Atención presencial con agendamiento previo"
+        local_context += "\n- Para enviar consultas, usar el formulario de contacto en la página de contacto"
+        
         if include_local:
             try:
                 conn = get_db()
@@ -2351,7 +2362,7 @@ def api_chatbot_search():
                         tecnica = m['tecnica'] if 'tecnica' in m.keys() and m['tecnica'] else 'técnica variada'
                         met_list.append(f"{analito} en {matriz} ({tecnica})")
                     if met_list:
-                        local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list)
+                        local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list) + local_context
                 
                 # Obtener servicios principales
                 try:
@@ -2371,16 +2382,6 @@ def api_chatbot_search():
                             local_context += f"\n\nServicios principales: {', '.join(servicios)}"
                 except:
                     pass
-                
-                # Obtener información de contacto
-                local_context += "\n\nINFORMACIÓN DE CONTACTO DE FARMAVET:"
-                local_context += "\n- Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile"
-                local_context += "\n- Teléfono: +56 2 2978 XXXX"
-                local_context += "\n- Email general: farmavet@uchile.cl"
-                local_context += "\n- Email programas académicos: postitulo@veterinaria.uchile.cl"
-                local_context += "\n- Horario: Lunes a viernes, 09:00 a 17:30 hrs"
-                local_context += "\n- Atención presencial con agendamiento previo"
-                local_context += "\n- Para enviar consultas, usar el formulario de contacto en la página de contacto"
                 
                 # Obtener FAQ activas
                 try:

@@ -256,11 +256,11 @@ class MetodologiasChatbot {
             
             // Detectar si la consulta es sobre metodologías o información general
             const queryLower = query.toLowerCase();
-            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|contacto|email|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion)\b/i.test(query);
+            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|contacto|email|correo|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion|solicitar|solicitud)\b/i.test(query);
             
             // Si es una consulta general (no sobre metodologías), ir directamente a Perplexity
             if (isGeneralQuery) {
-                await this.searchWithPerplexity(query, false);
+                await this.searchWithPerplexity(query, false, true); // true = es consulta general
                 return;
             }
             
@@ -622,7 +622,7 @@ class MetodologiasChatbot {
         this.addMessage(message);
     }
 
-    async searchWithPerplexity(query, includeLocal = true) {
+    async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false) {
         const typingId = this.showTyping();
         try {
             console.log('🔄 Chatbot: Buscando con Perplexity API...');
@@ -654,37 +654,53 @@ class MetodologiasChatbot {
                     
                     // No mostrar información de fuentes para simplificar la respuesta
                     
-                    if (!includeLocal) {
+                    if (!includeLocal && !isGeneralQuery) {
                         message += '<p><small>Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio.</small></p>';
                     }
                     
                     this.addMessage(message);
                 } else {
                     console.warn('⚠️ Chatbot Perplexity: Respuesta sin answer');
-                    this.showNoResultsHelp(query);
+                    if (isGeneralQuery) {
+                        this.showGeneralInfoHelp();
+                    } else {
+                        this.showNoResultsHelp(query);
+                    }
                 }
             } else {
-                // Si Perplexity falla, mostrar ayuda
+                // Si Perplexity falla, mostrar ayuda apropiada
                 const errorData = await perplexityResponse.json().catch(() => ({}));
                 console.error('❌ Chatbot Perplexity: Error', perplexityResponse.status, errorData);
                 
                 if (perplexityResponse.status === 503 && errorData.error === 'API de Perplexity no configurada') {
-                    // API no configurada, mostrar ayuda estándar
-                    this.showNoResultsHelp(query);
+                    // API no configurada, mostrar información básica para consultas generales
+                    if (isGeneralQuery) {
+                        this.showGeneralInfoHelp();
+                    } else {
+                        this.showNoResultsHelp(query);
+                    }
                 } else {
-                    // Otro error, mostrar ayuda estándar
-                    this.showNoResultsHelp(query);
+                    // Otro error
+                    if (isGeneralQuery) {
+                        this.showGeneralInfoHelp();
+                    } else {
+                        this.showNoResultsHelp(query);
+                    }
                 }
             }
         } catch (error) {
             console.error('❌ Chatbot Perplexity: Error de red', error);
             this.hideTyping(typingId);
-            this.showNoResultsHelp(query);
+            if (isGeneralQuery) {
+                this.showGeneralInfoHelp();
+            } else {
+                this.showNoResultsHelp(query);
+            }
         }
     }
 
     showNoResultsHelp(query) {
-        // Mostrar ayuda cuando no se encuentra nada ni con Perplexity
+        // Mostrar ayuda cuando no se encuentra nada ni con Perplexity (para metodologías)
         this.addMessage(`
             <p>Intenta con términos como:</p>
             <ul class="chatbot-examples">
@@ -694,6 +710,22 @@ class MetodologiasChatbot {
                 <li>Categoría (ej: "residuos", "contaminantes")</li>
             </ul>
             <p><small>💡 También puedes contactar directamente con FARMAVET para consultas específicas.</small></p>
+        `);
+    }
+    
+    showGeneralInfoHelp() {
+        // Mostrar información de contacto cuando Perplexity no está disponible para consultas generales
+        this.addMessage(`
+            <p>Información de contacto de FARMAVET:</p>
+            <ul class="chatbot-examples">
+                <li><strong>Dirección:</strong> Av. Santa Rosa 11735, La Pintana, Santiago, Chile</li>
+                <li><strong>Teléfono:</strong> +56 2 2978 XXXX</li>
+                <li><strong>Email:</strong> farmavet@uchile.cl</li>
+                <li><strong>Email programas:</strong> postitulo@veterinaria.uchile.cl</li>
+                <li><strong>Horario:</strong> Lunes a viernes, 09:00 a 17:30 hrs</li>
+                <li><strong>Atención:</strong> Presencial con agendamiento previo</li>
+            </ul>
+            <p><small>Para enviar consultas, puedes usar el formulario de contacto en nuestra página web.</small></p>
         `);
     }
 
