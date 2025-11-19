@@ -647,11 +647,11 @@ def init_db():
         pass  # La columna ya existe
     try:
         conn.execute('ALTER TABLE eventos ADD COLUMN texto_boton_en TEXT')
-        try:
-            conn.execute('ALTER TABLE eventos ADD COLUMN destacada INTEGER DEFAULT 0')
-        except sqlite3.OperationalError:
-            pass  # La columna ya existe
-    except:
+    except sqlite3.OperationalError:
+        pass  # La columna ya existe
+    try:
+        conn.execute('ALTER TABLE eventos ADD COLUMN destacada INTEGER DEFAULT 0')
+    except sqlite3.OperationalError:
         pass  # La columna ya existe
     
     # Tabla de contenido editable (textos generales)
@@ -3448,6 +3448,13 @@ def admin_evento_nuevo():
     if request.method == 'POST':
         try:
             conn = get_db()
+            # Asegurar que la columna destacada existe
+            try:
+                conn.execute('ALTER TABLE eventos ADD COLUMN destacada INTEGER DEFAULT 0')
+                conn.commit()
+            except sqlite3.OperationalError:
+                pass  # La columna ya existe
+            
             activo = 1 if request.form.get('activo') == 'on' or request.form.get('activo') == '' else 0
             destacada = 1 if request.form.get('destacada') == 'on' else 0
             
@@ -3484,6 +3491,13 @@ def admin_evento_nuevo():
 def admin_evento_editar(evento_id):
     try:
         conn = get_db()
+        
+        # Asegurar que la columna destacada existe
+        try:
+            conn.execute('ALTER TABLE eventos ADD COLUMN destacada INTEGER DEFAULT 0')
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # La columna ya existe
         
         if request.method == 'POST':
             destacada = 1 if request.form.get('destacada') == 'on' else 0
