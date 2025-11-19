@@ -270,6 +270,30 @@
     text-decoration: underline;
 }
 
+/* Resultados en formato de texto legible */
+.chatbot-results-text {
+    margin-top: 0.5rem;
+}
+
+.chatbot-results-text p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
+.chatbot-results-text p:first-child {
+    margin-top: 0;
+}
+
+.chatbot-results-text p:last-child {
+    margin-bottom: 0;
+}
+
+.chatbot-results-text strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
 .chatbot-examples {
     list-style: none;
     padding-left: 0;

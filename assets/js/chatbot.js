@@ -331,28 +331,29 @@ class MetodologiasChatbot {
             return;
         }
 
-        let message = `<p>Encontré <strong>${results.length}</strong> metodología${results.length > 1 ? 's' : ''} relacionada${results.length > 1 ? 's' : ''} con "<strong>${this.escapeHtml(query)}</strong>":</p>`;
-        message += '<div class="chatbot-results">';
+        // Generar respuesta en formato de frase legible
+        let message = '';
         
-        results.slice(0, 5).forEach(met => {
-            message += `
-                <div class="chatbot-result-item">
-                    <h4>${this.escapeHtml(met.nombre)}</h4>
-                    <div class="chatbot-result-details">
-                        <span><strong>Analito:</strong> ${this.escapeHtml(met.analito)}</span>
-                        <span><strong>Matriz:</strong> ${this.escapeHtml(met.matriz)}</span>
-                        <span><strong>Técnica:</strong> ${this.escapeHtml(met.tecnica)}</span>
-                        ${met.acreditada ? `<span class="badge-acreditada">✓ Acreditada</span>` : ''}
-                    </div>
-                </div>
-            `;
-        });
-
-        if (results.length > 5) {
-            message += `<p class="chatbot-more">Y ${results.length - 5} metodología${results.length - 5 > 1 ? 's' : ''} más. <a href="#metodologias-completas" onclick="document.getElementById('chatbot-window').classList.remove('open'); document.getElementById('search-metodologias').value='${this.escapeHtml(query)}'; document.getElementById('search-metodologias').dispatchEvent(new Event('input')); document.getElementById('metodologias-completas').scrollIntoView({behavior: 'smooth'});">Ver todas</a></p>`;
+        if (results.length === 1) {
+            const met = results[0];
+            const acreditada = met.acreditada ? 'acreditada' : 'no acreditada';
+            message = `<p>Sí, tenemos una metodología ${acreditada} para <strong>${this.escapeHtml(met.analito || met.nombre)}</strong> en <strong>${this.escapeHtml(met.matriz)}</strong> usando la técnica <strong>${this.escapeHtml(met.tecnica)}</strong>.</p>`;
+        } else {
+            message = `<p>Encontré <strong>${results.length}</strong> metodología${results.length > 1 ? 's' : ''} relacionada${results.length > 1 ? 's' : ''} con tu búsqueda:</p>`;
+            message += '<div class="chatbot-results-text">';
+            
+            results.slice(0, 5).forEach((met, index) => {
+                const acreditada = met.acreditada ? ' (acreditada)' : '';
+                message += `<p>${index + 1}. <strong>${this.escapeHtml(met.analito || met.nombre)}</strong> en ${this.escapeHtml(met.matriz)} mediante ${this.escapeHtml(met.tecnica)}${acreditada}.</p>`;
+            });
+            
+            if (results.length > 5) {
+                message += `<p class="chatbot-more">Y ${results.length - 5} metodología${results.length - 5 > 1 ? 's' : ''} más. <a href="#metodologias-completas" onclick="document.getElementById('chatbot-window').classList.remove('open'); document.getElementById('search-metodologias').value='${this.escapeHtml(query)}'; document.getElementById('search-metodologias').dispatchEvent(new Event('input')); document.getElementById('metodologias-completas').scrollIntoView({behavior: 'smooth'});">Ver todas</a></p>`;
+            }
+            
+            message += '</div>';
         }
 
-        message += '</div>';
         this.addMessage(message);
     }
 
