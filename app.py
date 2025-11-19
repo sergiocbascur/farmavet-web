@@ -2301,25 +2301,21 @@ def api_chatbot_search():
                 app.logger.warning(f'Error al obtener contexto local: {str(e)}')
         
         # Construir el prompt contextual para Perplexity
-        # IMPORTANTE: Solo usar información proporcionada, NO buscar en internet
+        # CRÍTICO: Solo usar información proporcionada, NO buscar en internet ni dar información general
         context = f"""Eres un asistente del Laboratorio FARMAVET de la Universidad de Chile.
 
-REGLAS CRÍTICAS:
-1. SOLO usa la información que te proporciono a continuación
-2. NO busques información adicional en internet
-3. Si no tienes la información específica, di que deben contactar directamente con FARMAVET
-4. Responde de manera CONCISA (máximo 2-3 oraciones)
-5. NO des explicaciones generales a menos que se pida explícitamente
+REGLAS OBLIGATORIAS:
+1. SOLO responde usando la información que te proporciono a continuación
+2. NO busques información en internet
+3. NO des explicaciones generales o educativas
+4. Si la pregunta no está en la información proporcionada, responde: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
+5. Responde de manera MUY CONCISA: máximo 1-2 oraciones
+6. NO agregues información que no esté en la lista proporcionada
 
 INFORMACIÓN DISPONIBLE DE FARMAVET:
-- Laboratorio de Farmacología Veterinaria (FARMAVET) de la Universidad de Chile
-- Más de 70 metodologías analíticas acreditadas ISO 17025
-- Análisis de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos
-- Matrices: productos hidrobiológicos (salmón, trucha, mariscos), pecuarios (carne, leche, huevos)
-- Técnicas: UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL
 {local_context}
 
-Ejemplo: Si preguntan "hacen amprolio?" y tienes esa información en la lista, responde: "Sí, tenemos metodología para amprolio en [matriz] mediante [técnica]." Si NO tienes esa información, di: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
+Si la información NO está en la lista anterior, responde SOLO: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
 """
         
         system_message = context
