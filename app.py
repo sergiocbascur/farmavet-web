@@ -2121,7 +2121,7 @@ def api_metodologias():
                 try:
                     # Intentar acceder a 'activo' - si no existe, incluir todas
                     if 'activo' in met.keys():
-                        if met.get('activo', 0) == 1:
+                        if met['activo'] == 1:
                             filtered_metodologias.append(met)
                     else:
                         # Si no existe columna activo, incluir todas
@@ -2165,23 +2165,28 @@ def api_metodologias():
                 }), 500
         
         # Convertir a lista de diccionarios
+        # sqlite3.Row no tiene método .get(), se accede con [] o con 'in'
         result = []
         for met in metodologias:
             try:
+                # Acceder a campos de sqlite3.Row usando [] en lugar de .get()
                 result.append({
-                    'nombre': met.get('nombre') or '',
-                    'nombre_en': met.get('nombre_en') or '',
-                    'categoria': met.get('categoria') or '',
-                    'analito': met.get('analito') or '',
-                    'analito_en': met.get('analito_en') or '',
-                    'matriz': met.get('matriz') or '',
-                    'matriz_en': met.get('matriz_en') or '',
-                    'tecnica': met.get('tecnica') or '',
-                    'tecnica_en': met.get('tecnica_en') or '',
-                    'lod': met.get('limite_deteccion') or '',
-                    'loq': met.get('limite_cuantificacion') or '',
-                    'acreditada': bool(met.get('acreditada', 0))
+                    'nombre': met['nombre'] if 'nombre' in met.keys() else '',
+                    'nombre_en': met['nombre_en'] if 'nombre_en' in met.keys() else '',
+                    'categoria': met['categoria'] if 'categoria' in met.keys() else '',
+                    'analito': met['analito'] if 'analito' in met.keys() else '',
+                    'analito_en': met['analito_en'] if 'analito_en' in met.keys() else '',
+                    'matriz': met['matriz'] if 'matriz' in met.keys() else '',
+                    'matriz_en': met['matriz_en'] if 'matriz_en' in met.keys() else '',
+                    'tecnica': met['tecnica'] if 'tecnica' in met.keys() else '',
+                    'tecnica_en': met['tecnica_en'] if 'tecnica_en' in met.keys() else '',
+                    'lod': met['limite_deteccion'] if 'limite_deteccion' in met.keys() else '',
+                    'loq': met['limite_cuantificacion'] if 'limite_cuantificacion' in met.keys() else '',
+                    'acreditada': bool(met['acreditada'] if 'acreditada' in met.keys() else 0)
                 })
+            except KeyError as e:
+                app.logger.warning(f'API metodologias: Columna faltante: {str(e)}')
+                continue
             except Exception as e:
                 app.logger.warning(f'API metodologias: Error al procesar metodología: {str(e)}')
                 continue
