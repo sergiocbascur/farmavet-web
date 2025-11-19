@@ -95,6 +95,16 @@
               <span class="pill">{{ _('Alianza público-privada') }}</span>
               <span class="pill">{{ _('Proyección internacional') }}</span>
             </div>
+            {# Cuadro de información - dentro del mismo contenedor que el texto #}
+            <div class="card" style="margin-top: 2rem;">
+              <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+                {{ _('¿Qué es CASA?') }}
+              </h2>
+              <p>
+                {{ _('El Center for Antimicrobial Stewardship in Aquaculture (CASA) apoya a los países miembros de la OMSA en la implementación de estándares del Código Acuático, fortaleciendo la gestión responsable de antimicrobianos y la vigilancia de la resistencia antimicrobiana.') }}
+              </p>
+              <a class="cta-inline" href="https://www.casauchile.cl" rel="noopener" target="_blank">{{ _('Visitar sitio oficial') }}</a>
+            </div>
           </div>
           {# Carrusel de imágenes del hero - usando imágenes de la galería #}
           {% if imagenes_hero %}
@@ -136,16 +146,6 @@
             {% endif %}
           </div>
           {% endif %}
-          {# Cuadro de información - siempre visible #}
-          <div class="card">
-            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
-              {{ _('¿Qué es CASA?') }}
-            </h2>
-            <p>
-              {{ _('El Center for Antimicrobial Stewardship in Aquaculture (CASA) apoya a los países miembros de la OMSA en la implementación de estándares del Código Acuático, fortaleciendo la gestión responsable de antimicrobianos y la vigilancia de la resistencia antimicrobiana.') }}
-            </p>
-            <a class="cta-inline" href="https://www.casauchile.cl" rel="noopener" target="_blank">{{ _('Visitar sitio oficial') }}</a>
-          </div>
         </div>
       </section>
 
