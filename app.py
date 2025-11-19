@@ -1236,7 +1236,7 @@ def page(page):
                 ORDER BY fecha DESC, id DESC
             ''').fetchall()
             eventos = conn.execute('''
-                SELECT * FROM eventos WHERE activo = 1 
+                SELECT * FROM eventos WHERE activo = 1 AND destacada = 1 
                 ORDER BY orden, id
             ''').fetchall()
             tarjetas_destacadas = conn.execute('''
