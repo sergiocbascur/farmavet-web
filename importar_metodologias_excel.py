@@ -60,36 +60,54 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     
     print(f"📖 Leyendo archivo Excel: {excel_path}")
     
-    # Leer Excel - El archivo tiene encabezados en la fila 2 (índice 2)
+    # Leer Excel - Estructura: ITLF (método), MÉTODO, Analito, EQUIPO, LD, LC, MATRIZ, ACREDITADO
+    # Los encabezados están en la fila 2 (índice 2)
+    # Los datos empiezan en la fila 4 (índice 4)
     try:
         if HAS_PANDAS:
-            # Leer sin header primero para inspeccionar
+            # Leer sin header para procesar manualmente
             df_raw = pd.read_excel(excel_path, engine='openpyxl', header=None)
             
-            # Buscar la fila de encabezados (debería estar en la fila 2)
-            header_row = 2
-            headers = []
-            for j in range(len(df_raw.columns)):
-                val = df_raw.iloc[header_row, j]
-                if pd.notna(val):
-                    headers.append(str(val).strip())
-                else:
-                    headers.append(f"Col_{j}")
+            # Los datos empiezan en la fila 4 (índice 4)
+            data_rows = []
+            current_itlf = None
+            current_metodo = None
+            current_equipo = None
             
-            # Leer de nuevo con los encabezados correctos, saltando las primeras filas
-            df = pd.read_excel(excel_path, engine='openpyxl', header=header_row, names=headers)
+            for i in range(4, len(df_raw)):  # Empezar desde fila 4
+                row = df_raw.iloc[i]
+                
+                # Leer valores según estructura:
+                # Col 1: ITLF, Col 2: MÉTODO, Col 3: Analito, Col 4: EQUIPO, Col 5: LD, Col 6: LC, Col 7: MATRIZ, Col 8: ACREDITADO
+                itlf = row[1] if pd.notna(row[1]) else None
+                metodo = row[2] if pd.notna(row[2]) else None
+                analito = row[3] if pd.notna(row[3]) else None
+                equipo = row[4] if pd.notna(row[4]) else None
+                ld = row[5] if pd.notna(row[5]) else None
+                lc = row[6] if pd.notna(row[6]) else None
+                matriz = row[7] if pd.notna(row[7]) else None
+                acreditado = row[8] if pd.notna(row[8]) else None
+                
+                # Si hay ITLF, actualizar método actual
+                if pd.notna(itlf) and str(itlf).strip():
+                    current_itlf = str(itlf).strip()
+                    current_metodo = str(metodo).strip() if pd.notna(metodo) else None
+                    current_equipo = str(equipo).strip() if pd.notna(equipo) else None
+                
+                # Si hay analito, crear una entrada
+                if pd.notna(analito) and str(analito).strip() and current_itlf:
+                    data_rows.append({
+                        'itlf': current_itlf,
+                        'metodo': current_metodo or str(analito).strip(),
+                        'analito': str(analito).strip(),
+                        'equipo': current_equipo or str(equipo).strip() if pd.notna(equipo) else None,
+                        'ld': str(ld).strip() if pd.notna(ld) else None,
+                        'lc': str(lc).strip() if pd.notna(lc) else None,
+                        'matriz': str(matriz).strip() if pd.notna(matriz) else None,
+                        'acreditado': str(acreditado).strip() if pd.notna(acreditado) else None,
+                    })
             
-            # Los datos empiezan en la fila 4 (después del header en fila 2 y una fila vacía)
-            # Eliminar la primera fila si está vacía o es otra fila de encabezados
-            if len(df) > 0:
-                first_row = df.iloc[0]
-                # Si la primera fila parece ser otra fila de encabezados o está vacía, eliminarla
-                first_row_str = ' '.join([str(v).lower() for v in first_row.values if pd.notna(v)])
-                if 'metodo' in first_row_str.lower() or 'equipo' in first_row_str.lower() or first_row_str.strip() == '':
-                    df = df.drop(df.index[0]).reset_index(drop=True)
-            
-            # Eliminar filas completamente vacías
-            df = df.dropna(how='all').reset_index(drop=True)
+            df = pd.DataFrame(data_rows)
             
         else:
             # Usar openpyxl directamente
@@ -97,19 +115,42 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             wb = load_workbook(excel_path)
             ws = wb.active
             
-            # Convertir a DataFrame manualmente
-            # Encabezados en fila 3 (índice 2 en 0-based)
-            headers = [str(cell.value).strip() if cell.value else f"Col_{i}" 
-                      for i, cell in enumerate(ws[3], 1)]
+            data_rows = []
+            current_itlf = None
+            current_metodo = None
+            current_equipo = None
             
-            data = []
             for row in ws.iter_rows(min_row=4, values_only=True):
-                if any(cell for cell in row if cell):  # Saltar filas vacías
-                    data.append(dict(zip(headers, row)))
-            df = pd.DataFrame(data)
+                itlf = row[1] if row[1] else None
+                metodo = row[2] if row[2] else None
+                analito = row[3] if row[3] else None
+                equipo = row[4] if row[4] else None
+                ld = row[5] if row[5] else None
+                lc = row[6] if row[6] else None
+                matriz = row[7] if row[7] else None
+                acreditado = row[8] if row[8] else None
+                
+                if itlf:
+                    current_itlf = str(itlf).strip()
+                    current_metodo = str(metodo).strip() if metodo else None
+                    current_equipo = str(equipo).strip() if equipo else None
+                
+                if analito and current_itlf:
+                    data_rows.append({
+                        'itlf': current_itlf,
+                        'metodo': current_metodo or str(analito).strip(),
+                        'analito': str(analito).strip(),
+                        'equipo': current_equipo or str(equipo).strip() if equipo else None,
+                        'ld': str(ld).strip() if ld else None,
+                        'lc': str(lc).strip() if lc else None,
+                        'matriz': str(matriz).strip() if matriz else None,
+                        'acreditado': str(acreditado).strip() if acreditado else None,
+                    })
+            
+            df = pd.DataFrame(data_rows)
         
-        print(f"✅ Archivo leído: {len(df)} filas encontradas")
-        print(f"📋 Columnas detectadas: {', '.join(df.columns.tolist())}")
+        print(f"✅ Archivo leído: {len(df)} analitos encontrados")
+        print(f"📊 Métodos únicos (ITLF): {df['itlf'].nunique() if 'itlf' in df.columns else 0}")
         
     except Exception as e:
         print(f"❌ Error leyendo Excel: {str(e)}")
@@ -129,52 +170,29 @@ def import_from_excel(excel_path, db_path, dry_run=False):
         conn.close()
         sys.exit(1)
     
-    # Mapeo de columnas del Excel a campos de la BD
-    # Basado en la estructura real del archivo "RESUMEN CLIENTES-LAB.xlsx"
-    column_mapping = {
-        'codigo': ['it lf n', 'it lf', 'codigo', 'código', 'cod', 'id', 'unnamed: 1', 'col_1'],
-        'analito': ['método', 'metodo', 'mtodo', 'analito', 'analito', 'sustancia', 'compuesto', 'unnamed: 2', 'col_2'],
-        'tecnica': ['equipo', 'tecnica', 'técnica', 'tecnica analitica', 'método analítico', 'unnamed: 3', 'col_3'],
-        'limite_deteccion': ['ld', 'lod', 'limite deteccion', 'límite detección', 'limite_deteccion', 'unnamed: 4', 'col_4'],
-        'limite_cuantificacion': ['lc', 'loq', 'limite cuantificacion', 'límite cuantificación', 'limite_cuantificacion', 'unnamed: 5', 'col_5'],
-        'matriz': ['matriz', 'muestra', 'tipo muestra', 'unnamed: 6', 'col_6'],
-        'acreditada': ['acreditado\ninn', 'acreditado inn', 'acreditada', 'acreditado', 'acreditacion', 'acreditación', 'unnamed: 7', 'col_7']
-    }
+    # Las columnas ya están mapeadas en el DataFrame
+    # Estructura: itlf, metodo, analito, equipo, ld, lc, matriz, acreditado
+    print(f"\n📊 Estructura detectada:")
+    print(f"   - ITLF (código método): Columna 'itlf'")
+    print(f"   - MÉTODO (nombre): Columna 'metodo'")
+    print(f"   - Analito: Columna 'analito'")
+    print(f"   - EQUIPO (técnica): Columna 'equipo'")
+    print(f"   - LD: Columna 'ld'")
+    print(f"   - LC: Columna 'lc'")
+    print(f"   - MATRIZ: Columna 'matriz'")
+    print(f"   - ACREDITADO: Columna 'acreditado'")
     
-    # Encontrar las columnas del Excel que coinciden
-    excel_columns = {col.lower().strip(): col for col in df.columns}
-    field_mapping = {}
+    # Verificar que las columnas necesarias existen
+    required_columns = ['analito']
+    missing_columns = [col for col in required_columns if col not in df.columns]
     
-    for db_field, possible_names in column_mapping.items():
-        for name in possible_names:
-            name_lower = name.lower().strip()
-            # Buscar coincidencia exacta o parcial
-            for excel_col in excel_columns.keys():
-                if name_lower == excel_col or excel_col.startswith(name_lower) or name_lower in excel_col:
-                    field_mapping[db_field] = df.columns[list(excel_columns.keys()).index(excel_col)]
-                    break
-            if db_field in field_mapping:
-                break
-    
-    print(f"\n📊 Mapeo de columnas detectado:")
-    for db_field, excel_col in field_mapping.items():
-        print(f"   {db_field} ← {excel_col}")
-    
-    # Campos requeridos (analito es obligatorio, los demás pueden tener valores por defecto)
-    required_fields = ['analito']
-    missing_fields = [f for f in required_fields if f not in field_mapping]
-    
-    if missing_fields:
-        print(f"\n❌ Error: Faltan campos requeridos: {', '.join(missing_fields)}")
-        print("   No se puede continuar sin estos campos")
+    if missing_columns:
+        print(f"\n❌ Error: Faltan columnas requeridas: {', '.join(missing_columns)}")
+        print(f"   Columnas disponibles: {', '.join(df.columns.tolist())}")
         conn.close()
         sys.exit(1)
     
-    # Si falta matriz, usar un valor por defecto o intentar inferir
-    if 'matriz' not in field_mapping:
-        print(f"\n⚠️  Advertencia: No se encontró columna 'matriz', se intentará usar un valor por defecto")
-    
-    # Categoría por defecto si no existe
+    # Categoría por defecto
     categoria_default = 'residuos'  # Se puede ajustar según necesites
     
     # Procesar cada fila
@@ -186,59 +204,44 @@ def import_from_excel(excel_path, db_path, dry_run=False):
     
     for idx, row in df.iterrows():
         try:
-            # Extraer valores con manejo mejorado
-            codigo = None
-            if field_mapping.get('codigo'):
-                codigo_val = row.get(field_mapping['codigo'])
-                if pd.notna(codigo_val):
-                    codigo = str(codigo_val).strip()
-            
-            # Analito es el campo principal (columna "MÉTODO")
-            analito = None
-            if field_mapping.get('analito'):
-                analito_val = row.get(field_mapping['analito'])
-                if pd.notna(analito_val):
-                    analito = str(analito_val).strip()
+            # Extraer valores directamente del DataFrame ya procesado
+            itlf = normalize_text(row.get('itlf'))
+            metodo = normalize_text(row.get('metodo'))
+            analito = normalize_text(row.get('analito'))
+            equipo = normalize_text(row.get('equipo'))
+            ld = normalize_text(row.get('ld'))
+            lc = normalize_text(row.get('lc'))
+            matriz = normalize_text(row.get('matriz'))
+            acreditado_val = normalize_text(row.get('acreditado'))
             
             # Si no hay analito, saltar esta fila
             if not analito:
                 skipped += 1
                 continue
             
-            # Usar analito como nombre también (si no hay nombre separado)
-            nombre = analito
+            # Usar ITLF como código, método como nombre
+            codigo = itlf if itlf else None
+            nombre = metodo if metodo else analito
             
-            # Matriz
-            matriz = None
-            if field_mapping.get('matriz'):
-                matriz_val = row.get(field_mapping['matriz'])
-                if pd.notna(matriz_val):
-                    matriz = str(matriz_val).strip()
+            # Si no hay matriz, usar un valor por defecto
             if not matriz:
-                matriz = 'No especificada'  # Valor por defecto
+                matriz = 'No especificada'
             
             # Categoría (por defecto)
             categoria = categoria_default
             
             # Técnica (EQUIPO)
-            tecnica = None
-            if field_mapping.get('tecnica'):
-                tecnica_val = row.get(field_mapping['tecnica'])
-                if pd.notna(tecnica_val):
-                    tecnica = str(tecnica_val).strip()
+            tecnica = equipo if equipo else None
             
             # Límites
-            limite_deteccion = None
-            if field_mapping.get('limite_deteccion'):
-                lod_val = row.get(field_mapping['limite_deteccion'])
-                if pd.notna(lod_val):
-                    limite_deteccion = str(lod_val).strip()
+            limite_deteccion = ld if ld else None
+            limite_cuantificacion = lc if lc else None
             
-            limite_cuantificacion = None
-            if field_mapping.get('limite_cuantificacion'):
-                loq_val = row.get(field_mapping['limite_cuantificacion'])
-                if pd.notna(loq_val):
-                    limite_cuantificacion = str(loq_val).strip()
+            # Acreditada (puede ser "OK", "Sí", etc.)
+            acreditada = False
+            if acreditado_val:
+                acreditado_str = str(acreditado_val).lower().strip()
+                acreditada = acreditado_str in ['ok', 'si', 'sí', 's', 'yes', 'true', '1', 'acreditada', 'acreditado']
             
             # Otros campos opcionales
             nombre_en = None
@@ -247,6 +250,7 @@ def import_from_excel(excel_path, db_path, dry_run=False):
             tecnica_en = None
             norma_referencia = None
             vigencia = None
+            orden = None
             
             # Acreditada (puede ser texto como "Sí", "S", "1", True, etc.)
             acreditada_val = row.get(field_mapping.get('acreditada', '')) if field_mapping.get('acreditada') else None
