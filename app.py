@@ -1173,7 +1173,7 @@ def equipo_page():
     # Cargar imágenes de la galería para el hero slider
     imagenes_hero = conn.execute('''
         SELECT * FROM galeria_imagenes 
-        WHERE activo = 1 AND pagina = 'equipo'
+        WHERE activo = 1 AND (pagina = 'equipo' OR pagina IS NULL OR pagina = '')
         ORDER BY orden, id DESC
         LIMIT 10
     ''').fetchall()
