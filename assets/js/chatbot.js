@@ -254,15 +254,24 @@ class MetodologiasChatbot {
         setTimeout(async () => {
             this.hideTyping(typingId);
             
-            // Siempre buscar localmente primero, usar Perplexity solo si no encuentra
+            // Detectar si la consulta es sobre metodologías o información general
+            const queryLower = query.toLowerCase();
+            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|contacto|email|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion)\b/i.test(query);
+            
+            // Si es una consulta general (no sobre metodologías), ir directamente a Perplexity
+            if (isGeneralQuery) {
+                await this.searchWithPerplexity(query, false);
+                return;
+            }
+            
+            // Para consultas sobre metodologías, buscar localmente primero
             const results = await this.searchMetodologias(query);
             
             // Si encuentra resultados locales, mostrarlos
             if (results.length > 0) {
                 await this.showResults(query, results);
             } else {
-                // Solo si NO encuentra localmente, usar Perplexity
-                // Para consultas simples (ej: "hacen X?"), buscar local primero y luego Perplexity como complemento
+                // Si no encuentra localmente, usar Perplexity (mostrará mensaje apropiado)
                 await this.showResults(query, results);
                 // showResults ya llama a searchWithPerplexity si no hay resultados
             }
@@ -508,11 +517,17 @@ class MetodologiasChatbot {
         }
         
         if (results.length === 0) {
-            // Primero mostrar mensaje de no encontrado
-            this.addMessage(`
-                <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>" en nuestra base de datos.</p>
-                <p><small>Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
-            `);
+            // Detectar si es una consulta sobre metodologías específicamente
+            const queryLower = query.toLowerCase();
+            const isMethodologyQuery = /\b(metodología|metodologia|análisis|analisis|analito|matriz|técnica|tecnica|hacen|tienen|realizan|detectan|analizan|cuantifican|determinan|diquat|amprolio|antibiotico|antibiótico|micotoxina|residuo|plaguicida|herbicida)\b/i.test(query);
+            
+            // Solo mostrar mensaje de "no encontré metodologías" si la consulta es claramente sobre metodologías
+            if (isMethodologyQuery) {
+                this.addMessage(`
+                    <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>" en nuestra base de datos.</p>
+                    <p><small>Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
+                `);
+            }
             
             // Intentar búsqueda inteligente con Perplexity
             await this.searchWithPerplexity(query, false);
