@@ -684,18 +684,35 @@ class MetodologiasChatbot {
         // Escapar HTML primero
         let formatted = this.escapeHtml(answer);
         
-        // Limpiar formato innecesario
+        // Limpiar referencias a citas y notas (formato [1], [2], <...>, etc.)
         formatted = formatted
+            .replace(/\[(\d+)\]/g, '') // Eliminar referencias como [1], [2], etc.
+            .replace(/\[\d+\]/g, '') // Eliminar referencias con múltiples números
+            .replace(/<[^>]*>/g, '') // Eliminar tags HTML que puedan quedar
+            .replace(/<\.\.\.>/g, '') // Eliminar <...>
+            .replace(/\[\.\.\.\]/g, '') // Eliminar [...]
+            .replace(/\(fuente[^)]*\)/gi, '') // Eliminar (fuente: ...)
+            .replace(/\(referencia[^)]*\)/gi, '') // Eliminar (referencia: ...)
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita **texto**
-            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva *texto*
-            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Eliminar enlaces [texto](url)
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva *texto* (solo si no es lista)
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Eliminar enlaces [texto](url)
+            .replace(/\s+/g, ' ') // Normalizar espacios múltiples
+            .trim();
         
         // Convertir saltos de línea dobles en párrafos
         let paragraphs = formatted.split(/\n\s*\n/).filter(p => p.trim().length > 0);
         
+        // Si no hay párrafos separados, dividir por saltos de línea simples
+        if (paragraphs.length === 1 && formatted.includes('\n')) {
+            paragraphs = formatted.split(/\n/).filter(p => p.trim().length > 0);
+        }
+        
         // Formatear cada párrafo
         formatted = paragraphs.map(para => {
             para = para.trim();
+            
+            // Limpiar referencias que puedan quedar al inicio o final
+            para = para.replace(/^\[[\d\s,]+\]\s*/, '').replace(/\s*\[[\d\s,]+\]$/, '');
             
             // Si es una lista numerada
             if (/^\d+\.\s/.test(para)) {
@@ -703,6 +720,7 @@ class MetodologiasChatbot {
                 if (items.length > 1) {
                     const listItems = items.map(item => {
                         item = item.replace(/^\d+\.\s*/, '').trim();
+                        item = item.replace(/\[[\d\s,]+\]/g, ''); // Limpiar referencias en items
                         return `<li>${item}</li>`;
                     }).join('');
                     return `<ol>${listItems}</ol>`;
@@ -717,6 +735,7 @@ class MetodologiasChatbot {
                 if (items.length > 1) {
                     const listItems = items.map(item => {
                         item = item.replace(/^[-*•]\s*/, '').trim();
+                        item = item.replace(/\[[\d\s,]+\]/g, ''); // Limpiar referencias en items
                         return `<li>${item}</li>`;
                     }).join('');
                     return `<ul>${listItems}</ul>`;
@@ -727,6 +746,9 @@ class MetodologiasChatbot {
             
             // Convertir saltos de línea simples en <br>
             para = para.replace(/\n/g, '<br>');
+            
+            // Limpiar espacios múltiples
+            para = para.replace(/\s+/g, ' ').trim();
             
             // Si no empieza con una etiqueta HTML, envolver en <p>
             if (!para.match(/^<(p|ul|ol|li|h[1-6]|div|strong|em)/i)) {
