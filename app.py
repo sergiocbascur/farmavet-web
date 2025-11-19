@@ -3482,44 +3482,55 @@ def admin_evento_nuevo():
 @app.route('/admin/eventos/<int:evento_id>/editar', methods=['GET', 'POST'])
 @login_required
 def admin_evento_editar(evento_id):
-    conn = get_db()
-    
-    if request.method == 'POST':
-        destacada = 1 if request.form.get('destacada') == 'on' else 0
-        conn.execute('''
-            UPDATE eventos 
-            SET titulo=?, fecha=?, meta=?, descripcion=?, enlace=?, texto_boton=?, orden=?, destacada=?, activo=?, 
-                titulo_en=?, descripcion_en=?, meta_en=?, texto_boton_en=?, updated_at=CURRENT_TIMESTAMP
-            WHERE id=?
-        ''', (
-            request.form.get('titulo'),
-            request.form.get('fecha'),
-            request.form.get('meta'),
-            request.form.get('descripcion'),
-            request.form.get('enlace'),
-            request.form.get('texto_boton', 'Ver más'),
-            int(request.form.get('orden', 0)),
-            destacada,
-            1 if request.form.get('activo') == 'on' else 0,
-            request.form.get('titulo_en', '').strip() or None,
-            request.form.get('descripcion_en', '').strip() or None,
-            request.form.get('meta_en', '').strip() or None,
-            request.form.get('texto_boton_en', '').strip() or None,
-            evento_id
-        ))
-        conn.commit()
+    try:
+        conn = get_db()
+        
+        if request.method == 'POST':
+            destacada = 1 if request.form.get('destacada') == 'on' else 0
+            conn.execute('''
+                UPDATE eventos 
+                SET titulo=?, fecha=?, meta=?, descripcion=?, enlace=?, texto_boton=?, orden=?, destacada=?, activo=?, 
+                    titulo_en=?, descripcion_en=?, meta_en=?, texto_boton_en=?, updated_at=CURRENT_TIMESTAMP
+                WHERE id=?
+            ''', (
+                request.form.get('titulo'),
+                request.form.get('fecha'),
+                request.form.get('meta'),
+                request.form.get('descripcion'),
+                request.form.get('enlace'),
+                request.form.get('texto_boton', 'Ver más'),
+                int(request.form.get('orden', 0)),
+                destacada,
+                1 if request.form.get('activo') == 'on' else 0,
+                request.form.get('titulo_en', '').strip() or None,
+                request.form.get('descripcion_en', '').strip() or None,
+                request.form.get('meta_en', '').strip() or None,
+                request.form.get('texto_boton_en', '').strip() or None,
+                evento_id
+            ))
+            conn.commit()
+            conn.close()
+            flash('Evento actualizado correctamente', 'success')
+            return redirect(url_for('admin_eventos'))
+        
+        evento = conn.execute('SELECT * FROM eventos WHERE id = ?', (evento_id,)).fetchone()
         conn.close()
-        flash('Evento actualizado correctamente', 'success')
+        
+        if not evento:
+            flash('Evento no encontrado', 'error')
+            return redirect(url_for('admin_eventos'))
+        
+        # Asegurar que el campo destacada existe (para eventos antiguos)
+        evento_dict = dict(evento)
+        if 'destacada' not in evento_dict:
+            evento_dict['destacada'] = 0
+        
+        return render_template('admin/evento_form.html', evento=evento_dict)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        flash(f'Error al cargar evento: {str(e)}', 'error')
         return redirect(url_for('admin_eventos'))
-    
-    evento = conn.execute('SELECT * FROM eventos WHERE id = ?', (evento_id,)).fetchone()
-    conn.close()
-    
-    if not evento:
-        flash('Evento no encontrado', 'error')
-        return redirect(url_for('admin_eventos'))
-    
-    return render_template('admin/evento_form.html', evento=evento)
 
 @app.route('/admin/eventos/<int:evento_id>/eliminar', methods=['POST'])
 @login_required
