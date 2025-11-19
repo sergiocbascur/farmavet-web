@@ -254,8 +254,20 @@ class MetodologiasChatbot {
         // Procesar consulta
         setTimeout(async () => {
             this.hideTyping(typingId);
-            const results = this.searchMetodologias(query);
-            await this.showResults(query, results);
+            
+            // Para consultas más complejas o conversacionales, usar Perplexity directamente
+            const isComplexQuery = query.length > 30 || 
+                                   /^(qué|qué|cómo|cuál|cuáles|cuando|donde|dónde|por qué|porque)/i.test(query) ||
+                                   /\?/.test(query);
+            
+            if (isComplexQuery && this.metodologias.length > 0) {
+                // Usar Perplexity para consultas más naturales/complejas
+                await this.searchWithPerplexity(query, true);
+            } else {
+                // Búsqueda local primero
+                const results = await this.searchMetodologias(query);
+                await this.showResults(query, results);
+            }
         }, 500);
     }
 
@@ -335,7 +347,7 @@ class MetodologiasChatbot {
         return keywords;
     }
 
-    searchMetodologias(query) {
+    async searchMetodologias(query) {
         const normalizedQuery = this.normalizeText(query);
         const keywords = this.extractKeywords(query);
         
@@ -498,16 +510,9 @@ class MetodologiasChatbot {
             `);
             
             // Intentar búsqueda inteligente con Perplexity
-            const typingId = this.showTyping();
-            try {
-                console.log('🔄 Chatbot: Buscando con Perplexity API...');
-                const perplexityResponse = await fetch('/api/chatbot/search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ query: query })
-                });
+            await this.searchWithPerplexity(query, false);
+            return;
+        }
                 
                 this.hideTyping(typingId);
                 
@@ -642,6 +647,69 @@ class MetodologiasChatbot {
         }
 
         this.addMessage(message);
+    }
+
+    async searchWithPerplexity(query, includeLocal = true) {
+        const typingId = this.showTyping();
+        try {
+            console.log('🔄 Chatbot: Buscando con Perplexity API...');
+            const perplexityResponse = await fetch('/api/chatbot/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    query: query,
+                    include_local: includeLocal
+                })
+            });
+            
+            this.hideTyping(typingId);
+            
+            console.log(`📡 Chatbot Perplexity: Status ${perplexityResponse.status}`);
+            
+            if (perplexityResponse.ok) {
+                const data = await perplexityResponse.json();
+                console.log('✅ Chatbot Perplexity: Respuesta recibida', data);
+                
+                if (data.answer) {
+                    let message = `
+                        <div class="chatbot-results-text">
+                            ${this.formatPerplexityAnswer(data.answer)}
+                        </div>
+                    `;
+                    
+                    if (data.sources && data.sources.length > 0) {
+                        message += `<p><small>📚 Fuente${data.sources.length > 1 ? 's' : ''}: ${data.sources.length}</small></p>`;
+                    }
+                    
+                    if (!includeLocal) {
+                        message += `<p><small>💡 Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
+                    }
+                    
+                    this.addMessage(message);
+                } else {
+                    console.warn('⚠️ Chatbot Perplexity: Respuesta sin answer');
+                    this.showNoResultsHelp(query);
+                }
+            } else {
+                // Si Perplexity falla, mostrar ayuda
+                const errorData = await perplexityResponse.json().catch(() => ({}));
+                console.error('❌ Chatbot Perplexity: Error', perplexityResponse.status, errorData);
+                
+                if (perplexityResponse.status === 503 && errorData.error === 'API de Perplexity no configurada') {
+                    // API no configurada, mostrar ayuda estándar
+                    this.showNoResultsHelp(query);
+                } else {
+                    // Otro error, mostrar ayuda estándar
+                    this.showNoResultsHelp(query);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Chatbot Perplexity: Error de red', error);
+            this.hideTyping(typingId);
+            this.showNoResultsHelp(query);
+        }
     }
 
     showNoResultsHelp(query) {

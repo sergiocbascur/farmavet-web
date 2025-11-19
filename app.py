@@ -2214,6 +2214,7 @@ def api_chatbot_search():
     try:
         data = request.get_json()
         query = data.get('query', '').strip()
+        include_local = data.get('include_local', True)  # Incluir contexto local
         
         if not query:
             return jsonify({'error': 'Query vacía'}), 400
@@ -2227,12 +2228,54 @@ def api_chatbot_search():
                 'message': 'La funcionalidad de búsqueda inteligente no está disponible'
             }), 503
         
-        # Construir el prompt contextual para Perplexity
-        context = """Eres un asistente experto del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025 para análisis de residuos químicos, antibióticos, micotoxinas y contaminantes en alimentos de origen animal.
-
-Responde de manera natural, clara y conversacional en español. Sé breve pero informativo. Evita listas largas y prefiero respuestas en formato de párrafos continuos cuando sea posible."""
+        # Obtener información del contexto local (metodologías, servicios, etc.)
+        local_context = ""
+        if include_local:
+            try:
+                conn = get_db()
+                
+                # Obtener metodologías disponibles
+                metodologias = conn.execute('''
+                    SELECT DISTINCT analito, matriz, tecnica, categoria 
+                    FROM metodologias 
+                    WHERE activo = 1 
+                    LIMIT 20
+                ''').fetchall()
+                
+                if metodologias:
+                    met_list = [f"{m['analito']} en {m['matriz']} ({m['tecnica'] or 'técnica variada'})" 
+                               for m in metodologias[:10]]
+                    local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list)
+                
+                # Obtener servicios principales
+                tarjetas = conn.execute('''
+                    SELECT titulo, descripcion FROM tarjetas_destacadas 
+                    WHERE activo = 1 
+                    LIMIT 5
+                ''').fetchall()
+                
+                if tarjetas:
+                    servicios = [t['titulo'] for t in tarjetas]
+                    local_context += f"\n\nServicios principales: {', '.join(servicios)}"
+                
+                conn.close()
+            except Exception as e:
+                app.logger.warning(f'Error al obtener contexto local: {str(e)}')
         
-        system_message = f"{context} Si no tienes información específica sobre metodologías de FARMAVET, indica amablemente que deben consultar directamente con el laboratorio."
+        # Construir el prompt contextual para Perplexity
+        context = f"""Eres un asistente experto del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025 para análisis de residuos químicos, antibióticos, micotoxinas y contaminantes en alimentos de origen animal.
+
+CONTEXTO DEL LABORATORIO:
+- Laboratorio de Farmacología Veterinaria (FARMAVET) de la Universidad de Chile
+- Más de 70 metodologías analíticas acreditadas ISO 17025
+- Análisis de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos y microbiológicos
+- Matrices: productos hidrobiológicos (salmón, trucha, mariscos), pecuarios (carne, leche, huevos) y derivados
+- Técnicas: UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL
+{local_context}
+
+Responde de manera natural, conversacional y amigable en español. Sé claro y directo. Si el usuario pregunta sobre algo específico de FARMAVET, proporciona información detallada. Si pregunta algo general sobre metodologías analíticas, explica de manera educativa pero siempre mencionando que FARMAVET ofrece estos servicios."""
+        
+        system_message = context
         
         # Llamar a la API de Perplexity
         perplexity_url = "https://api.perplexity.ai/chat/completions"
