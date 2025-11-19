@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_babel import Babel, gettext as _, get_locale, lazy_gettext as _l
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from urllib.parse import unquote
 import sqlite3
 import os
 import json
@@ -904,7 +905,27 @@ def assets(filename):
 
 @app.route('/logos/<path:filename>')
 def logos(filename):
-    return send_from_directory('logos', filename)
+    # Decodificar espacios y caracteres especiales en el nombre del archivo
+    decoded_filename = unquote(filename)
+    # Normalizar la ruta para manejar espacios correctamente
+    logo_path = os.path.join('logos', decoded_filename)
+    
+    # Verificar que el archivo existe
+    if not os.path.exists(logo_path):
+        # Si no existe, intentar buscar el archivo real (puede tener espacios codificados diferente)
+        import glob
+        # Buscar archivos que coincidan con el patrón
+        base_name = os.path.basename(decoded_filename)
+        pattern = os.path.join('logos', base_name.replace(' ', '*'))
+        matches = glob.glob(pattern)
+        if matches:
+            # Usar el primer match encontrado
+            actual_filename = os.path.basename(matches[0])
+            return send_from_directory('logos', actual_filename)
+        # Si no se encuentra, devolver 404
+        return "Logo no encontrado", 404
+    
+    return send_from_directory('logos', decoded_filename)
 
 # Sistema de idioma con Flask-Babel
 # En Flask-Babel 4.0.0, se registra la función directamente
