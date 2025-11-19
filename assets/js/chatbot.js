@@ -279,8 +279,15 @@ class MetodologiasChatbot {
         contentDiv.className = 'message-content';
         
         if (typeof content === 'string') {
-            contentDiv.innerHTML = `<p>${this.escapeHtml(content)}</p>`;
+            // Si es string y parece HTML (contiene tags), renderizar como HTML
+            if (content.includes('<p>') || content.includes('<strong>') || content.includes('<div>')) {
+                contentDiv.innerHTML = content;
+            } else {
+                // Si es texto plano, escapar HTML y envolver en <p>
+                contentDiv.innerHTML = `<p>${this.escapeHtml(content)}</p>`;
+            }
         } else {
+            // Si ya es HTML formateado, renderizar directamente
             contentDiv.innerHTML = content;
         }
         
@@ -681,23 +688,30 @@ class MetodologiasChatbot {
     formatPerplexityAnswer(answer) {
         if (!answer) return '';
         
-        // Escapar HTML primero
-        let formatted = this.escapeHtml(answer);
+        // NO escapar HTML todavía - primero limpiar referencias
+        let formatted = answer;
         
-        // Limpiar referencias a citas y notas (formato [1], [2], <...>, etc.)
+        // Limpiar referencias a citas y notas ANTES de formatear
         formatted = formatted
             .replace(/\[(\d+)\]/g, '') // Eliminar referencias como [1], [2], etc.
             .replace(/\[\d+\]/g, '') // Eliminar referencias con múltiples números
-            .replace(/<[^>]*>/g, '') // Eliminar tags HTML que puedan quedar
             .replace(/<\.\.\.>/g, '') // Eliminar <...>
             .replace(/\[\.\.\.\]/g, '') // Eliminar [...]
             .replace(/\(fuente[^)]*\)/gi, '') // Eliminar (fuente: ...)
             .replace(/\(referencia[^)]*\)/gi, '') // Eliminar (referencia: ...)
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita **texto**
-            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva *texto* (solo si no es lista)
-            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Eliminar enlaces [texto](url)
+            .replace(/\(ver[^)]*\)/gi, '') // Eliminar (ver: ...)
+            .replace(/\(consulta[^)]*\)/gi, '') // Eliminar (consulta: ...)
             .replace(/\s+/g, ' ') // Normalizar espacios múltiples
             .trim();
+        
+        // Ahora escapar HTML para seguridad, pero preservar formato básico
+        formatted = this.escapeHtml(formatted);
+        
+        // Aplicar formato después de escapar
+        formatted = formatted
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita **texto**
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva *texto* (solo si no es lista)
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Eliminar enlaces [texto](url)
         
         // Convertir saltos de línea dobles en párrafos
         let paragraphs = formatted.split(/\n\s*\n/).filter(p => p.trim().length > 0);
@@ -744,19 +758,21 @@ class MetodologiasChatbot {
                 para = para.replace(/^[-*•]\s*/, '');
             }
             
-            // Convertir saltos de línea simples en <br>
-            para = para.replace(/\n/g, '<br>');
-            
-            // Limpiar espacios múltiples
+            // Limpiar espacios múltiples antes de procesar
             para = para.replace(/\s+/g, ' ').trim();
             
             // Si no empieza con una etiqueta HTML, envolver en <p>
             if (!para.match(/^<(p|ul|ol|li|h[1-6]|div|strong|em)/i)) {
+                // No convertir saltos de línea en <br> si ya está en un párrafo
+                // Solo envolver en <p>
                 return `<p>${para}</p>`;
             }
             
             return para;
         }).join('');
+        
+        // Limpiar párrafos vacíos o con solo espacios
+        formatted = formatted.replace(/<p>\s*<\/p>/g, '');
         
         return formatted;
     }
