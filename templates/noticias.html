@@ -163,7 +163,7 @@
                   {% endif %}
                   {% if tarjeta.enlace %}
                     {% set enlace_url = tarjeta.enlace %}
-                    <a href="{{ enlace_url }}" class="cta-link-red mt-3" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <a href="{{ enlace_url }}" class="cta-link-red mt-3" style="color: var(--color-secondary) !important;" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
                       {{ get_translated_field(tarjeta, 'texto_enlace') or tarjeta.texto_enlace or _('Ver más') }}
                     </a>
                   {% endif %}
