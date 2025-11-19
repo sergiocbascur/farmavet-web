@@ -512,7 +512,7 @@ class MetodologiasChatbot {
             // Primero mostrar mensaje de no encontrado
             this.addMessage(`
                 <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>" en nuestra base de datos.</p>
-                <p><small>💡 Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
+                <p><small>Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
             `);
             
             // Intentar búsqueda inteligente con Perplexity
