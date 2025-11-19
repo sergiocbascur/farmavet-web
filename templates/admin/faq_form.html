@@ -1,0 +1,105 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if faq %}Editar{% else %}Nueva{% endif %} FAQ{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if faq else 'plus-circle' }} me-2"></i>
+        {% if faq %}Editar{% else %}Nueva{% endif %} Pregunta Frecuente
+    </h2>
+    <a href="{{ url_for('admin_faq') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="pregunta" class="form-label">Pregunta <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="pregunta" name="pregunta" 
+                           value="{{ faq.pregunta if faq else '' }}" required
+                           placeholder="Ej: ¿Cuál es el plazo para obtener resultados?">
+                </div>
+                
+                <div class="col-12">
+                    <label for="respuesta" class="form-label">Respuesta <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="respuesta" name="respuesta" rows="6" required>{{ faq.respuesta if faq else '' }}</textarea>
+                    <small class="text-muted">Respuesta clara y concisa (máx. 300 palabras recomendado)</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria" name="categoria">
+                        <option value="">Seleccionar...</option>
+                        <option value="servicios" {% if faq and faq.categoria == 'servicios' %}selected{% endif %}>Servicios</option>
+                        <option value="proceso" {% if faq and faq.categoria == 'proceso' %}selected{% endif %}>Proceso</option>
+                        <option value="tiempos" {% if faq and faq.categoria == 'tiempos' %}selected{% endif %}>Tiempos y Plazos</option>
+                        <option value="costos" {% if faq and faq.categoria == 'costos' %}selected{% endif %}>Costos</option>
+                        <option value="tecnicas" {% if faq and faq.categoria == 'tecnicas' %}selected{% endif %}>Técnicas y Metodologías</option>
+                        <option value="certificaciones" {% if faq and faq.categoria == 'certificaciones' %}selected{% endif %}>Certificaciones</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ faq.orden if faq else 0 }}" min="0">
+                    <small class="text-muted">Menor número = aparece primero en su categoría</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, la FAQ se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="pregunta_en" class="form-label">Pregunta (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="pregunta_en" name="pregunta_en" 
+                           value="{{ faq.pregunta_en if faq and faq.pregunta_en else '' }}" 
+                           placeholder="Question in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="respuesta_en" class="form-label">Respuesta (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="respuesta_en" name="respuesta_en" rows="6" 
+                              placeholder="Answer in English">{{ faq.respuesta_en if faq and faq.respuesta_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not faq or faq.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            FAQ activa (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar FAQ
+                        </button>
+                        <a href="{{ url_for('admin_faq') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

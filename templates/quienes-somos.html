@@ -3,12 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ _('Quiénes Somos') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>Quiénes Somos | Laboratorio FARMAVET - 30+ Años Acreditado ISO 17025</title>
     <meta
       name="description"
-      content="Historia, misión y valores del Laboratorio FARMAVET. 30+ años de trayectoria, acreditación ISO 17025 continua y equipo multidisciplinario de excelencia."
+      content="Laboratorio FARMAVET: 30+ años de trayectoria, acreditado ISO 17025 desde 2004, Centro Colaborador OMSA único en Latinoamérica. Equipo multidisciplinario especializado en farmacología veterinaria e inocuidad alimentaria."
     />
+    <meta name="keywords" content="laboratorio FARMAVET historia, acreditación ISO 17025 veterinaria, Centro Colaborador OMSA Chile, equipo farmacología veterinaria, certificaciones laboratorio veterinario" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.laboratoriofarmavet.cl/quienes-somos.html" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -47,11 +50,11 @@
       </div>
       <div class="container nav-container">
         <nav class="main-nav" aria-label="Navegación principal">
-          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
-            {{ _('Menú') }}
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
           </button>
           <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
-            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <img src="{{ url_for('logos', filename='LOGO_FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
             <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
           </a>
           <ul class="nav-links" id="nav-links" data-nav-links>
@@ -73,6 +76,7 @@
             </li>
             <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
             <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
           </ul>
@@ -87,16 +91,56 @@
             <p class="hero-subtitle">{{ _('Quiénes Somos') }}</p>
             <h1 class="hero-title">{{ _('Excelencia científica al servicio de la salud pública') }}</h1>
             <p class="hero-description">
-              {{ _('FARMAVET es un laboratorio universitario con más de 30 años de trayectoria, acreditado ISO 17025 y reconocido como Centro Colaborador OMSA. Acompañamos al país y a la región desde la ciencia aplicada y el servicio público.') }}
+              {{ _('FARMAVET es el Laboratorio de Farmacología Veterinaria de la Universidad de Chile, instituido como Centro Colaborador de OMSA (Organización Mundial de Sanidad Animal) — único en Latinoamérica en su categoría. Desde 1995, brindamos servicios analíticos de excelencia para garantizar la inocuidad de alimentos de origen animal.') }}
             </p>
             <div class="pill-group">
-              <span class="pill">{{ _('Fundado en 1993') }}</span>
-              <span class="pill">{{ _('30+ años de trayectoria') }}</span>
-              <span class="pill">{{ _('Vinculación permanente con la industria') }}</span>
+              <span class="pill">{{ _('Acreditación ISO 17025 desde 2004') }}</span>
+              <span class="pill">{{ _('+70 metodologías acreditadas') }}</span>
+              <span class="pill">{{ _('Centro Colaborador OMSA único en Latinoamérica') }}</span>
             </div>
           </div>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% elif tarjetas_destacadas %}
+          {# Fallback a tarjetas destacadas si no hay imágenes #}
           {# Sección de tarjetas destacadas - dinámico #}
-          {% if tarjetas_destacadas %}
             {% if tarjetas_destacadas|length > 1 %}
               {# Carrusel si hay múltiples tarjetas #}
               <div
@@ -190,7 +234,7 @@
           </p>
           <div class="timeline">
             <div class="timeline-item">
-              <div class="timeline-year">1993</div>
+              <div class="timeline-year">1995</div>
               <div class="timeline-card">
                 <h3 class="timeline-card-title">{{ _('Fundación') }}</h3>
                 <p class="timeline-card-text">
@@ -199,11 +243,11 @@
               </div>
             </div>
             <div class="timeline-item">
-              <div class="timeline-year">2003</div>
+              <div class="timeline-year">2004</div>
               <div class="timeline-card">
-                <h3 class="timeline-card-title">ISO 17025</h3>
+                <h3 class="timeline-card-title">{{ _('ISO 17025') }}</h3>
                 <p class="timeline-card-text">
-                  {{ _('Obtenemos por primera vez la acreditación ISO 17025 del INN, iniciando un camino de mejora continua y ampliación del alcance metodológico.') }}
+                  {{ _('Obtenemos por primera vez la acreditación ISO 17025 del INN, iniciando un camino de mejora continua y ampliación del alcance metodológico. Mantenemos esta acreditación de forma continua desde entonces (+20 años).') }}
                 </p>
               </div>
             </div>
@@ -233,6 +277,37 @@
                   {{ _('Ampliamos alcance a nuevas matrices y metodologías LC-MS/MS de alta resolución, integrando investigación, docencia y servicios con enfoque sostenible.') }}
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section light" id="numeros">
+        <div class="container">
+          <h2 class="section-title">{{ _('Nuestros Números') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Datos que respaldan nuestra trayectoria y compromiso con la excelencia') }}
+          </p>
+          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 2rem;">
+            <div class="stat-card" style="text-align: center; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: var(--shadow-soft);">
+              <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">🏆</div>
+              <h3 style="font-size: 2rem; font-weight: 700; color: var(--color-primary); margin: 0.5rem 0;">+20</h3>
+              <p style="margin: 0; color: #666;">{{ _('Años con acreditación ISO 17025 continua (desde 2004)') }}</p>
+            </div>
+            <div class="stat-card" style="text-align: center; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: var(--shadow-soft);">
+              <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">🔬</div>
+              <h3 style="font-size: 2rem; font-weight: 700; color: var(--color-primary); margin: 0.5rem 0;">+70</h3>
+              <p style="margin: 0; color: #666;">{{ _('Metodologías analíticas acreditadas') }}</p>
+            </div>
+            <div class="stat-card" style="text-align: center; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: var(--shadow-soft);">
+              <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">🌍</div>
+              <h3 style="font-size: 2rem; font-weight: 700; color: var(--color-primary); margin: 0.5rem 0;">1</h3>
+              <p style="margin: 0; color: #666;">{{ _('Centro Colaborador OMSA único en Latinoamérica') }}</p>
+            </div>
+            <div class="stat-card" style="text-align: center; padding: 1.5rem; background: white; border-radius: 16px; box-shadow: var(--shadow-soft);">
+              <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.5rem;">👥</div>
+              <h3 style="font-size: 2rem; font-weight: 700; color: var(--color-primary); margin: 0.5rem 0;">30+</h3>
+              <p style="margin: 0; color: #666;">{{ _('Especialistas en química y medicina veterinaria') }}</p>
             </div>
           </div>
         </div>
@@ -316,51 +391,109 @@
           <p class="section-subtitle">
             {{ _('Respaldos nacionales e internacionales que certifican la calidad, la confiabilidad y el impacto de FARMAVET.') }}
           </p>
-          <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="4500">
-            <div class="carousel-wrapper">
-              <div class="carousel-track-infinite" data-carousel-track-infinite>
-                <article class="card">
-                  <h3 class="pillar-title">ISO 17025 - INN</h3>
-                  <p>
-                    {{ _('Acreditación continua por más de 20 años. Certifica la competencia técnica y la validez de los resultados analíticos emitidos por el laboratorio.') }}
-                  </p>
-                </article>
-                <article class="card">
-                  <h3 class="pillar-title">{{ _('Laboratorio Verificador SERNAPESCA') }}</h3>
-                  <p>
-                    {{ _('Apoyamos el control de residuos de medicamentos veterinarios y contaminantes químicos en productos hidrobiológicos para exportación.') }}
-                  </p>
-                </article>
-                <article class="card">
-                  <h3 class="pillar-title">{{ _('Laboratorio Verificador SAG') }}</h3>
-                  <p>
-                    {{ _('Respaldamos programas oficiales de monitoreo en carnes, lácteos y matrices pecuarias, asegurando el cumplimiento de normativas internacionales.') }}
-                  </p>
-                </article>
-                <article class="card">
-                  <h3 class="pillar-title">{{ _('Laboratorio Bromatológico MINSAL') }}</h3>
-                  <p>
-                    {{ _('Autorización del Ministerio de Salud para análisis bromatológicos que protegen a los consumidores a nivel nacional.') }}
-                  </p>
-                </article>
-                <article class="card">
-                  <h3 class="pillar-title">{{ _('Centro Colaborador OMSA') }}</h3>
-                  <p>
-                    {{ _('Único centro en Latinoamérica dedicado a la gestión de antimicrobianos en acuicultura, colaborando con países miembros de la OMSA.') }}
-                  </p>
-                </article>
+          {% if certificados %}
+            <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="4500">
+              <div class="carousel-wrapper">
+                <div class="carousel-track-infinite" data-carousel-track-infinite>
+                  {% for certificado in certificados %}
+                    <article class="card">
+                      <h3 class="pillar-title">
+                        {{ get_translated_field(certificado, 'titulo') or certificado.titulo }}
+                        {% if certificado.numero_certificado %}
+                          <small style="display: block; font-size: 0.85em; font-weight: normal; color: #666; margin-top: 0.25rem;">
+                            {{ _('N°') }} {{ certificado.numero_certificado }}
+                          </small>
+                        {% endif %}
+                      </h3>
+                      {% if certificado.fecha_emision or certificado.fecha_vencimiento %}
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 0.5rem;">
+                          {% if certificado.fecha_emision %}
+                            {{ _('Emitido') }}: {{ certificado.fecha_emision }}
+                          {% endif %}
+                          {% if certificado.fecha_vencimiento %}
+                            {% if certificado.fecha_emision %} | {% endif %}
+                            {{ _('Vigente hasta') }}: {{ certificado.fecha_vencimiento }}
+                          {% endif %}
+                        </p>
+                      {% endif %}
+                      <p>
+                        {{ get_translated_field(certificado, 'descripcion') or certificado.descripcion or '' }}
+                      </p>
+                      {% if certificado.imagen or certificado.enlace_externo %}
+                        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+                          {% if certificado.imagen %}
+                            {% set es_pdf = certificado.imagen.lower().endswith('.pdf') %}
+                            {% if es_pdf %}
+                              <a href="{{ certificado.imagen }}" target="_blank" rel="noopener noreferrer" class="cta-button-green" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; font-size: 0.9em; text-decoration: none;">
+                                <i class="bi bi-file-earmark-pdf" style="font-size: 1.2em;"></i>
+                                {{ _('Ver certificado PDF') }}
+                              </a>
+                            {% else %}
+                              <a href="{{ certificado.imagen }}" target="_blank" rel="noopener noreferrer" style="display: inline-block;">
+                                <img src="{{ certificado.imagen }}" alt="{{ certificado.titulo }}" style="max-width: 150px; max-height: 100px; border-radius: 8px; border: 1px solid #e0e0e0; object-fit: contain;">
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                          {% if certificado.enlace_externo %}
+                            <a href="{{ certificado.enlace_externo }}" target="_blank" rel="noopener noreferrer" class="cta-button" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; font-size: 0.9em; text-decoration: none;">
+                              <i class="bi bi-box-arrow-up-right"></i>
+                              {{ _('Ver en sitio oficial') }}
+                            </a>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </article>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="carousel-nav-infinite">
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
               </div>
             </div>
-            <div class="carousel-nav-infinite">
-              <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
-              <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+          {% else %}
+            {# Fallback con certificados estáticos si no hay en BD #}
+            <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="4500">
+              <div class="carousel-wrapper">
+                <div class="carousel-track-infinite" data-carousel-track-infinite>
+                  <article class="card">
+                    <h3 class="pillar-title">ISO 17025 - INN</h3>
+                    <p>
+                      {{ _('Acreditación continua por más de 20 años. Certifica la competencia técnica y la validez de los resultados analíticos emitidos por el laboratorio.') }}
+                    </p>
+                  </article>
+                  <article class="card">
+                    <h3 class="pillar-title">{{ _('Laboratorio Verificador SERNAPESCA') }}</h3>
+                    <p>
+                      {{ _('Apoyamos el control de residuos de medicamentos veterinarios y contaminantes químicos en productos hidrobiológicos para exportación.') }}
+                    </p>
+                  </article>
+                  <article class="card">
+                    <h3 class="pillar-title">{{ _('Laboratorio Verificador SAG') }}</h3>
+                    <p>
+                      {{ _('Respaldamos programas oficiales de monitoreo en carnes, lácteos y matrices pecuarias, asegurando el cumplimiento de normativas internacionales.') }}
+                    </p>
+                  </article>
+                  <article class="card">
+                    <h3 class="pillar-title">{{ _('Centro Colaborador OMSA') }}</h3>
+                    <p>
+                      {{ _('Único centro en Latinoamérica dedicado a la gestión de antimicrobianos en acuicultura, colaborando con países miembros de la OMSA.') }}
+                    </p>
+                  </article>
+                </div>
+              </div>
+              <div class="carousel-nav-infinite">
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+              </div>
             </div>
-          </div>
+          {% endif %}
           <div style="margin-top: 2.5rem; text-align: center">
             <a class="cta-button" href="{{ url_for('page', page='contacto') }}">{{ _('Solicitar más información') }}</a>
           </div>
         </div>
       </section>
+
     </main>
 
     <footer class="site-footer">

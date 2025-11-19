@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>Preguntas Frecuentes (FAQ) | Servicios Analíticos | FARMAVET</title>
+    <meta
+      name="description"
+      content="Preguntas frecuentes sobre servicios analíticos FARMAVET: plazos de análisis, costos, metodologías acreditadas, requisitos de muestras, certificaciones y procesos. Respuestas a las consultas más comunes."
+    />
+    <meta name="keywords" content="FAQ laboratorio veterinario, preguntas frecuentes análisis residuos, plazos análisis antibióticos, costos análisis micotoxinas, requisitos muestras laboratorio" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.laboratoriofarmavet.cl/faq.html" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.laboratoriofarmavet.cl/faq.html" />
+    <meta property="og:title" content="Preguntas Frecuentes | FARMAVET - Universidad de Chile" />
+    <meta property="og:description" content="Preguntas frecuentes sobre servicios analíticos, procesos, tiempos, costos y metodologías del Laboratorio FARMAVET." />
+    <meta property="og:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <meta property="og:site_name" content="FARMAVET - Universidad de Chile" />
+    <meta property="og:locale" content="es_CL" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.laboratoriofarmavet.cl/faq.html" />
+    <meta name="twitter:title" content="Preguntas Frecuentes | FARMAVET" />
+    <meta name="twitter:description" content="Preguntas frecuentes sobre servicios analíticos, procesos, tiempos, costos y metodologías del Laboratorio FARMAVET." />
+    <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+  </head>
+  <body data-page="faq">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('logos', filename='LOGO_FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-content">
+          <div>
+            <p class="hero-subtitle">{{ _('Preguntas Frecuentes') }}</p>
+            <h1 class="hero-title">{{ _('Resolvemos tus dudas sobre nuestros servicios') }}</h1>
+            <p class="hero-description">
+              {{ _('Encuentra respuestas rápidas a las preguntas más comunes sobre nuestros servicios analíticos, procesos, tiempos, costos y metodologías. Si no encuentras lo que buscas, contáctanos directamente.') }}
+            </p>
+            <div class="pill-group">
+              <span class="pill">{{ _('Servicios acreditados') }}</span>
+              <span class="pill">{{ _('Procesos claros') }}</span>
+              <span class="pill">{{ _('Atención personalizada') }}</span>
+            </div>
+          </div>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% elif tarjetas_destacadas %}
+            {% if tarjetas_destacadas|length > 1 %}
+              <div
+                class="hero-media"
+                aria-hidden="true"
+                data-hero-slider
+                data-hero-interval="6000"
+                style="position: relative; overflow: hidden; min-height: 300px;"
+              >
+                {% for tarjeta in tarjetas_destacadas %}
+                <div class="card{% if loop.first %} is-active{% endif %}" data-hero-slide data-hero-order="{{ loop.index0 }}" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
+                  <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--color-primary)">
+                    {{ get_translated_field(tarjeta, 'titulo') or tarjeta.titulo }}
+                  </h2>
+                  {% set contenido_raw = get_translated_field(tarjeta, 'contenido') or tarjeta.contenido %}
+                  {% if '\n' in contenido_raw %}
+                    <ul class="footer-links">
+                      {% for linea in contenido_raw.split('\n') %}
+                        {% set linea_trim = linea|trim %}
+                        {% if linea_trim %}
+                          <li>{{ linea_trim }}</li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  {% else %}
+                    <p>{{ contenido_raw }}</p>
+                  {% endif %}
+                  {% if tarjeta.enlace %}
+                    {% set enlace_url = tarjeta.enlace %}
+                    <a href="{{ enlace_url }}" class="btn btn-primary mt-3" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                      {{ get_translated_field(tarjeta, 'texto_enlace') or tarjeta.texto_enlace or _('Ver más') }}
+                    </a>
+                  {% endif %}
+                </div>
+                {% endfor %}
+                <div class="hero-dots" role="presentation" data-hero-dots style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 10;"></div>
+              </div>
+            {% else %}
+              {% set tarjeta = tarjetas_destacadas[0] %}
+              <div class="card">
+                <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--color-primary)">
+                  {{ get_translated_field(tarjeta, 'titulo') or tarjeta.titulo }}
+                </h2>
+                {% set contenido_raw = get_translated_field(tarjeta, 'contenido') or tarjeta.contenido %}
+                {% if '\n' in contenido_raw %}
+                  <ul class="footer-links">
+                    {% for linea in contenido_raw.split('\n') %}
+                      {% set linea_trim = linea|trim %}
+                      {% if linea_trim %}
+                        <li>{{ linea_trim }}</li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p>{{ contenido_raw }}</p>
+                {% endif %}
+                {% if tarjeta.enlace %}
+                  {% set enlace_url = tarjeta.enlace %}
+                  <a href="{{ enlace_url }}" class="btn btn-primary mt-3" {% if 'http://' in enlace_url or 'https://' in enlace_url %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    {{ get_translated_field(tarjeta, 'texto_enlace') or tarjeta.texto_enlace or _('Ver más') }}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="section light" id="faq">
+        <div class="container">
+          <h2 class="section-title">{{ _('Preguntas frecuentes') }}</h2>
+          {% if faqs_por_categoria %}
+            {% for categoria, faqs_cat in faqs_por_categoria.items() %}
+              {% if loop.index > 1 %}
+                <div style="margin-top: 3rem;"></div>
+              {% endif %}
+              <h3 class="section-subtitle" style="margin-bottom: 1.5rem; font-family: var(--font-heading); color: var(--color-primary);">
+                {{ categorias_nombres.get(categoria, categoria|title) }}
+              </h3>
+              <div class="accordion" data-accordion>
+                {% for faq in faqs_cat %}
+                  <div class="accordion-item" data-accordion-item>
+                    <button class="accordion-toggle" type="button" data-accordion-toggle>
+                      {{ get_translated_field(faq, 'pregunta') or faq.pregunta }}
+                    </button>
+                    <div class="accordion-content" data-accordion-content>
+                      <div class="accordion-content-inner">
+                        {{ get_translated_field(faq, 'respuesta') or faq.respuesta }}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-5">
+              <p class="text-muted">{{ _('No hay preguntas frecuentes disponibles en este momento.') }}</p>
+              <a href="{{ url_for('page', page='contacto') }}" class="cta-button">
+                {{ _('Contactar directamente') }}
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="section" id="cta-faq">
+        <div class="container">
+          <div class="cta-banner">
+            <h3>{{ _('¿No encuentras tu respuesta?') }}</h3>
+            <p>
+              {{ _('Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte.') }}
+            </p>
+            <a class="cta-button" href="{{ url_for('page', page='contacto') }}">{{ _('Contactar a FARMAVET') }}</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Facultad de Ciencias Veterinarias y Pecuarias, Universidad de Chile. Excelencia analítica, investigación y formación profesional al servicio de la salud pública.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Enlaces rápidos') }}</h3>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('page', page='servicios') }}">{{ _('Servicios analíticos') }}</a></li>
+            <li><a href="{{ url_for('page', page='investigacion') }}">{{ _('Investigación') }}</a></li>
+            <li><a href="{{ url_for('page', page='docencia') }}">{{ _('Formación y capacitación') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}">{{ _('Preguntas Frecuentes') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}">{{ _('Formulario de contacto') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
+            <li>{{ _('Email') }}: farmavet@uchile.cl</li>
+            <li>{{ _('Programas') }}: postitulo@veterinaria.uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">{{ _('Laboratorio Verificador SERNAPESCA') }}</li>
+            <li class="badge">{{ _('Laboratorio Verificador SAG') }}</li>
+            <li class="badge">{{ _('Centro Colaborador OMSA') }}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}. {{ _('Todos los derechos reservados.') }}</div>
+    </footer>
+
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
+

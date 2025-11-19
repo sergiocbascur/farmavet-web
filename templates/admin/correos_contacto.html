@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Correos de Contacto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Correos de Contacto</h2>
+    <a href="{{ url_for('admin_correo_contacto_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Agregar Correo
+    </a>
+</div>
+
+<p class="text-muted mb-4">
+    Configura los correos de destino para cada tipo de consulta del formulario de contacto.
+    Cuando un usuario envíe una consulta, se enviará un correo a todos los destinatarios activos del tipo correspondiente.
+</p>
+
+{% for tipo, nombre in tipos_consulta.items() %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">{{ nombre }}</h5>
+        <small class="text-muted">Tipo: {{ tipo }}</small>
+    </div>
+    <div class="card-body">
+        {% if correos_por_tipo[tipo] %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Fecha de creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for correo in correos_por_tipo[tipo] %}
+                    <tr>
+                        <td>{{ correo.email }}</td>
+                        <td>
+                            {% if correo.activo %}
+                            <span class="badge bg-success">Activo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ correo.created_at[:10] if correo.created_at else '-' }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_correo_contacto_editar', correo_id=correo.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_correo_contacto_eliminar', correo_id=correo.id) }}" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este correo?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No hay correos configurados para este tipo de consulta.</p>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Nota:</strong> Para que el envío de correos funcione, debes configurar las variables de entorno SMTP en el servidor:
+    <ul class="mb-0 mt-2">
+        <li><code>SMTP_HOST</code> - Servidor SMTP (ej: smtp.gmail.com)</li>
+        <li><code>SMTP_PORT</code> - Puerto SMTP (ej: 587)</li>
+        <li><code>SMTP_USER</code> - Usuario SMTP</li>
+        <li><code>SMTP_PASSWORD</code> - Contraseña SMTP</li>
+        <li><code>SMTP_FROM</code> - Email remitente (opcional, usa SMTP_USER si no se especifica)</li>
+    </ul>
+</div>
+{% endblock %}
+

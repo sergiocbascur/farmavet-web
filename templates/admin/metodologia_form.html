@@ -1,0 +1,179 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if metodologia %}Editar{% else %}Nueva{% endif %} Metodología Analítica{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if metodologia else 'plus-circle' }} me-2"></i>
+        {% if metodologia %}Editar{% else %}Nueva{% endif %} Metodología Analítica
+    </h2>
+    <a href="{{ url_for('admin_metodologias') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="codigo" class="form-label">Código Interno</label>
+                    <input type="text" class="form-control" id="codigo" name="codigo" 
+                           value="{{ metodologia.codigo if metodologia else '' }}" 
+                           placeholder="Ej: MET-001">
+                    <small class="text-muted">Código único para identificación interna</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoría <span class="text-danger">*</span></label>
+                    <select class="form-select" id="categoria" name="categoria" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="residuos" {% if metodologia and metodologia.categoria == 'residuos' %}selected{% endif %}>Residuos de Medicamentos</option>
+                        <option value="contaminantes" {% if metodologia and metodologia.categoria == 'contaminantes' %}selected{% endif %}>Contaminantes Químicos</option>
+                        <option value="microbiologia" {% if metodologia and metodologia.categoria == 'microbiologia' %}selected{% endif %}>Microbiología</option>
+                        <option value="otros" {% if metodologia and metodologia.categoria == 'otros' %}selected{% endif %}>Otros</option>
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <label for="nombre" class="form-label">Nombre de la Metodología <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                           value="{{ metodologia.nombre if metodologia else '' }}" required
+                           placeholder="Ej: Determinación de tetraciclinas en músculo de salmón">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="analito" class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="analito" name="analito" 
+                           value="{{ metodologia.analito if metodologia else '' }}" required
+                           placeholder="Ej: Tetraciclinas, Mercurio, E. coli">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="matriz" class="form-label">Matriz <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="matriz" name="matriz" 
+                           value="{{ metodologia.matriz if metodologia else '' }}" required
+                           placeholder="Ej: Músculo de salmón, Leche, Agua">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tecnica" class="form-label">Técnica Analítica</label>
+                    <input type="text" class="form-control" id="tecnica" name="tecnica" 
+                           value="{{ metodologia.tecnica if metodologia else '' }}" 
+                           placeholder="Ej: LC-MS/MS, GC-MS, HPLC">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="norma_referencia" class="form-label">Norma o Guía de Referencia</label>
+                    <input type="text" class="form-control" id="norma_referencia" name="norma_referencia" 
+                           value="{{ metodologia.norma_referencia if metodologia else '' }}" 
+                           placeholder="Ej: SANTE/11312/2021, CODEX, FDA">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="limite_deteccion" class="form-label">Límite de Detección (LOD)</label>
+                    <input type="text" class="form-control" id="limite_deteccion" name="limite_deteccion" 
+                           value="{{ metodologia.limite_deteccion if metodologia else '' }}" 
+                           placeholder="Ej: 0.5 µg/kg">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="limite_cuantificacion" class="form-label">Límite de Cuantificación (LOQ)</label>
+                    <input type="text" class="form-control" id="limite_cuantificacion" name="limite_cuantificacion" 
+                           value="{{ metodologia.limite_cuantificacion if metodologia else '' }}" 
+                           placeholder="Ej: 1.0 µg/kg">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="vigencia" class="form-label">Vigencia de Acreditación</label>
+                    <input type="text" class="form-control" id="vigencia" name="vigencia" 
+                           value="{{ metodologia.vigencia if metodologia else '' }}" 
+                           placeholder="Ej: 2024-2027">
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="acreditada" name="acreditada" 
+                               {% if not metodologia or metodologia.acreditada %}checked{% endif %}>
+                        <label class="form-check-label" for="acreditada">
+                            Metodología acreditada ISO 17025
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, la metodología se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="nombre_en" class="form-label">Nombre (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="nombre_en" name="nombre_en" 
+                           value="{{ metodologia.nombre_en if metodologia and metodologia.nombre_en and metodologia.nombre_en != 'None' else '' }}" 
+                           placeholder="Method name in English">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="analito_en" class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="analito_en" name="analito_en" 
+                           value="{{ metodologia.analito_en if metodologia and metodologia.analito_en and metodologia.analito_en != 'None' else '' }}" 
+                           placeholder="Analyte in English">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="matriz_en" class="form-label">Matriz (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="matriz_en" name="matriz_en" 
+                           value="{{ metodologia.matriz_en if metodologia and metodologia.matriz_en and metodologia.matriz_en != 'None' else '' }}" 
+                           placeholder="Matrix in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="tecnica_en" class="form-label">Técnica (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="tecnica_en" name="tecnica_en" 
+                           value="{{ metodologia.tecnica_en if metodologia and metodologia.tecnica_en and metodologia.tecnica_en != 'None' else '' }}" 
+                           placeholder="Technique in English">
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ metodologia.orden if metodologia else 0 }}" min="0">
+                    <small class="text-muted">Menor número = aparece primero en su categoría</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not metodologia or metodologia.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Metodología activa (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Metodología
+                        </button>
+                        <a href="{{ url_for('admin_metodologias') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

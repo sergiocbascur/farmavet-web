@@ -3,12 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ _('Investigación') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>Investigación | Proyectos FONDECYT y Publicaciones Científicas | FARMAVET</title>
     <meta
       name="description"
-      content="Líneas de investigación, proyectos FONDECYT y publicaciones científicas del laboratorio FARMAVET. Farmacocinética, inocuidad alimentaria y resistencia antimicrobiana."
+      content="Investigación FARMAVET: Proyectos FONDECYT/FONDEF, publicaciones científicas indexadas, líneas de investigación en farmacocinética, inocuidad alimentaria y resistencia antimicrobiana. Transferencia tecnológica a la industria."
     />
+    <meta name="keywords" content="investigación farmacología veterinaria, proyectos FONDECYT, publicaciones científicas veterinaria, farmacocinética acuicultura, resistencia antimicrobiana, investigación inocuidad alimentaria" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.laboratoriofarmavet.cl/investigacion.html" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -47,11 +50,11 @@
       </div>
       <div class="container nav-container">
         <nav class="main-nav" aria-label="Navegación principal">
-          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
-            {{ _('Menú') }}
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
           </button>
           <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
-            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <img src="{{ url_for('logos', filename='LOGO_FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
             <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
           </a>
           <ul class="nav-links" id="nav-links" data-nav-links>
@@ -73,6 +76,7 @@
             </li>
             <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
             <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
           </ul>
@@ -152,30 +156,242 @@
               <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
             </div>
           </div>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% elif tarjetas_destacadas %}
+          {# Fallback a tarjetas destacadas si no hay imágenes #}
+          {% endif %}
         </div>
       </section>
 
       <section class="section light" id="proyectos">
         <div class="container">
           <h2 class="section-title">{{ _('Proyectos destacados') }}</h2>
-          <div class="cards-grid">
-            {% if proyectos %}
+          <p class="section-subtitle">
+            {{ _('Investigación aplicada en farmacología veterinaria, inocuidad alimentaria y resistencia antimicrobiana, financiada por FONDECYT, FONDEF y organismos internacionales.') }}
+          </p>
+          {% if proyectos and proyectos|length >= 4 %}
+            {# Carrusel infinito para 4 o más proyectos #}
+            <div class="infinite-carousel" data-carousel-infinite data-items-per-view="3" data-autoplay="true" data-autoplay-speed="5000">
+              <div class="carousel-wrapper">
+                <div class="carousel-track-infinite" data-carousel-track-infinite>
+                  {% for proyecto in proyectos %}
+                  <article class="card proyecto-card">
+                    {% if proyecto.imagen %}
+                    <div class="proyecto-imagen-wrapper">
+                      <img src="/static/uploads/proyectos/{{ proyecto.imagen }}" 
+                           alt="{{ get_translated_field(proyecto, 'titulo') }}" 
+                           class="proyecto-imagen">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="proyecto-header">
+                      {% if proyecto.financiador %}
+                      <span class="badge proyecto-badge-financiador">{{ proyecto.financiador }}</span>
+                      {% elif get_translated_field(proyecto, 'tipo') %}
+                      <span class="badge">{{ get_translated_field(proyecto, 'tipo') }}</span>
+                      {% endif %}
+                      {% if proyecto.estado %}
+                      <span class="badge proyecto-badge-estado proyecto-estado-{{ proyecto.estado }}">
+                        {% if proyecto.estado == 'en_curso' %}{{ _('En Curso') }}{% elif proyecto.estado == 'completado' %}{{ _('Completado') }}{% elif proyecto.estado == 'activo' %}{{ _('Activo') }}{% else %}{{ proyecto.estado|title }}{% endif %}
+                      </span>
+                      {% endif %}
+                    </div>
+                    
+                    <h3 class="pillar-title">{{ get_translated_field(proyecto, 'titulo') }}</h3>
+                    
+                    {% if proyecto.codigo_proyecto %}
+                    <div class="proyecto-meta">
+                      <i class="bi bi-hash"></i>
+                      <code class="proyecto-codigo">{{ proyecto.codigo_proyecto }}</code>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proyecto.año_inicio or proyecto.año_fin %}
+                    <div class="proyecto-meta">
+                      <i class="bi bi-calendar-range"></i>
+                      <span>
+                        {% if proyecto.año_inicio and proyecto.año_fin %}
+                          {{ proyecto.año_inicio }} - {{ proyecto.año_fin }}
+                        {% elif proyecto.año_inicio %}
+                          {{ _('Desde') }} {{ proyecto.año_inicio }}
+                        {% elif proyecto.año_fin %}
+                          {{ _('Hasta') }} {{ proyecto.año_fin }}
+                        {% endif %}
+                      </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if get_translated_field(proyecto, 'descripcion') %}
+                    <p>{{ get_translated_field(proyecto, 'descripcion') }}</p>
+                    {% endif %}
+                    
+                    {% if proyecto.investigadores %}
+                    <div class="proyecto-investigadores">
+                      <strong><i class="bi bi-people"></i> {{ _('Investigadores') }}:</strong>
+                      <p class="small">{{ proyecto.investigadores }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proyecto.resultados %}
+                    <details class="proyecto-resultados">
+                      <summary class="proyecto-resultados-toggle">
+                        <i class="bi bi-chevron-down"></i> {{ _('Resultados y logros') }}
+                      </summary>
+                      <div class="proyecto-resultados-content">
+                        <p>{{ proyecto.resultados }}</p>
+                      </div>
+                    </details>
+                    {% endif %}
+                    
+                    {% if proyecto.presupuesto %}
+                    <div class="proyecto-meta proyecto-presupuesto">
+                      <i class="bi bi-cash-coin"></i>
+                      <span>{{ proyecto.presupuesto }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if proyecto.enlace %}
+                    <a class="cta-inline" href="{{ proyecto.enlace }}" {% if 'http' in proyecto.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                      <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver más') }}
+                    </a>
+                    {% endif %}
+                  </article>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="carousel-nav-infinite">
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+              </div>
+            </div>
+          {% elif proyectos %}
+            {# Grid centrado para menos de 4 proyectos #}
+            <div class="cards-grid proyectos-grid-centrado">
               {% for proyecto in proyectos %}
-              <article class="card">
-                {% if get_translated_field(proyecto, 'tipo') %}
-                <span class="badge">{{ get_translated_field(proyecto, 'tipo') }}</span>
+              <article class="card proyecto-card">
+                {% if proyecto.imagen %}
+                <div class="proyecto-imagen-wrapper">
+                  <img src="/static/uploads/proyectos/{{ proyecto.imagen }}" 
+                       alt="{{ get_translated_field(proyecto, 'titulo') }}" 
+                       class="proyecto-imagen">
+                </div>
                 {% endif %}
+                
+                <div class="proyecto-header">
+                  {% if proyecto.financiador %}
+                  <span class="badge proyecto-badge-financiador">{{ proyecto.financiador }}</span>
+                  {% elif get_translated_field(proyecto, 'tipo') %}
+                  <span class="badge">{{ get_translated_field(proyecto, 'tipo') }}</span>
+                  {% endif %}
+                  {% if proyecto.estado %}
+                  <span class="badge proyecto-badge-estado proyecto-estado-{{ proyecto.estado }}">
+                    {% if proyecto.estado == 'en_curso' %}{{ _('En Curso') }}{% elif proyecto.estado == 'completado' %}{{ _('Completado') }}{% elif proyecto.estado == 'activo' %}{{ _('Activo') }}{% else %}{{ proyecto.estado|title }}{% endif %}
+                  </span>
+                  {% endif %}
+                </div>
+                
                 <h3 class="pillar-title">{{ get_translated_field(proyecto, 'titulo') }}</h3>
+                
+                {% if proyecto.codigo_proyecto %}
+                <div class="proyecto-meta">
+                  <i class="bi bi-hash"></i>
+                  <code class="proyecto-codigo">{{ proyecto.codigo_proyecto }}</code>
+                </div>
+                {% endif %}
+                
+                {% if proyecto.año_inicio or proyecto.año_fin %}
+                <div class="proyecto-meta">
+                  <i class="bi bi-calendar-range"></i>
+                  <span>
+                    {% if proyecto.año_inicio and proyecto.año_fin %}
+                      {{ proyecto.año_inicio }} - {{ proyecto.año_fin }}
+                    {% elif proyecto.año_inicio %}
+                      {{ _('Desde') }} {{ proyecto.año_inicio }}
+                    {% elif proyecto.año_fin %}
+                      {{ _('Hasta') }} {{ proyecto.año_fin }}
+                    {% endif %}
+                  </span>
+                </div>
+                {% endif %}
+                
                 {% if get_translated_field(proyecto, 'descripcion') %}
                 <p>{{ get_translated_field(proyecto, 'descripcion') }}</p>
                 {% endif %}
+                
+                {% if proyecto.investigadores %}
+                <div class="proyecto-investigadores">
+                  <strong><i class="bi bi-people"></i> {{ _('Investigadores') }}:</strong>
+                  <p class="small">{{ proyecto.investigadores }}</p>
+                </div>
+                {% endif %}
+                
+                {% if proyecto.resultados %}
+                <details class="proyecto-resultados">
+                  <summary class="proyecto-resultados-toggle">
+                    <i class="bi bi-chevron-down"></i> {{ _('Resultados y logros') }}
+                  </summary>
+                  <div class="proyecto-resultados-content">
+                    <p>{{ proyecto.resultados }}</p>
+                  </div>
+                </details>
+                {% endif %}
+                
+                {% if proyecto.presupuesto %}
+                <div class="proyecto-meta proyecto-presupuesto">
+                  <i class="bi bi-cash-coin"></i>
+                  <span>{{ proyecto.presupuesto }}</span>
+                </div>
+                {% endif %}
+                
                 {% if proyecto.enlace %}
-                <a class="cta-inline" href="{{ proyecto.enlace }}" {% if 'http' in proyecto.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ _('Ver más') }}</a>
+                <a class="cta-inline" href="{{ proyecto.enlace }}" {% if 'http' in proyecto.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                  <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver más') }}
+                </a>
                 {% endif %}
               </article>
               {% endfor %}
-            {% else %}
-              <!-- Proyectos por defecto si no hay en BD -->
+            </div>
+          {% else %}
+            <!-- Proyectos por defecto si no hay en BD -->
+            <div class="cards-grid proyectos-grid-centrado">
               <article class="card">
                 <span class="badge">{{ _('FONDECYT Regular') }}</span>
                 <h3 class="pillar-title">{{ _('Farmacocinética de antimicrobianos en salmón Atlántico') }}</h3>
@@ -204,8 +420,8 @@
                   {{ _('Validación de métodos rápidos para detectar residuos en plumas y deyecciones, facilitando la vigilancia ambiental.') }}
                 </p>
               </article>
-            {% endif %}
-          </div>
+            </div>
+          {% endif %}
         </div>
       </section>
 
@@ -215,17 +431,81 @@
           <p class="section-subtitle">
             {{ _('Selección de artículos recientes publicados en revistas indexadas. Revisa nuestro repositorio institucional para conocer el catálogo completo.') }}
           </p>
-          <div class="news-feed">
-            {% if publicaciones %}
-              {% for publicacion in publicaciones %}
-              <article class="news-item">
-                <h3 class="pillar-title">{{ get_translated_field(publicacion, 'titulo') }}</h3>
-                <div class="news-meta">
-                  {% if publicacion.revista %}{{ publicacion.revista }}{% endif %}{% if publicacion.revista and publicacion.año %} · {% endif %}{% if publicacion.año %}{{ publicacion.año }}{% endif %}
+          {% if publicaciones and publicaciones|length > 3 %}
+            {# Carrusel vertical para más de 3 publicaciones #}
+            <div class="vertical-carousel" data-vertical-carousel data-items-per-view="3" data-autoplay="false">
+              <div class="vertical-carousel-wrapper">
+                <div class="vertical-carousel-track" data-vertical-carousel-track>
+                  {% for publicacion in publicaciones %}
+                  <article class="news-item publicacion-item">
+                <div class="publicacion-header">
+                  {% if publicacion.tipo_publicacion %}
+                  <span class="badge publicacion-badge-tipo">{{ publicacion.tipo_publicacion }}</span>
+                  {% endif %}
+                  {% if publicacion.factor_impacto %}
+                  <span class="badge publicacion-badge-impacto">
+                    <i class="bi bi-star-fill"></i> {{ _('IF') }}: {{ publicacion.factor_impacto }}
+                  </span>
+                  {% endif %}
                 </div>
-                {% if get_translated_field(publicacion, 'descripcion') %}
-                <p>{{ get_translated_field(publicacion, 'descripcion') }}</p>
+                
+                <h3 class="pillar-title publicacion-titulo">{{ get_translated_field(publicacion, 'titulo') }}</h3>
+                
+                {% if publicacion.autores %}
+                <div class="publicacion-autores">
+                  <i class="bi bi-people"></i>
+                  <span>{{ publicacion.autores }}</span>
+                </div>
                 {% endif %}
+                
+                <div class="publicacion-meta">
+                  {% if publicacion.revista %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-journal-text"></i>
+                    <strong>{{ publicacion.revista }}</strong>
+                  </div>
+                  {% endif %}
+                  
+                  {% if publicacion.año %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-calendar"></i>
+                    <span>{{ publicacion.año }}</span>
+                  </div>
+                  {% endif %}
+                  
+                  {% if publicacion.volumen or publicacion.numero or publicacion.paginas %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-file-text"></i>
+                    <span>
+                      {% if publicacion.volumen %}{{ _('Vol.') }} {{ publicacion.volumen }}{% endif %}
+                      {% if publicacion.numero %}({{ publicacion.numero }}){% endif %}
+                      {% if publicacion.paginas %}, {{ _('pp.') }} {{ publicacion.paginas }}{% endif %}
+                    </span>
+                  </div>
+                  {% endif %}
+                </div>
+                
+                {% if publicacion.doi %}
+                <div class="publicacion-doi">
+                  <i class="bi bi-link-45deg"></i>
+                  <strong>{{ _('DOI') }}:</strong>
+                  <a href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer" class="publicacion-doi-link">
+                    {{ publicacion.doi }}
+                  </a>
+                </div>
+                {% endif %}
+                
+                {% if get_translated_field(publicacion, 'descripcion') %}
+                <p class="publicacion-descripcion">{{ get_translated_field(publicacion, 'descripcion') }}</p>
+                {% endif %}
+                
+                {% if publicacion.base_datos %}
+                <div class="publicacion-bases-datos">
+                  <i class="bi bi-database"></i>
+                  <span class="small">{{ publicacion.base_datos }}</span>
+                </div>
+                {% endif %}
+                
                 {% if publicacion.tags %}
                   {% set tags_list = publicacion.tags|from_json %}
                   {% if tags_list %}
@@ -236,13 +516,133 @@
                   </div>
                   {% endif %}
                 {% endif %}
-                {% if publicacion.enlace and publicacion.enlace.strip() %}
-                <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ _('Ver publicación') }}</a>
+                
+                <div class="publicacion-acciones">
+                  {% if publicacion.enlace and publicacion.enlace.strip() %}
+                  <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
+                  </a>
+                  {% endif %}
+                  {% if publicacion.doi %}
+                  <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
+                  </a>
+                  {% endif %}
+                </div>
+              </article>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="vertical-carousel-nav">
+                <button class="vertical-carousel-btn" type="button" aria-label="{{ _('Anterior') }}" data-vertical-carousel-prev>
+                  <i class="bi bi-chevron-up"></i>
+                </button>
+                <button class="vertical-carousel-btn" type="button" aria-label="{{ _('Siguiente') }}" data-vertical-carousel-next>
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+              </div>
+            </div>
+          {% elif publicaciones %}
+            {# Lista normal para 3 o menos publicaciones #}
+            <div class="news-feed publicaciones-feed">
+              {% for publicacion in publicaciones %}
+              <article class="news-item publicacion-item">
+                <div class="publicacion-header">
+                  {% if publicacion.tipo_publicacion %}
+                  <span class="badge publicacion-badge-tipo">{{ publicacion.tipo_publicacion }}</span>
+                  {% endif %}
+                  {% if publicacion.factor_impacto %}
+                  <span class="badge publicacion-badge-impacto">
+                    <i class="bi bi-star-fill"></i> {{ _('IF') }}: {{ publicacion.factor_impacto }}
+                  </span>
+                  {% endif %}
+                </div>
+                
+                <h3 class="pillar-title publicacion-titulo">{{ get_translated_field(publicacion, 'titulo') }}</h3>
+                
+                {% if publicacion.autores %}
+                <div class="publicacion-autores">
+                  <i class="bi bi-people"></i>
+                  <span>{{ publicacion.autores }}</span>
+                </div>
                 {% endif %}
+                
+                <div class="publicacion-meta">
+                  {% if publicacion.revista %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-journal-text"></i>
+                    <strong>{{ publicacion.revista }}</strong>
+                  </div>
+                  {% endif %}
+                  
+                  {% if publicacion.año %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-calendar"></i>
+                    <span>{{ publicacion.año }}</span>
+                  </div>
+                  {% endif %}
+                  
+                  {% if publicacion.volumen or publicacion.numero or publicacion.paginas %}
+                  <div class="publicacion-meta-item">
+                    <i class="bi bi-file-text"></i>
+                    <span>
+                      {% if publicacion.volumen %}{{ _('Vol.') }} {{ publicacion.volumen }}{% endif %}
+                      {% if publicacion.numero %}({{ publicacion.numero }}){% endif %}
+                      {% if publicacion.paginas %}, {{ _('pp.') }} {{ publicacion.paginas }}{% endif %}
+                    </span>
+                  </div>
+                  {% endif %}
+                </div>
+                
+                {% if publicacion.doi %}
+                <div class="publicacion-doi">
+                  <i class="bi bi-link-45deg"></i>
+                  <strong>{{ _('DOI') }}:</strong>
+                  <a href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer" class="publicacion-doi-link">
+                    {{ publicacion.doi }}
+                  </a>
+                </div>
+                {% endif %}
+                
+                {% if get_translated_field(publicacion, 'descripcion') %}
+                <p class="publicacion-descripcion">{{ get_translated_field(publicacion, 'descripcion') }}</p>
+                {% endif %}
+                
+                {% if publicacion.base_datos %}
+                <div class="publicacion-bases-datos">
+                  <i class="bi bi-database"></i>
+                  <span class="small">{{ publicacion.base_datos }}</span>
+                </div>
+                {% endif %}
+                
+                {% if publicacion.tags %}
+                  {% set tags_list = publicacion.tags|from_json %}
+                  {% if tags_list %}
+                  <div class="news-tags">
+                    {% for tag in tags_list %}
+                    <span class="chip">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                {% endif %}
+                
+                <div class="publicacion-acciones">
+                  {% if publicacion.enlace and publicacion.enlace.strip() %}
+                  <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
+                  </a>
+                  {% endif %}
+                  {% if publicacion.doi %}
+                  <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
+                  </a>
+                  {% endif %}
+                </div>
               </article>
               {% endfor %}
-            {% else %}
-              <!-- Publicaciones por defecto si no hay en BD -->
+            </div>
+          {% else %}
+            <!-- Publicaciones por defecto si no hay en BD -->
               <article class="news-item">
                 <h3 class="pillar-title">
                   {{ _('LC-MS/MS multirresiduo para monitoreo de tetraciclinas en salmónidos') }}
@@ -288,9 +688,6 @@
                 <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
               </article>
             {% endif %}
-          </div>
-          <div style="margin-top:2.5rem; text-align:center">
-            <a class="cta-button" href="#">{{ _('Ir al repositorio completo') }}</a>
           </div>
         </div>
       </section>
@@ -380,5 +777,159 @@
 
     <div class="toast" role="status" aria-live="polite" data-toast></div>
     <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+    
+    {# Script para igualar alturas de cards de proyectos #}
+    <script>
+      (function() {
+        function equalizeProyectoCardHeights() {
+          // Buscar todos los contenedores de proyectos
+          const gridContainers = document.querySelectorAll('.proyectos-grid-centrado, .cards-grid');
+          
+          gridContainers.forEach(container => {
+            const cards = container.querySelectorAll('.proyecto-card');
+            if (cards.length === 0) return;
+            
+            // Resetear alturas
+            cards.forEach(card => {
+              card.style.height = 'auto';
+              card.style.minHeight = 'auto';
+            });
+            
+            // Calcular la altura máxima (solo de cards no expandidas)
+            let maxHeight = 0;
+            cards.forEach(card => {
+              const details = card.querySelector('.proyecto-resultados[open]');
+              // Solo considerar cards que no tienen detalles expandidos
+              if (!details) {
+                const height = card.offsetHeight;
+                if (height > maxHeight) {
+                  maxHeight = height;
+                }
+              }
+            });
+            
+            // Si hay cards expandidas, calcular su altura también
+            let maxExpandedHeight = 0;
+            cards.forEach(card => {
+              const details = card.querySelector('.proyecto-resultados[open]');
+              if (details) {
+                const height = card.offsetHeight;
+                if (height > maxExpandedHeight) {
+                  maxExpandedHeight = height;
+                }
+              }
+            });
+            
+            // Aplicar altura: usar la máxima entre no expandidas y expandidas
+            const finalHeight = Math.max(maxHeight, maxExpandedHeight);
+            
+            if (finalHeight > 0) {
+              cards.forEach(card => {
+                const details = card.querySelector('.proyecto-resultados[open]');
+                // Si está expandida, usar su altura natural, sino usar la altura base
+                if (details) {
+                  card.style.height = 'auto';
+                  card.style.minHeight = finalHeight + 'px';
+                } else {
+                  card.style.height = finalHeight + 'px';
+                  card.style.minHeight = 'auto';
+                }
+              });
+            }
+          });
+          
+          // También para carrusel infinito
+          const carouselTracks = document.querySelectorAll('.infinite-carousel .carousel-track-infinite');
+          carouselTracks.forEach(track => {
+            const cards = track.querySelectorAll('.proyecto-card');
+            if (cards.length === 0) return;
+            
+            // Resetear alturas
+            cards.forEach(card => {
+              card.style.height = 'auto';
+              card.style.minHeight = 'auto';
+            });
+            
+            // Calcular la altura máxima (solo de cards no expandidas)
+            let maxHeight = 0;
+            cards.forEach(card => {
+              const details = card.querySelector('.proyecto-resultados[open]');
+              if (!details) {
+                const height = card.offsetHeight;
+                if (height > maxHeight) {
+                  maxHeight = height;
+                }
+              }
+            });
+            
+            // Si hay cards expandidas, calcular su altura también
+            let maxExpandedHeight = 0;
+            cards.forEach(card => {
+              const details = card.querySelector('.proyecto-resultados[open]');
+              if (details) {
+                const height = card.offsetHeight;
+                if (height > maxExpandedHeight) {
+                  maxExpandedHeight = height;
+                }
+              }
+            });
+            
+            // Aplicar altura
+            const finalHeight = Math.max(maxHeight, maxExpandedHeight);
+            
+            if (finalHeight > 0) {
+              cards.forEach(card => {
+                const details = card.querySelector('.proyecto-resultados[open]');
+                if (details) {
+                  card.style.height = 'auto';
+                  card.style.minHeight = finalHeight + 'px';
+                } else {
+                  card.style.height = finalHeight + 'px';
+                  card.style.minHeight = 'auto';
+                }
+              });
+            }
+          });
+        }
+        
+        // Función para manejar la expansión de detalles
+        function handleDetailsToggle() {
+          // Esperar un momento para que el DOM se actualice
+          setTimeout(equalizeProyectoCardHeights, 100);
+        }
+        
+        // Observar cambios en los detalles
+        function observeDetails() {
+          const detailsElements = document.querySelectorAll('.proyecto-resultados');
+          detailsElements.forEach(details => {
+            details.addEventListener('toggle', handleDetailsToggle);
+          });
+        }
+        
+        // Ejecutar al cargar la página
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            equalizeProyectoCardHeights();
+            observeDetails();
+          });
+        } else {
+          equalizeProyectoCardHeights();
+          observeDetails();
+        }
+        
+        // Re-ejecutar cuando cambie el tamaño de la ventana
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(equalizeProyectoCardHeights, 250);
+        });
+        
+        // Re-ejecutar después de que las imágenes se carguen
+        window.addEventListener('load', function() {
+          equalizeProyectoCardHeights();
+          observeDetails();
+        });
+      })();
+    </script>
   </body>
 </html>

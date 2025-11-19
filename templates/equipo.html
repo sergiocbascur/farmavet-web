@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
     <title>{{ _('Equipo HUMANO') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
     <meta
       name="description"
@@ -48,11 +48,11 @@
       </div>
       <div class="container nav-container">
         <nav class="main-nav" aria-label="Navegación principal">
-          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
-            {{ _('Menú') }}
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
           </button>
           <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
-            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <img src="{{ url_for('logos', filename='LOGO_FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
             <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
           </a>
           <ul class="nav-links" id="nav-links" data-nav-links>
@@ -74,6 +74,7 @@
             </li>
             <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
             <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
           </ul>
@@ -96,6 +97,47 @@
               <span class="pill">{{ _('Colaboradores nacionales e internacionales') }}</span>
             </div>
           </div>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
+          </div>
+          {% else %}
+          {# Fallback a tarjeta si no hay imágenes #}
           <div class="card">
             <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
               {{ _('Nuestra filosofía') }}
@@ -104,6 +146,7 @@
               {{ _('Fomentamos una cultura basada en la excelencia, la colaboración y la innovación. Promovemos el desarrollo profesional continuo y la equidad de género en los equipos científicos.') }}
             </p>
           </div>
+          {% endif %}
         </div>
       </section>
 
@@ -222,7 +265,22 @@
                                 <article class="org-member-card">
                                   <div class="org-member-photo">
                                     {% if cargo.miembro and cargo.miembro.imagen %}
-                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% set img = cargo.miembro.imagen %}
+                                    {% if img and img|length > 0 %}
+                                      {% if img[0] == '/' %}
+                                        {% set imagen_url = img %}
+                                      {% elif img[:4] == 'http' %}
+                                        {% if '/static/uploads/equipo/' in img %}
+                                          {% set partes = img.split('/static/uploads/equipo/') %}
+                                          {% set imagen_url = '/static/uploads/equipo/' + partes[1] %}
+                                        {% else %}
+                                          {% set imagen_url = img %}
+                                        {% endif %}
+                                      {% else %}
+                                        {% set imagen_url = '/static/uploads/equipo/' + img %}
+                                      {% endif %}
+                                      <img src="{{ imagen_url }}" alt="Foto de {{ cargo.miembro.nombre }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="console.error('Error cargando imagen:', '{{ imagen_url }}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
                                     {% endif %}
                                     <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
                                       <span>{{ _('Foto') }}</span>
@@ -272,7 +330,22 @@
                                 <article class="org-member-card">
                                   <div class="org-member-photo">
                                     {% if cargo.miembro and cargo.miembro.imagen %}
-                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% set img = cargo.miembro.imagen %}
+                                    {% if img and img|length > 0 %}
+                                      {% if img[0] == '/' %}
+                                        {% set imagen_url = img %}
+                                      {% elif img[:4] == 'http' %}
+                                        {% if '/static/uploads/equipo/' in img %}
+                                          {% set partes = img.split('/static/uploads/equipo/') %}
+                                          {% set imagen_url = '/static/uploads/equipo/' + partes[1] %}
+                                        {% else %}
+                                          {% set imagen_url = img %}
+                                        {% endif %}
+                                      {% else %}
+                                        {% set imagen_url = '/static/uploads/equipo/' + img %}
+                                      {% endif %}
+                                      <img src="{{ imagen_url }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="console.error('Error cargando imagen:', '{{ imagen_url }}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
                                     {% endif %}
                                     <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
                                       <span>{{ _('Foto') }}</span>
@@ -323,7 +396,22 @@
                                 <article class="org-member-card">
                                   <div class="org-member-photo">
                                     {% if cargo.miembro and cargo.miembro.imagen %}
-                                    <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% set img = cargo.miembro.imagen %}
+                                    {% if img and img|length > 0 %}
+                                      {% if img[0] == '/' %}
+                                        {% set imagen_url = img %}
+                                      {% elif img[:4] == 'http' %}
+                                        {% if '/static/uploads/equipo/' in img %}
+                                          {% set partes = img.split('/static/uploads/equipo/') %}
+                                          {% set imagen_url = '/static/uploads/equipo/' + partes[1] %}
+                                        {% else %}
+                                          {% set imagen_url = img %}
+                                        {% endif %}
+                                      {% else %}
+                                        {% set imagen_url = '/static/uploads/equipo/' + img %}
+                                      {% endif %}
+                                      <img src="{{ imagen_url }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" style="{% if cargo.miembro.imagen_zoom or cargo.miembro.imagen_x or cargo.miembro.imagen_y %} transform: scale({{ cargo.miembro.imagen_zoom or 1.0 }}) translate({{ cargo.miembro.imagen_x or 0.0 }}px, {{ cargo.miembro.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}" onerror="console.error('Error cargando imagen:', '{{ imagen_url }}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                    {% endif %}
                                     {% endif %}
                                     <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
                                       <span>{{ _('Foto') }}</span>
@@ -375,7 +463,22 @@
                                     <article class="org-member-card">
                                       <div class="org-member-photo">
                                         {% if cargo.miembro and cargo.miembro.imagen %}
-                                        <img src="{{ cargo.miembro.imagen }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        {% set img = cargo.miembro.imagen %}
+                                        {% if img and img|length > 0 %}
+                                          {% if img[0] == '/' %}
+                                            {% set imagen_url = img %}
+                                          {% elif img[:4] == 'http' %}
+                                            {% if '/static/uploads/equipo/' in img %}
+                                              {% set partes = img.split('/static/uploads/equipo/') %}
+                                              {% set imagen_url = '/static/uploads/equipo/' + partes[1] %}
+                                            {% else %}
+                                              {% set imagen_url = img %}
+                                            {% endif %}
+                                          {% else %}
+                                            {% set imagen_url = '/static/uploads/equipo/' + img %}
+                                          {% endif %}
+                                          <img src="{{ imagen_url }}" alt="Foto de {{ cargo.miembro.nombre or get_translated_field(cargo, 'cargo') or cargo.cargo }}" onerror="console.error('Error cargando imagen:', '{{ imagen_url }}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                        {% endif %}
                                         {% endif %}
                                         <div class="org-member-photo-placeholder" {% if cargo.miembro and cargo.miembro.imagen %}style="display:none;"{% endif %}>
                                           <span>Foto</span>
@@ -444,27 +547,27 @@
           <h2 class="section-title">{{ _('Equipo técnico y profesional') }}</h2>
           <div class="cards-grid">
             <article class="card">
-              <h3 class="pillar-title">{{ _('Químicos farmacéuticos') }}</h3>
+              <h3 class="pillar-title">{{ _('Analistas Químicos') }}</h3>
               <p>
-                {{ _('Especialistas en cromatografía de alta resolución, espectrometría de masas y validación de metodologías multirresiduo.') }}
+                {{ _('Son el pilar técnico en la ejecución y validación de metodologías analíticas para diversas matrices veterinarias; trabajan directamente en el laboratorio y tienen entrenamiento en química analítica y farmacología.') }}
               </p>
             </article>
             <article class="card">
-              <h3 class="pillar-title">{{ _('Médicos veterinarios') }}</h3>
+              <h3 class="pillar-title">{{ _('Técnicos Químicos') }}</h3>
               <p>
-                {{ _('Profesionales responsables de la interpretación normativa, manejo de matrices y vinculación con clientes del sector pecuario y acuícola.') }}
+                {{ _('Apoyan la labor de los analistas: realizan preparaciones, controles de calidad, manejo de equipamiento y aseguran la correcta ejecución de procedimientos normalizados.') }}
               </p>
             </article>
             <article class="card">
-              <h3 class="pillar-title">{{ _('Tecnólogos médicos y bioquímicos') }}</h3>
+              <h3 class="pillar-title">{{ _('Médicos Veterinarios / Doctores') }}</h3>
               <p>
-                {{ _('Ejecutan protocolos analíticos, controlan calidad instrumental y gestionan la cadena de custodia de muestras.') }}
+                {{ _('Profesionales responsables de la interpretación normativa, gestión de clientes del área pecuaria-acuícola y liderazgo científico dentro del laboratorio, incluyendo la dirección y representación ante organismos reguladores.') }}
               </p>
             </article>
             <article class="card">
-              <h3 class="pillar-title">{{ _('Analistas de datos') }}</h3>
+              <h3 class="pillar-title">{{ _('Administración y Apoyo') }}</h3>
               <p>
-                {{ _('Procesan datos complejos, generan reportes automatizados y apoyan la toma de decisiones basada en evidencia.') }}
+                {{ _('Este grupo abarca roles claves como secretarias (gestión administrativa y atención interna/externa), contabilidad (manejo financiero y presupuestario), y encargados de calidad (auditorías, acreditación y gestión técnica).') }}
               </p>
             </article>
           </div>

@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if correo %}Editar{% else %}Nuevo{% endif %} Correo de Contacto{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{% if correo %}Editar{% else %}Nuevo{% endif %} Correo de Contacto</h2>
+    <a href="{{ url_for('admin_correos_contacto') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="tipo_consulta" class="form-label">Tipo de Consulta <span class="text-danger">*</span></label>
+                <select class="form-select" id="tipo_consulta" name="tipo_consulta" required>
+                    <option value="">Selecciona un tipo</option>
+                    {% for tipo, nombre in tipos_consulta.items() %}
+                    <option value="{{ tipo }}" {% if correo and correo.tipo_consulta == tipo %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">Selecciona el tipo de consulta para el cual se enviará este correo.</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       value="{% if correo %}{{ correo.email }}{% endif %}" 
+                       placeholder="ejemplo@correo.com" required>
+                <small class="form-text text-muted">Dirección de correo electrónico que recibirá las consultas de este tipo.</small>
+            </div>
+            
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                           {% if not correo or correo.activo %}checked{% endif %}>
+                    <label class="form-check-label" for="activo">
+                        Activo
+                    </label>
+                </div>
+                <small class="form-text text-muted">Solo los correos activos recibirán las consultas.</small>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save me-2"></i>Guardar
+            </button>
+            <a href="{{ url_for('admin_correos_contacto') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </div>
+</form>
+{% endblock %}
+

@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de FAQ{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-question-circle me-2"></i>Gestión de Preguntas Frecuentes (FAQ)</h2>
+    <a href="{{ url_for('admin_faq_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva FAQ
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Pregunta</th>
+                        <th>Categoría</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faq in faqs %}
+                    <tr>
+                        <td><strong>{{ faq.pregunta }}</strong></td>
+                        <td>
+                            <span class="badge bg-info">
+                                {% if faq.categoria == 'servicios' %}Servicios
+                                {% elif faq.categoria == 'proceso' %}Proceso
+                                {% elif faq.categoria == 'tiempos' %}Tiempos
+                                {% elif faq.categoria == 'costos' %}Costos
+                                {% elif faq.categoria == 'tecnicas' %}Técnicas
+                                {% elif faq.categoria == 'certificaciones' %}Certificaciones
+                                {% else %}General{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ faq.orden }}</td>
+                        <td>
+                            {% if faq.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_faq_editar', faq_id=faq.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_faq_eliminar', faq_id=faq.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta FAQ?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox me-2"></i>No hay FAQs registradas. <a href="{{ url_for('admin_faq_nuevo') }}">Crear la primera</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

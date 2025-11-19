@@ -1,0 +1,208 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if certificado %}Editar{% else %}Nuevo{% endif %} Certificado{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-{{ 'pencil' if certificado else 'plus-circle' }} me-2"></i>
+        {% if certificado %}Editar{% else %}Nuevo{% endif %} Certificado
+    </h2>
+    <a href="{{ url_for('admin_certificados') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="titulo" class="form-label">Título del Certificado <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ certificado.titulo if certificado else '' }}" required
+                           placeholder="Ej: ISO 17025 - INN">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="organismo" class="form-label">Organismo Emisor <span class="text-danger">*</span></label>
+                    <select class="form-select" id="organismo" name="organismo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="ISO" {% if certificado and certificado.organismo == 'ISO' %}selected{% endif %}>ISO / INN</option>
+                        <option value="OMSA" {% if certificado and certificado.organismo == 'OMSA' %}selected{% endif %}>OMSA</option>
+                        <option value="SAG" {% if certificado and certificado.organismo == 'SAG' %}selected{% endif %}>SAG</option>
+                        <option value="SERNAPESCA" {% if certificado and certificado.organismo == 'SERNAPESCA' %}selected{% endif %}>SERNAPESCA</option>
+                        <option value="MINSAL" {% if certificado and certificado.organismo == 'MINSAL' %}selected{% endif %}>MINSAL</option>
+                        <option value="Otro" {% if certificado and certificado.organismo == 'Otro' %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="numero_certificado" class="form-label">Número de Certificado</label>
+                    <input type="text" class="form-control" id="numero_certificado" name="numero_certificado" 
+                           value="{{ certificado.numero_certificado if certificado else '' }}" 
+                           placeholder="Ej: CERT-2024-001">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="fecha_emision" class="form-label">Fecha de Emisión</label>
+                    <input type="date" class="form-control" id="fecha_emision" name="fecha_emision" 
+                           value="{{ certificado.fecha_emision if certificado else '' }}">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+                    <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento" 
+                           value="{{ certificado.fecha_vencimiento if certificado else '' }}">
+                    <small class="text-muted">Dejar vacío si no tiene vencimiento</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4">{{ certificado.descripcion if certificado else '' }}</textarea>
+                    <small class="text-muted">Breve descripción del certificado y su importancia</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="imagen" class="form-label">Archivo del Certificado (Imagen o PDF)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="imagen" name="imagen" 
+                               value="{{ certificado.imagen if certificado else '' }}" 
+                               placeholder="/static/uploads/certificados/certificado.pdf o certificado.jpg">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                            <i class="bi bi-upload me-1"></i>Subir
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*,.pdf" style="display: none;" onchange="uploadImage(event)">
+                    </div>
+                    <small class="text-muted">Pega la URL del archivo o sube uno nuevo. Formatos: JPG, PNG, WEBP, SVG, PDF (recomendado para certificados oficiales)</small>
+                    {% if certificado and certificado.imagen %}
+                    <div class="mt-2">
+                        {% set es_pdf = certificado.imagen.lower().endswith('.pdf') %}
+                        {% if es_pdf %}
+                            <small>Archivo actual:</small><br>
+                            <a href="{{ certificado.imagen }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Ver PDF actual
+                            </a>
+                        {% else %}
+                            <small>Imagen actual:</small><br>
+                            <img src="{{ certificado.imagen }}" alt="Vista previa" style="max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 0.5rem; border: 1px solid #e0e0e0;" onerror="this.style.display='none';">
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-12">
+                    <label for="enlace_externo" class="form-label">Enlace Externo (opcional)</label>
+                    <input type="url" class="form-control" id="enlace_externo" name="enlace_externo" 
+                           value="{{ certificado.enlace_externo if certificado and certificado.enlace_externo and certificado.enlace_externo != 'None' else '' }}" 
+                           placeholder="https://www.inn.cl/certificado...">
+                    <small class="text-muted">URL al certificado oficial en el sitio del organismo emisor</small>
+                </div>
+                
+                <!-- Sección de Traducción al Inglés -->
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-translate me-2"></i>Traducción al Inglés (English Translation)</h5>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Opcional:</strong> Si completas estos campos, el certificado se mostrará en inglés cuando el usuario cambie el idioma del sitio.
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <label for="titulo_en" class="form-label">Título (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="titulo_en" name="titulo_en" 
+                           value="{{ certificado.titulo_en if certificado and certificado.titulo_en else '' }}" 
+                           placeholder="Title in English">
+                </div>
+                
+                <div class="col-12">
+                    <label for="descripcion_en" class="form-label">Descripción (English) <span class="text-muted">(opcional)</span></label>
+                    <textarea class="form-control" id="descripcion_en" name="descripcion_en" rows="4" 
+                              placeholder="Description in English">{{ certificado.descripcion_en if certificado and certificado.descripcion_en else '' }}</textarea>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="orden" class="form-label">Orden de visualización</label>
+                    <input type="number" class="form-control" id="orden" name="orden" 
+                           value="{{ certificado.orden if certificado else 0 }}" min="0">
+                    <small class="text-muted">Menor número = aparece primero</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-check mt-4">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if not certificado or certificado.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Certificado activo (visible en el sitio web)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Certificado
+                        </button>
+                        <a href="{{ url_for('admin_certificados') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function uploadImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'certificados');
+        
+        const btn = event.target.previousElementSibling;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Subiendo...';
+        
+        fetch('{{ url_for("upload_file") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) {
+                document.getElementById('imagen').value = data.url;
+                btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Subido';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-secondary');
+                    btn.disabled = false;
+                }, 2000);
+            } else {
+                alert('Error al subir imagen: ' + (data.error || 'Error desconocido'));
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al subir la imagen');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+</script>
+{% endblock %}
+
