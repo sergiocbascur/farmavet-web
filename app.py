@@ -626,6 +626,7 @@ def init_db():
             texto_boton TEXT DEFAULT 'Ver más',
             texto_boton_en TEXT,
             orden INTEGER DEFAULT 0,
+            destacada INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -646,6 +647,10 @@ def init_db():
         pass  # La columna ya existe
     try:
         conn.execute('ALTER TABLE eventos ADD COLUMN texto_boton_en TEXT')
+        try:
+            conn.execute('ALTER TABLE eventos ADD COLUMN destacada INTEGER DEFAULT 0')
+        except sqlite3.OperationalError:
+            pass  # La columna ya existe
     except:
         pass  # La columna ya existe
     
@@ -1008,8 +1013,8 @@ def index():
         ORDER BY orden, id
     ''').fetchall()
     noticias = conn.execute('''
-        SELECT * FROM noticias WHERE activa = 1 
-        ORDER BY destacada DESC, fecha DESC, id DESC LIMIT 3
+        SELECT * FROM noticias WHERE activa = 1 AND destacada = 1 
+        ORDER BY fecha DESC, id DESC LIMIT 3
     ''').fetchall()
     clientes = conn.execute('''
         SELECT * FROM clientes WHERE activo = 1 AND mostrar_en_index = 1 
@@ -1227,8 +1232,8 @@ def page(page):
         elif page == 'noticias':
             conn = get_db()
             noticias = conn.execute('''
-                SELECT * FROM noticias WHERE activa = 1 
-                ORDER BY destacada DESC, fecha DESC, id DESC
+                SELECT * FROM noticias WHERE activa = 1 AND destacada = 1 
+                ORDER BY fecha DESC, id DESC
             ''').fetchall()
             eventos = conn.execute('''
                 SELECT * FROM eventos WHERE activo = 1 
@@ -3469,9 +3474,10 @@ def admin_evento_editar(evento_id):
     conn = get_db()
     
     if request.method == 'POST':
+        destacada = 1 if request.form.get('destacada') == 'on' else 0
         conn.execute('''
             UPDATE eventos 
-            SET titulo=?, fecha=?, meta=?, descripcion=?, enlace=?, texto_boton=?, orden=?, activo=?, 
+            SET titulo=?, fecha=?, meta=?, descripcion=?, enlace=?, texto_boton=?, orden=?, destacada=?, activo=?, 
                 titulo_en=?, descripcion_en=?, meta_en=?, texto_boton_en=?, updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         ''', (
@@ -3482,6 +3488,7 @@ def admin_evento_editar(evento_id):
             request.form.get('enlace'),
             request.form.get('texto_boton', 'Ver más'),
             int(request.form.get('orden', 0)),
+            destacada,
             1 if request.form.get('activo') == 'on' else 0,
             request.form.get('titulo_en', '').strip() or None,
             request.form.get('descripcion_en', '').strip() or None,
