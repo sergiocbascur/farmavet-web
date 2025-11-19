@@ -17,9 +17,11 @@
                 <thead>
                     <tr>
                         <th>Título</th>
-                        <th>Tipo</th>
-                        <th>Orden</th>
+                        <th>Código</th>
+                        <th>Financiador</th>
+                        <th>Período</th>
                         <th>Estado</th>
+                        <th>Orden</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -27,15 +29,48 @@
                     {% for proyecto in proyectos %}
                     <tr>
                         <td><strong>{{ proyecto.titulo }}</strong></td>
-                        <td><span class="badge bg-info">{{ proyecto.tipo|title if proyecto.tipo else '—' }}</span></td>
-                        <td>{{ proyecto.orden }}</td>
                         <td>
-                            {% if proyecto.activo %}
-                                <span class="badge bg-success">Activo</span>
+                            {% if proyecto.codigo_proyecto %}
+                                <code class="small">{{ proyecto.codigo_proyecto }}</code>
                             {% else %}
-                                <span class="badge bg-secondary">Inactivo</span>
+                                <span class="text-muted">—</span>
                             {% endif %}
                         </td>
+                        <td>
+                            {% if proyecto.financiador %}
+                                <span class="badge bg-primary">{{ proyecto.financiador }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if proyecto.año_inicio or proyecto.año_fin %}
+                                {% if proyecto.año_inicio and proyecto.año_fin %}
+                                    {{ proyecto.año_inicio }} - {{ proyecto.año_fin }}
+                                {% elif proyecto.año_inicio %}
+                                    Desde {{ proyecto.año_inicio }}
+                                {% elif proyecto.año_fin %}
+                                    Hasta {{ proyecto.año_fin }}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if proyecto.estado == 'completado' %}
+                                <span class="badge bg-secondary">Completado</span>
+                            {% elif proyecto.estado == 'en_curso' %}
+                                <span class="badge bg-info">En Curso</span>
+                            {% elif proyecto.estado == 'activo' %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ proyecto.estado|title if proyecto.estado else '—' }}</span>
+                            {% endif %}
+                            {% if not proyecto.activo %}
+                                <span class="badge bg-warning text-dark ms-1">Oculto</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ proyecto.orden }}</td>
                         <td>
                             <a href="{{ url_for('admin_proyecto_editar', proyecto_id=proyecto.id) }}" class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-pencil"></i>
@@ -50,7 +85,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             No hay proyectos registrados. <a href="{{ url_for('admin_proyecto_nuevo') }}">Crear el primero</a>
                         </td>
                     </tr>

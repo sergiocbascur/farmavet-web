@@ -15,7 +15,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <div class="row g-3">
                 <div class="col-12">
                     <label for="titulo" class="form-label">Título del Proyecto <span class="text-danger">*</span></label>
@@ -32,15 +32,150 @@
                 </div>
                 
                 <div class="col-md-6">
+                    <label for="financiador" class="form-label">Financiador</label>
+                    <select class="form-control" id="financiador" name="financiador">
+                        <option value="">Seleccionar...</option>
+                        <option value="FONDECYT" {% if proyecto and proyecto.financiador == 'FONDECYT' %}selected{% endif %}>FONDECYT</option>
+                        <option value="FONDEF" {% if proyecto and proyecto.financiador == 'FONDEF' %}selected{% endif %}>FONDEF</option>
+                        <option value="OMSA" {% if proyecto and proyecto.financiador == 'OMSA' %}selected{% endif %}>OMSA</option>
+                        <option value="FAO" {% if proyecto and proyecto.financiador == 'FAO' %}selected{% endif %}>FAO</option>
+                        <option value="Cooperación Internacional" {% if proyecto and proyecto.financiador == 'Cooperación Internacional' %}selected{% endif %}>Cooperación Internacional</option>
+                        <option value="Otro" {% if proyecto and proyecto.financiador and proyecto.financiador not in ['FONDECYT', 'FONDEF', 'OMSA', 'FAO', 'Cooperación Internacional'] %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="codigo_proyecto" class="form-label">Código del Proyecto</label>
+                    <input type="text" class="form-control" id="codigo_proyecto" name="codigo_proyecto" 
+                           value="{{ proyecto.codigo_proyecto if proyecto and proyecto.codigo_proyecto else '' }}" 
+                           placeholder="Ej: FONDECYT 1234567, FONDEF ID20I10001">
+                    <small class="text-muted">Código oficial del proyecto</small>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="año_inicio" class="form-label">Año Inicio</label>
+                    <input type="number" class="form-control" id="año_inicio" name="año_inicio" 
+                           value="{{ proyecto.año_inicio if proyecto and proyecto.año_inicio else '' }}" 
+                           min="2000" max="2100" placeholder="2024">
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="año_fin" class="form-label">Año Fin</label>
+                    <input type="number" class="form-control" id="año_fin" name="año_fin" 
+                           value="{{ proyecto.año_fin if proyecto and proyecto.año_fin else '' }}" 
+                           min="2000" max="2100" placeholder="2027">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="estado" class="form-label">Estado del Proyecto</label>
+                    <select class="form-control" id="estado" name="estado">
+                        <option value="en_curso" {% if not proyecto or proyecto.estado == 'en_curso' %}selected{% endif %}>En Curso</option>
+                        <option value="completado" {% if proyecto and proyecto.estado == 'completado' %}selected{% endif %}>Completado</option>
+                        <option value="activo" {% if proyecto and proyecto.estado == 'activo' %}selected{% endif %}>Activo</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
                     <label for="orden" class="form-label">Orden de visualización</label>
                     <input type="number" class="form-control" id="orden" name="orden" 
                            value="{{ proyecto.orden if proyecto else 0 }}" min="0">
                 </div>
                 
                 <div class="col-12">
+                    <label for="investigadores" class="form-label">Investigadores</label>
+                    <textarea class="form-control" id="investigadores" name="investigadores" rows="2" 
+                              placeholder="Lista de investigadores principales, separados por comas o saltos de línea">{{ proyecto.investigadores if proyecto and proyecto.investigadores else '' }}</textarea>
+                    <small class="text-muted">Ej: Dra. Javiera Cornejo (Investigadora Principal), Dr. Aldo Maddaleno (Co-investigador)</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="presupuesto" class="form-label">Presupuesto</label>
+                    <input type="text" class="form-control" id="presupuesto" name="presupuesto" 
+                           value="{{ proyecto.presupuesto if proyecto and proyecto.presupuesto else '' }}" 
+                           placeholder="Ej: $150.000.000 CLP">
+                    <small class="text-muted">Presupuesto total del proyecto (opcional)</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="imagen" class="form-label">Imagen del Proyecto</label>
+                    <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*">
+                    <small class="text-muted">
+                        Imagen representativa del proyecto (opcional). Se mostrará arriba en la tarjeta del proyecto.
+                        <br><strong>Formato:</strong> 16:9 (800x450px). La imagen se recortará automáticamente a este formato.
+                    </small>
+                    
+                    {# Información del formato #}
+                    <div class="mt-3" id="format-info-proyecto" style="display: none;">
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Formato Card de Proyecto (16:9):</strong> Las imágenes se recortarán automáticamente al formato de la tarjeta. 
+                            Ajusta la zona visible para que el contenido importante quede centrado. La vista previa muestra exactamente cómo se verá.
+                        </div>
+                    </div>
+                    
+                    {# Preview de cómo se verá en la card #}
+                    <div class="mt-3" id="proyecto-preview-container" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <strong>Vista previa en Card de Proyecto</strong>
+                                <small class="text-muted ms-2">(Así se verá en la página)</small>
+                            </div>
+                            <div class="card-body">
+                                <div style="width: 100%; max-width: 400px; margin: 0 auto; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #f0f0f0; position: relative;">
+                                    <img id="proyecto-preview" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+                                </div>
+                                <small class="text-muted d-block mt-2 text-center">
+                                    <i class="bi bi-info-circle"></i> Esta es la vista exacta que verán los usuarios. Ajusta el recorte para que el contenido importante quede visible.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Contenedor para preview y crop #}
+                    <div class="mt-3" id="image-preview-container-proyecto" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <strong>Vista previa y ajuste</strong>
+                                <button type="button" class="btn btn-sm btn-outline-secondary float-end" id="reset-crop-proyecto">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reiniciar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div style="max-width: 100%; max-height: 500px; overflow: auto; background: #f8f9fa; padding: 10px;">
+                                    <img id="image-preview-proyecto" style="max-width: 100%; display: block;">
+                                </div>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle"></i> Arrastra para mover la zona visible. Usa las esquinas para ajustar el tamaño.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Preview de imagen actual (si existe) #}
+                    {% if proyecto and proyecto.imagen %}
+                    <div class="mt-2">
+                        <label class="form-label">Imagen actual:</label>
+                        <img src="/static/uploads/proyectos/{{ proyecto.imagen }}" alt="Imagen actual" class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                    </div>
+                    {% endif %}
+                    
+                    {# Input oculto para datos del crop #}
+                    <input type="hidden" id="crop-data-proyecto" name="crop_data">
+                </div>
+                
+                <div class="col-12">
                     <label for="descripcion" class="form-label">Descripción</label>
                     <textarea class="form-control" id="descripcion" name="descripcion" rows="4">{{ proyecto.descripcion if proyecto else '' }}</textarea>
-                    <small class="text-muted">Descripción del proyecto que aparecerá en la tarjeta</small>
+                    <small class="text-muted">Descripción breve del proyecto que aparecerá en la tarjeta</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="resultados" class="form-label">Resultados y Logros</label>
+                    <textarea class="form-control" id="resultados" name="resultados" rows="5" 
+                              placeholder="Describa los principales resultados, logros o impactos del proyecto...">{{ proyecto.resultados if proyecto and proyecto.resultados else '' }}</textarea>
+                    <small class="text-muted">Resultados destacados, publicaciones generadas, transferencia tecnológica, etc. (opcional)</small>
                 </div>
                 
                 <div class="col-12">
@@ -108,5 +243,158 @@
         </form>
     </div>
 </div>
+
+{# Cropper.js CSS y JS #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+let cropperProyecto = null;
+const fileInputProyecto = document.getElementById('imagen');
+const previewContainerProyecto = document.getElementById('image-preview-container-proyecto');
+const previewImageProyecto = document.getElementById('image-preview-proyecto');
+const formatInfoProyecto = document.getElementById('format-info-proyecto');
+const proyectoPreviewContainer = document.getElementById('proyecto-preview-container');
+const proyectoPreview = document.getElementById('proyecto-preview');
+const cropDataInputProyecto = document.getElementById('crop-data-proyecto');
+const resetCropBtnProyecto = document.getElementById('reset-crop-proyecto');
+
+// Cuando se selecciona un archivo
+fileInputProyecto.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImageProyecto.src = e.target.result;
+            previewContainerProyecto.style.display = 'block';
+            formatInfoProyecto.style.display = 'block';
+            proyectoPreviewContainer.style.display = 'block';
+            
+            // Destruir cropper anterior si existe
+            if (cropperProyecto) {
+                cropperProyecto.destroy();
+            }
+            
+            // Inicializar cropper con formato 16:9 para cards de proyecto
+            cropperProyecto = new Cropper(previewImageProyecto, {
+                aspectRatio: 16/9, // Formato card de proyecto
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+                responsive: true,
+                ready: function() {
+                    updateProyectoPreview();
+                },
+                crop: function() {
+                    // Actualizar preview cuando se mueve el crop
+                    updateProyectoPreview();
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewContainerProyecto.style.display = 'none';
+        formatInfoProyecto.style.display = 'none';
+        proyectoPreviewContainer.style.display = 'none';
+        if (cropperProyecto) {
+            cropperProyecto.destroy();
+            cropperProyecto = null;
+        }
+    }
+});
+
+// Actualizar preview del card de proyecto
+function updateProyectoPreview() {
+    if (!cropperProyecto || !proyectoPreview) return;
+    
+    const canvas = cropperProyecto.getCroppedCanvas({
+        width: 800,
+        height: 450,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high',
+        fillColor: '#fff'
+    });
+    
+    if (canvas) {
+        proyectoPreview.src = canvas.toDataURL('image/jpeg', 0.9);
+    }
+}
+
+// Botón reset
+resetCropBtnProyecto.addEventListener('click', function() {
+    if (cropperProyecto) {
+        cropperProyecto.reset();
+        updateProyectoPreview();
+    }
+});
+
+// Antes de enviar el formulario, guardar datos del crop
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (cropperProyecto && fileInputProyecto.files.length > 0) {
+        e.preventDefault();
+        
+        // Card de proyecto siempre usa 800x450 (16:9) para consistencia
+        const canvas = cropperProyecto.getCroppedCanvas({
+            width: 800,
+            height: 450,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+            fillColor: '#fff'
+        });
+        
+        if (canvas) {
+            // Convertir canvas a blob y reemplazar el archivo
+            canvas.toBlob(function(blob) {
+                if (!blob) {
+                    // Si falla el crop, enviar sin modificar
+                    e.target.submit();
+                    return;
+                }
+                
+                const file = new File([blob], fileInputProyecto.files[0].name, {
+                    type: fileInputProyecto.files[0].type || 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                
+                // Crear un nuevo DataTransfer y asignar el archivo
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInputProyecto.files = dataTransfer.files;
+                
+                // Guardar datos del crop para referencia
+                const cropData = cropperProyecto.getData();
+                cropDataInputProyecto.value = JSON.stringify(cropData);
+                
+                // Enviar el formulario
+                e.target.submit();
+            }, fileInputProyecto.files[0].type || 'image/jpeg', 0.95);
+        } else {
+            // Si no hay canvas, enviar sin modificar
+            e.target.submit();
+        }
+    }
+    // Si no hay cropper o no hay archivo, enviar normalmente
+});
+</script>
+
+<style>
+.cropper-container {
+    direction: ltr;
+}
+.cropper-view-box {
+    outline: 2px solid #2373BA;
+    outline-offset: -2px;
+}
+.cropper-face {
+    background-color: rgba(35, 115, 186, 0.1);
+}
+</style>
 {% endblock %}
 

@@ -19,6 +19,8 @@
                         <th>Título</th>
                         <th>Revista</th>
                         <th>Año</th>
+                        <th>Tipo</th>
+                        <th>DOI</th>
                         <th>Orden</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -30,6 +32,20 @@
                         <td><strong>{{ publicacion.titulo }}</strong></td>
                         <td>{{ publicacion.revista or '—' }}</td>
                         <td>{{ publicacion.año or '—' }}</td>
+                        <td>
+                            {% if publicacion.tipo_publicacion %}
+                                <span class="badge bg-info">{{ publicacion.tipo_publicacion }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if publicacion.doi %}
+                                <code class="small">{{ publicacion.doi }}</code>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td>{{ publicacion.orden }}</td>
                         <td>
                             {% if publicacion.activo %}
@@ -52,7 +68,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             No hay publicaciones registradas. <a href="{{ url_for('admin_publicacion_nuevo') }}">Crear la primera</a>
                         </td>
                     </tr>

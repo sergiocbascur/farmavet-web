@@ -32,9 +32,74 @@
                 
                 <div class="col-md-6">
                     <label for="año" class="form-label">Año</label>
-                    <input type="text" class="form-control" id="año" name="año" 
+                    <input type="number" class="form-control" id="año" name="año" 
                            value="{{ publicacion.año if publicacion else '' }}" 
-                           placeholder="Ej: 2025, 2024">
+                           min="1990" max="2100" placeholder="Ej: 2025">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="tipo_publicacion" class="form-label">Tipo de Publicación</label>
+                    <select class="form-control" id="tipo_publicacion" name="tipo_publicacion">
+                        <option value="">Seleccionar...</option>
+                        <option value="Artículo" {% if publicacion and publicacion.tipo_publicacion == 'Artículo' %}selected{% endif %}>Artículo</option>
+                        <option value="Revisión" {% if publicacion and publicacion.tipo_publicacion == 'Revisión' %}selected{% endif %}>Revisión</option>
+                        <option value="Capítulo de Libro" {% if publicacion and publicacion.tipo_publicacion == 'Capítulo de Libro' %}selected{% endif %}>Capítulo de Libro</option>
+                        <option value="Comunicación" {% if publicacion and publicacion.tipo_publicacion == 'Comunicación' %}selected{% endif %}>Comunicación</option>
+                        <option value="Póster" {% if publicacion and publicacion.tipo_publicacion == 'Póster' %}selected{% endif %}>Póster</option>
+                        <option value="Otro" {% if publicacion and publicacion.tipo_publicacion and publicacion.tipo_publicacion not in ['Artículo', 'Revisión', 'Capítulo de Libro', 'Comunicación', 'Póster'] %}selected{% endif %}>Otro</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="doi" class="form-label">DOI</label>
+                    <input type="text" class="form-control" id="doi" name="doi" 
+                           value="{{ publicacion.doi if publicacion and publicacion.doi else '' }}" 
+                           placeholder="Ej: 10.1234/example.doi">
+                    <small class="text-muted">Digital Object Identifier</small>
+                </div>
+                
+                <div class="col-12">
+                    <label for="autores" class="form-label">Autores</label>
+                    <textarea class="form-control" id="autores" name="autores" rows="2" 
+                              placeholder="Lista de autores, separados por comas. Ej: Cornejo, J., Maddaleno, A., Torres, M.J.">{{ publicacion.autores if publicacion and publicacion.autores else '' }}</textarea>
+                    <small class="text-muted">Lista completa de autores de la publicación</small>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="volumen" class="form-label">Volumen</label>
+                    <input type="text" class="form-control" id="volumen" name="volumen" 
+                           value="{{ publicacion.volumen if publicacion and publicacion.volumen else '' }}" 
+                           placeholder="Ej: 45">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="numero" class="form-label">Número/Issue</label>
+                    <input type="text" class="form-control" id="numero" name="numero" 
+                           value="{{ publicacion.numero if publicacion and publicacion.numero else '' }}" 
+                           placeholder="Ej: 3">
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="paginas" class="form-label">Páginas</label>
+                    <input type="text" class="form-control" id="paginas" name="paginas" 
+                           value="{{ publicacion.paginas if publicacion and publicacion.paginas else '' }}" 
+                           placeholder="Ej: 123-135">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="factor_impacto" class="form-label">Factor de Impacto</label>
+                    <input type="text" class="form-control" id="factor_impacto" name="factor_impacto" 
+                           value="{{ publicacion.factor_impacto if publicacion and publicacion.factor_impacto else '' }}" 
+                           placeholder="Ej: 3.456 (2024)">
+                    <small class="text-muted">Factor de impacto de la revista (opcional)</small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="base_datos" class="form-label">Base de Datos Indexada</label>
+                    <input type="text" class="form-control" id="base_datos" name="base_datos" 
+                           value="{{ publicacion.base_datos if publicacion and publicacion.base_datos else '' }}" 
+                           placeholder="Ej: PubMed, Scopus, Web of Science">
+                    <small class="text-muted">Bases de datos donde está indexada (separadas por comas)</small>
                 </div>
                 
                 <div class="col-12">
