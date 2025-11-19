@@ -2546,16 +2546,31 @@ a.logo-card:focus {
 }
 
 /* Asegurar que los enlaces cta-link-red dentro de cards mantengan el color rojo */
+/* Enlaces rojos dentro de tarjetas - máxima especificidad */
 .card .cta-link-red,
-.card[data-hero-slide] .cta-link-red {
+.card[data-hero-slide] .cta-link-red,
+div.card .cta-link-red,
+div[data-hero-slide].card .cta-link-red,
+.hero-media .card .cta-link-red,
+.hero-media-wrapper .card .cta-link-red {
   color: var(--color-secondary) !important;
+  text-decoration: none !important;
 }
 
 .card .cta-link-red:hover,
 .card .cta-link-red:focus,
 .card[data-hero-slide] .cta-link-red:hover,
-.card[data-hero-slide] .cta-link-red:focus {
+.card[data-hero-slide] .cta-link-red:focus,
+div.card .cta-link-red:hover,
+div.card .cta-link-red:focus,
+div[data-hero-slide].card .cta-link-red:hover,
+div[data-hero-slide].card .cta-link-red:focus,
+.hero-media .card .cta-link-red:hover,
+.hero-media .card .cta-link-red:focus,
+.hero-media-wrapper .card .cta-link-red:hover,
+.hero-media-wrapper .card .cta-link-red:focus {
   color: #B01F28 !important;
+  text-decoration: underline !important;
 }
 
 .toast {
