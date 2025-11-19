@@ -252,10 +252,10 @@ class MetodologiasChatbot {
         const typingId = this.showTyping();
 
         // Procesar consulta
-        setTimeout(() => {
+        setTimeout(async () => {
             this.hideTyping(typingId);
             const results = this.searchMetodologias(query);
-            this.showResults(query, results);
+            await this.showResults(query, results);
         }, 500);
     }
 
@@ -470,7 +470,7 @@ class MetodologiasChatbot {
         return results;
     }
 
-    showResults(query, results) {
+    async showResults(query, results) {
         // Verificar si hay metodologías cargadas
         if (this.metodologias.length === 0) {
             console.warn('⚠️ Chatbot: No hay metodologías cargadas para buscar');
@@ -491,17 +491,54 @@ class MetodologiasChatbot {
         }
         
         if (results.length === 0) {
+            // Primero mostrar mensaje de no encontrado
             this.addMessage(`
-                <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>".</p>
-                <p>Intenta con términos como:</p>
-                <ul class="chatbot-examples">
-                    <li>Nombre del analito (ej: "tetraciclinas", "aflatoxinas", "diquat", "amprolio")</li>
-                    <li>Tipo de matriz (ej: "salmón", "carne", "leche")</li>
-                    <li>Técnica analítica (ej: "LC-MS/MS", "GC-MS")</li>
-                    <li>Categoría (ej: "residuos", "contaminantes")</li>
-                </ul>
+                <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>" en nuestra base de datos.</p>
                 <p><small>💡 Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
             `);
+            
+            // Intentar búsqueda inteligente con Perplexity
+            const typingId = this.showTyping();
+            try {
+                const perplexityResponse = await fetch('/api/chatbot/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                this.hideTyping(typingId);
+                
+                if (perplexityResponse.ok) {
+                    const data = await perplexityResponse.json();
+                    if (data.answer) {
+                        let message = `
+                            <p><strong>💡 Información adicional:</strong></p>
+                            <div class="chatbot-results-text">
+                                ${this.formatPerplexityAnswer(data.answer)}
+                            </div>
+                        `;
+                        
+                        if (data.sources && data.sources.length > 0) {
+                            message += `<p><small>📚 Fuentes: ${data.sources.length} referencia(s)</small></p>`;
+                        }
+                        
+                        message += `<p><small>⚠️ Esta información es general. Para metodologías específicas de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
+                        
+                        this.addMessage(message);
+                    } else {
+                        this.showNoResultsHelp(query);
+                    }
+                } else {
+                    // Si Perplexity falla, mostrar ayuda estándar
+                    this.showNoResultsHelp(query);
+                }
+            } catch (error) {
+                console.error('Error al buscar en Perplexity:', error);
+                this.hideTyping(typingId);
+                this.showNoResultsHelp(query);
+            }
             return;
         }
 
@@ -591,6 +628,43 @@ class MetodologiasChatbot {
         }
 
         this.addMessage(message);
+    }
+
+    showNoResultsHelp(query) {
+        // Mostrar ayuda cuando no se encuentra nada ni con Perplexity
+        this.addMessage(`
+            <p>Intenta con términos como:</p>
+            <ul class="chatbot-examples">
+                <li>Nombre del analito (ej: "tetraciclinas", "aflatoxinas", "diquat", "amprolio")</li>
+                <li>Tipo de matriz (ej: "salmón", "carne", "leche")</li>
+                <li>Técnica analítica (ej: "LC-MS/MS", "GC-MS")</li>
+                <li>Categoría (ej: "residuos", "contaminantes")</li>
+            </ul>
+            <p><small>💡 También puedes contactar directamente con FARMAVET para consultas específicas.</small></p>
+        `);
+    }
+
+    formatPerplexityAnswer(answer) {
+        // Formatear la respuesta de Perplexity para que sea más legible
+        let formatted = this.escapeHtml(answer);
+        
+        // Convertir saltos de línea en <br>
+        formatted = formatted.replace(/\n/g, '<br>');
+        
+        // Detectar y formatear listas
+        formatted = formatted.replace(/(\d+\.\s+[^\n]+)/g, '<p>$1</p>');
+        
+        // Convertir en párrafos
+        const paragraphs = formatted.split('<br><br>');
+        formatted = paragraphs.map(p => {
+            p = p.trim();
+            if (p && !p.startsWith('<p>') && !p.startsWith('<ul>')) {
+                return `<p>${p}</p>`;
+            }
+            return p;
+        }).join('');
+        
+        return formatted;
     }
 
     showSuggestions(query) {

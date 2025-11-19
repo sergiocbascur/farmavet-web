@@ -19,6 +19,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
+import requests
 
 # Configuración de logging
 logging.basicConfig(
@@ -2154,6 +2155,104 @@ def api_metodologias():
         app.logger.error(error_msg, exc_info=True)
         return jsonify({
             'error': 'Error al cargar metodologías',
+            'details': str(e) if app.debug else 'Error interno del servidor'
+        }), 500
+
+# API de Perplexity para búsquedas inteligentes
+@app.route('/api/chatbot/search', methods=['POST'])
+def api_chatbot_search():
+    """API endpoint para búsquedas inteligentes usando Perplexity"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '').strip()
+        
+        if not query:
+            return jsonify({'error': 'Query vacía'}), 400
+        
+        perplexity_api_key = os.environ.get('PERPLEXITY_API_KEY')
+        
+        if not perplexity_api_key:
+            app.logger.warning('PERPLEXITY_API_KEY no configurada')
+            return jsonify({
+                'error': 'API de Perplexity no configurada',
+                'message': 'La funcionalidad de búsqueda inteligente no está disponible'
+            }), 503
+        
+        # Construir el prompt contextual para Perplexity
+        context = "Eres un asistente experto del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025 para análisis de residuos químicos, antibióticos, micotoxinas y contaminantes en alimentos de origen animal."
+        
+        system_message = f"{context} Responde de manera clara y profesional en español. Si no tienes información específica sobre metodologías de FARMAVET, indica que debes consultar directamente con el laboratorio."
+        
+        # Llamar a la API de Perplexity
+        perplexity_url = "https://api.perplexity.ai/chat/completions"
+        
+        headers = {
+            "Authorization": f"Bearer {perplexity_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "llama-3.1-sonar-small-128k-online",  # Modelo con capacidad de búsqueda web
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_message
+                },
+                {
+                    "role": "user",
+                    "content": query
+                }
+            ],
+            "temperature": 0.2,
+            "max_tokens": 500,
+            "top_p": 0.9
+        }
+        
+        app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
+        
+        response = requests.post(perplexity_url, headers=headers, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            
+            # Extraer la respuesta del modelo
+            if 'choices' in result and len(result['choices']) > 0:
+                answer = result['choices'][0]['message']['content']
+                
+                # Extraer fuentes si están disponibles
+                sources = []
+                if 'citations' in result:
+                    sources = result['citations']
+                
+                app.logger.info(f'Chatbot Perplexity: Respuesta recibida ({len(answer)} caracteres)')
+                
+                return jsonify({
+                    'answer': answer,
+                    'sources': sources,
+                    'query': query
+                })
+            else:
+                app.logger.warning('Chatbot Perplexity: Respuesta sin choices')
+                return jsonify({'error': 'Respuesta inválida de Perplexity'}), 500
+        else:
+            error_text = response.text
+            app.logger.error(f'Chatbot Perplexity: Error {response.status_code}: {error_text}')
+            return jsonify({
+                'error': f'Error en Perplexity API: {response.status_code}',
+                'details': error_text[:200] if app.debug else 'Error al procesar la consulta'
+            }), response.status_code
+            
+    except requests.exceptions.Timeout:
+        app.logger.error('Chatbot Perplexity: Timeout al conectar con la API')
+        return jsonify({'error': 'Timeout al conectar con el servicio de búsqueda'}), 504
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f'Chatbot Perplexity: Error de conexión: {str(e)}')
+        return jsonify({'error': 'Error de conexión con el servicio de búsqueda'}), 503
+    except Exception as e:
+        error_msg = f'Error en chatbot search: {str(e)}'
+        app.logger.error(error_msg, exc_info=True)
+        return jsonify({
+            'error': 'Error al procesar la búsqueda',
             'details': str(e) if app.debug else 'Error interno del servidor'
         }), 500
 
