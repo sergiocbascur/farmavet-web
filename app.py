@@ -890,6 +890,10 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'admin_id' not in session:
+            flash('Por favor, inicia sesión para acceder a esta sección', 'warning')
+            # Guardar la URL a la que quería acceder para redirigir después del login
+            if request.path:
+                session['next_url'] = request.path
             return redirect(url_for('public_login'))
         # Renovar sesión si está activa
         session.permanent = True
@@ -1604,6 +1608,11 @@ def public_login():
             session['admin_username'] = admin['username']
             session.permanent = True
             reset_login_attempts(ip_address)
+            
+            # Redirigir a la URL que el usuario intentaba acceder antes del login
+            next_url = session.pop('next_url', None)
+            if next_url:
+                return redirect(next_url)
             flash('Sesión iniciada correctamente', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
