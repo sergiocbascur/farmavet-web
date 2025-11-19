@@ -85,7 +85,10 @@ class MetodologiasChatbot {
         
         try {
             // Siempre cargar desde la API - esto funciona en todas las páginas
-            const response = await fetch('/api/metodologias', {
+            const apiUrl = '/api/metodologias';
+            console.log(`🔄 Chatbot: Intentando cargar metodologías desde ${apiUrl} (intento ${this.loadAttempts}/${this.maxLoadAttempts})`);
+            
+            const response = await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,30 +97,51 @@ class MetodologiasChatbot {
                 cache: 'no-cache'
             });
             
+            console.log(`📡 Chatbot: Respuesta recibida - Status: ${response.status}, OK: ${response.ok}`);
+            
             if (response.ok) {
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    if (data.length > 0) {
-                        this.metodologias = data;
-                        console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
-                        this.loadAttempts = 0; // Reset contador en caso de éxito
-                        return;
-                    } else {
-                        console.warn('⚠️ Chatbot: La API devolvió un array vacío');
-                        // Si no hay metodologías, intentar fallback solo en página de servicios
-                        if (document.querySelector('#tabla-metodologias')) {
-                            this.loadFromDOM();
+                try {
+                    const data = await response.json();
+                    console.log(`📦 Chatbot: Datos recibidos:`, typeof data, Array.isArray(data) ? `Array de ${data.length} elementos` : 'No es array');
+                    
+                    if (Array.isArray(data)) {
+                        if (data.length > 0) {
+                            this.metodologias = data;
+                            console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
+                            this.loadAttempts = 0; // Reset contador en caso de éxito
                             return;
+                        } else {
+                            console.warn('⚠️ Chatbot: La API devolvió un array vacío. Puede que no haya metodologías activas.');
+                            // Si no hay metodologías, intentar fallback solo en página de servicios
+                            if (document.querySelector('#tabla-metodologias')) {
+                                console.log('🔄 Chatbot: Intentando fallback DOM...');
+                                this.loadFromDOM();
+                                return;
+                            }
                         }
+                    } else {
+                        console.error('❌ Chatbot: La API no devolvió un array válido. Tipo recibido:', typeof data, data);
                     }
-                } else {
-                    console.error('❌ Chatbot: La API no devolvió un array válido');
+                } catch (jsonError) {
+                    console.error('❌ Chatbot: Error al parsear JSON de la respuesta:', jsonError);
+                    const text = await response.text();
+                    console.error('❌ Chatbot: Respuesta recibida (texto):', text.substring(0, 500));
                 }
             } else {
+                // Intentar leer el mensaje de error
+                let errorText = '';
+                try {
+                    const errorData = await response.json();
+                    errorText = JSON.stringify(errorData);
+                } catch (e) {
+                    errorText = await response.text();
+                }
                 console.error(`❌ Chatbot: Error HTTP ${response.status}:`, response.statusText);
+                console.error(`❌ Chatbot: Detalles del error:`, errorText);
             }
         } catch (error) {
-            console.error('❌ Chatbot: Error al cargar metodologías desde API:', error);
+            console.error('❌ Chatbot: Error de red al cargar metodologías desde API:', error);
+            console.error('❌ Chatbot: Detalles del error:', error.message, error.stack);
             
             // Intentar de nuevo si no hemos alcanzado el límite
             if (this.loadAttempts < this.maxLoadAttempts) {
@@ -449,11 +473,20 @@ class MetodologiasChatbot {
     showResults(query, results) {
         // Verificar si hay metodologías cargadas
         if (this.metodologias.length === 0) {
-            this.addMessage(`
+            console.warn('⚠️ Chatbot: No hay metodologías cargadas para buscar');
+            let message = `
                 <p>⚠️ No se pudieron cargar las metodologías en este momento.</p>
                 <p>Por favor, intenta recargar la página o contacta al administrador.</p>
-                <p>Si estás en la página de servicios, puedes buscar directamente en la tabla.</p>
-            `);
+            `;
+            
+            // Si estamos en la página de servicios, sugerir buscar en la tabla
+            if (document.querySelector('#tabla-metodologias')) {
+                message += `<p>Puedes buscar directamente en la tabla de metodologías más abajo.</p>`;
+            }
+            
+            message += `<p><small>💡 Abre la consola del navegador (F12) para ver más detalles del error.</small></p>`;
+            
+            this.addMessage(message);
             return;
         }
         

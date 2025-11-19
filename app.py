@@ -2089,6 +2089,28 @@ def api_metodologias():
     """API endpoint para obtener todas las metodologías activas (para el chatbot)"""
     try:
         conn = get_db()
+        
+        # Verificar si la tabla existe
+        try:
+            table_check = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metodologias'").fetchone()
+            if not table_check:
+                app.logger.warning('API metodologias: La tabla metodologias no existe')
+                conn.close()
+                return jsonify({'error': 'La tabla de metodologías no existe'}), 500
+        except Exception as e:
+            app.logger.error(f'API metodologias: Error al verificar tabla: {str(e)}')
+            conn.close()
+            return jsonify({'error': 'Error al verificar la base de datos'}), 500
+        
+        # Contar total de metodologías (incluyendo inactivas para debug)
+        try:
+            total_count = conn.execute('SELECT COUNT(*) as count FROM metodologias').fetchone()['count']
+            active_count = conn.execute('SELECT COUNT(*) as count FROM metodologias WHERE activo = 1').fetchone()['count']
+            app.logger.info(f'API metodologias: Total metodologías: {total_count}, Activas: {active_count}')
+        except Exception as e:
+            app.logger.warning(f'API metodologias: Error al contar metodologías: {str(e)}')
+        
+        # Obtener metodologías activas
         metodologias = conn.execute('''
             SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
                    tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
@@ -2096,7 +2118,6 @@ def api_metodologias():
             WHERE activo = 1
             ORDER BY categoria, orden, nombre
         ''').fetchall()
-        conn.close()
         
         # Convertir a lista de diccionarios
         result = []
@@ -2121,10 +2142,20 @@ def api_metodologias():
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
+        app.logger.info(f'API metodologias: Devolviendo {len(result)} metodologías activas')
+        
+        # Si no hay metodologías, loguear una advertencia
+        if len(result) == 0:
+            app.logger.warning('API metodologias: No hay metodologías activas en la base de datos')
+        
         return response
     except Exception as e:
-        app.logger.error(f'Error en API metodologias: {str(e)}')
-        return jsonify({'error': 'Error al cargar metodologías'}), 500
+        error_msg = f'Error en API metodologias: {str(e)}'
+        app.logger.error(error_msg, exc_info=True)
+        return jsonify({
+            'error': 'Error al cargar metodologías',
+            'details': str(e) if app.debug else 'Error interno del servidor'
+        }), 500
 
 @app.route('/admin/metodologias')
 @login_required
