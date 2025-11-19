@@ -1020,6 +1020,11 @@ def index():
         SELECT * FROM noticias WHERE activa = 1 AND destacada = 1 
         ORDER BY fecha DESC, id DESC LIMIT 3
     ''').fetchall()
+    eventos = conn.execute('''
+        SELECT * FROM eventos WHERE activo = 1 AND destacada = 1 
+        ORDER BY orden, id
+        LIMIT 3
+    ''').fetchall()
     clientes = conn.execute('''
         SELECT * FROM clientes WHERE activo = 1 AND mostrar_en_index = 1 
         ORDER BY orden, id
@@ -1038,7 +1043,7 @@ def index():
     conn.close()
     lang = get_language()
     locale = get_locale()
-    return render_template('index.html', estadisticas=estadisticas, noticias=noticias, clientes=clientes, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+    return render_template('index.html', estadisticas=estadisticas, noticias=noticias, eventos=eventos, clientes=clientes, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
 
 @app.route('/equipo')
 @app.route('/equipo.html')

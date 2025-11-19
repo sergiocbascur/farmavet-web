@@ -494,7 +494,7 @@
           </p>
           <div class="news-carousel" data-carousel>
             <div class="news-track" data-carousel-track>
-              {% if noticias %}
+              {% if noticias or eventos %}
                 {% for noticia in noticias %}
                 <article class="news-card">
                   {% if noticia.imagen %}
@@ -539,6 +539,37 @@
                       href="{{ url_for('page', page='noticias') }}"
                     >
                       {{ _('Ver más') }}
+                    </a>
+                    {% endif %}
+                  </div>
+                </article>
+                {% endfor %}
+                {% for evento in eventos %}
+                <article class="news-card">
+                  <img
+                    src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}"
+                    alt="{{ get_translated_field(evento, 'titulo', evento.titulo) }}"
+                  />
+                  <div class="news-body">
+                    <span class="news-meta">
+                      {% if evento.fecha %}{{ evento.fecha }}{% endif %}{% if evento.fecha and evento.meta %} · {% endif %}{% if evento.meta %}{{ get_translated_field(evento, 'meta', evento.meta) }}{% endif %}
+                    </span>
+                    <h3 class="news-title">{{ get_translated_field(evento, 'titulo', evento.titulo) }}</h3>
+                    <p>{{ get_translated_field(evento, 'descripcion', evento.descripcion) or '' }}</p>
+                    {% if evento.enlace %}
+                    <a
+                      class="news-link"
+                      href="{{ evento.enlace }}"
+                      {% if 'http' in evento.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}
+                    >
+                      {{ get_translated_field(evento, 'texto_boton', evento.texto_boton) or _('Ver más') }}
+                    </a>
+                    {% else %}
+                    <a
+                      class="news-link"
+                      href="{{ url_for('page', page='noticias') }}#eventos"
+                    >
+                      {{ get_translated_field(evento, 'texto_boton', evento.texto_boton) or _('Ver más') }}
                     </a>
                     {% endif %}
                   </div>
