@@ -246,7 +246,6 @@ class MetodologiasChatbot {
         // Agregar mensaje del usuario
         this.addMessage(query, 'user');
         input.value = '';
-        this.hideSuggestions();
 
         // Mostrar "escribiendo..."
         const typingId = this.showTyping();
