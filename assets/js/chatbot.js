@@ -79,9 +79,11 @@ class MetodologiasChatbot {
 
     async loadMetodologias() {
         try {
+            // Siempre intentar cargar desde la API primero
             const response = await fetch('/api/metodologias');
             if (response.ok) {
                 this.metodologias = await response.json();
+                console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
             } else {
                 // Fallback: cargar desde el DOM si la API no existe
                 this.loadFromDOM();
@@ -439,16 +441,12 @@ class MetodologiasChatbot {
     }
 }
 
-// Inicializar chatbot cuando el DOM esté listo
+// Inicializar chatbot cuando el DOM esté listo (en todas las páginas)
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('tabla-metodologias')) {
-            window.chatbot = new MetodologiasChatbot();
-        }
+        window.chatbot = new MetodologiasChatbot();
     });
 } else {
-    if (document.getElementById('tabla-metodologias')) {
-        window.chatbot = new MetodologiasChatbot();
-    }
+    window.chatbot = new MetodologiasChatbot();
 }
 
