@@ -2206,9 +2206,11 @@ def api_chatbot_search():
             }), 503
         
         # Construir el prompt contextual para Perplexity
-        context = "Eres un asistente experto del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025 para análisis de residuos químicos, antibióticos, micotoxinas y contaminantes en alimentos de origen animal."
+        context = """Eres un asistente experto del Laboratorio FARMAVET de la Universidad de Chile, especializado en metodologías analíticas acreditadas ISO 17025 para análisis de residuos químicos, antibióticos, micotoxinas y contaminantes en alimentos de origen animal.
+
+Responde de manera natural, clara y conversacional en español. Sé breve pero informativo. Evita listas largas y prefiero respuestas en formato de párrafos continuos cuando sea posible."""
         
-        system_message = f"{context} Responde de manera clara y profesional en español. Si no tienes información específica sobre metodologías de FARMAVET, indica que debes consultar directamente con el laboratorio."
+        system_message = f"{context} Si no tienes información específica sobre metodologías de FARMAVET, indica amablemente que deben consultar directamente con el laboratorio."
         
         # Llamar a la API de Perplexity
         perplexity_url = "https://api.perplexity.ai/chat/completions"

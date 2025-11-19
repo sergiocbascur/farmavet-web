@@ -500,6 +500,7 @@ class MetodologiasChatbot {
             // Intentar búsqueda inteligente con Perplexity
             const typingId = this.showTyping();
             try {
+                console.log('🔄 Chatbot: Buscando con Perplexity API...');
                 const perplexityResponse = await fetch('/api/chatbot/search', {
                     method: 'POST',
                     headers: {
@@ -510,32 +511,45 @@ class MetodologiasChatbot {
                 
                 this.hideTyping(typingId);
                 
+                console.log(`📡 Chatbot Perplexity: Status ${perplexityResponse.status}`);
+                
                 if (perplexityResponse.ok) {
                     const data = await perplexityResponse.json();
+                    console.log('✅ Chatbot Perplexity: Respuesta recibida', data);
+                    
                     if (data.answer) {
                         let message = `
-                            <p><strong>💡 Información adicional:</strong></p>
                             <div class="chatbot-results-text">
                                 ${this.formatPerplexityAnswer(data.answer)}
                             </div>
                         `;
                         
                         if (data.sources && data.sources.length > 0) {
-                            message += `<p><small>📚 Fuentes: ${data.sources.length} referencia(s)</small></p>`;
+                            message += `<p><small>📚 Fuente${data.sources.length > 1 ? 's' : ''}: ${data.sources.length}</small></p>`;
                         }
                         
-                        message += `<p><small>⚠️ Esta información es general. Para metodologías específicas de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
+                        message += `<p><small>⚠️ <strong>Nota:</strong> Esta información es general. Para metodologías específicas de FARMAVET, contacta directamente con el laboratorio.</small></p>`;
                         
                         this.addMessage(message);
                     } else {
+                        console.warn('⚠️ Chatbot Perplexity: Respuesta sin answer');
                         this.showNoResultsHelp(query);
                     }
                 } else {
-                    // Si Perplexity falla, mostrar ayuda estándar
-                    this.showNoResultsHelp(query);
+                    // Si Perplexity falla, mostrar información útil
+                    const errorData = await perplexityResponse.json().catch(() => ({}));
+                    console.error('❌ Chatbot Perplexity: Error', perplexityResponse.status, errorData);
+                    
+                    if (perplexityResponse.status === 503 && errorData.error === 'API de Perplexity no configurada') {
+                        // API no configurada, no mostrar mensaje de error al usuario
+                        this.showNoResultsHelp(query);
+                    } else {
+                        // Otro error, mostrar ayuda estándar
+                        this.showNoResultsHelp(query);
+                    }
                 }
             } catch (error) {
-                console.error('Error al buscar en Perplexity:', error);
+                console.error('❌ Chatbot Perplexity: Error de red', error);
                 this.hideTyping(typingId);
                 this.showNoResultsHelp(query);
             }
@@ -645,23 +659,61 @@ class MetodologiasChatbot {
     }
 
     formatPerplexityAnswer(answer) {
-        // Formatear la respuesta de Perplexity para que sea más legible
+        if (!answer) return '';
+        
+        // Escapar HTML primero
         let formatted = this.escapeHtml(answer);
         
-        // Convertir saltos de línea en <br>
-        formatted = formatted.replace(/\n/g, '<br>');
+        // Limpiar formato innecesario
+        formatted = formatted
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Negrita **texto**
+            .replace(/\*(.*?)\*/g, '<em>$1</em>') // Cursiva *texto*
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Eliminar enlaces [texto](url)
         
-        // Detectar y formatear listas
-        formatted = formatted.replace(/(\d+\.\s+[^\n]+)/g, '<p>$1</p>');
+        // Convertir saltos de línea dobles en párrafos
+        let paragraphs = formatted.split(/\n\s*\n/).filter(p => p.trim().length > 0);
         
-        // Convertir en párrafos
-        const paragraphs = formatted.split('<br><br>');
-        formatted = paragraphs.map(p => {
-            p = p.trim();
-            if (p && !p.startsWith('<p>') && !p.startsWith('<ul>')) {
-                return `<p>${p}</p>`;
+        // Formatear cada párrafo
+        formatted = paragraphs.map(para => {
+            para = para.trim();
+            
+            // Si es una lista numerada
+            if (/^\d+\.\s/.test(para)) {
+                const items = para.split(/\n(?=\d+\.\s)/);
+                if (items.length > 1) {
+                    const listItems = items.map(item => {
+                        item = item.replace(/^\d+\.\s*/, '').trim();
+                        return `<li>${item}</li>`;
+                    }).join('');
+                    return `<ol>${listItems}</ol>`;
+                }
+                // Un solo item numerado, convertirlo en párrafo normal
+                para = para.replace(/^\d+\.\s*/, '');
             }
-            return p;
+            
+            // Si es una lista con viñetas
+            if (/^[-*•]\s/.test(para)) {
+                const items = para.split(/\n(?=[-*•]\s)/);
+                if (items.length > 1) {
+                    const listItems = items.map(item => {
+                        item = item.replace(/^[-*•]\s*/, '').trim();
+                        return `<li>${item}</li>`;
+                    }).join('');
+                    return `<ul>${listItems}</ul>`;
+                }
+                // Un solo item, convertirlo en párrafo normal
+                para = para.replace(/^[-*•]\s*/, '');
+            }
+            
+            // Convertir saltos de línea simples en <br>
+            para = para.replace(/\n/g, '<br>');
+            
+            // Si no empieza con una etiqueta HTML, envolver en <p>
+            if (!para.match(/^<(p|ul|ol|li|h[1-6]|div|strong|em)/i)) {
+                return `<p>${para}</p>`;
+            }
+            
+            return para;
         }).join('');
         
         return formatted;
