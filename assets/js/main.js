@@ -534,6 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const autoplayEnabled = carousel.dataset.autoplay === "true";
     const autoplaySpeed = parseInt(carousel.dataset.autoplaySpeed || "4000", 10);
     const itemsPerView = parseInt(carousel.dataset.itemsPerView || "4", 10);
+    const continuousScroll = carousel.dataset.continuousScroll === "true"; // Solo para carruseles de logos
 
     console.log(`Carousel ${carouselIndex}:`, { 
       track: !!track, 
@@ -590,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastFrameTime = null;
     let isTransitioning = false;
     let resetTimeout = null;
-    const scrollSpeed = 0.3; // píxeles por milisegundo (ajustable para velocidad)
+    const scrollSpeed = continuousScroll ? 0.1 : 0.3; // Velocidad más lenta para movimiento continuo (solo logos)
 
     function getItemsPerView() {
       const width = window.innerWidth;
@@ -748,8 +749,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Verify we have valid items before starting autoplay
       if (totalItems === 0) return;
       
-      // Usar requestAnimationFrame para movimiento continuo y suave
-      lastFrameTime = performance.now();
+      // Si es un carrusel de logos (continuous scroll), usar movimiento continuo
+      if (continuousScroll) {
+        // Usar requestAnimationFrame para movimiento continuo y suave
+        lastFrameTime = performance.now();
       
       function animate(currentTime) {
         if (!autoplayEnabled || isTransitioning) {
@@ -818,6 +821,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       animationFrameId = requestAnimationFrame(animate);
+      } else {
+        // Para carruseles con texto, usar el método original con setInterval
+        autoplayInterval = setInterval(() => {
+          if (!isTransitioning) {
+            nextSlide();
+          }
+        }, autoplaySpeed);
+      }
     }
 
     function stopAutoplay() {
