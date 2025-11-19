@@ -2087,35 +2087,44 @@ def admin_certificado_eliminar(certificado_id):
 @app.route('/api/metodologias')
 def api_metodologias():
     """API endpoint para obtener todas las metodologías activas (para el chatbot)"""
-    conn = get_db()
-    metodologias = conn.execute('''
-        SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-               tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
-        FROM metodologias 
-        WHERE activo = 1
-        ORDER BY categoria, orden, nombre
-    ''').fetchall()
-    conn.close()
-    
-    # Convertir a lista de diccionarios
-    result = []
-    for met in metodologias:
-        result.append({
-            'nombre': met['nombre'],
-            'nombre_en': met.get('nombre_en'),
-            'categoria': met['categoria'],
-            'analito': met['analito'],
-            'analito_en': met.get('analito_en'),
-            'matriz': met['matriz'],
-            'matriz_en': met.get('matriz_en'),
-            'tecnica': met.get('tecnica'),
-            'tecnica_en': met.get('tecnica_en'),
-            'lod': met.get('limite_deteccion'),
-            'loq': met.get('limite_cuantificacion'),
-            'acreditada': bool(met.get('acreditada', 0))
-        })
-    
-    return jsonify(result)
+    try:
+        conn = get_db()
+        metodologias = conn.execute('''
+            SELECT nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                   tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, acreditada
+            FROM metodologias 
+            WHERE activo = 1
+            ORDER BY categoria, orden, nombre
+        ''').fetchall()
+        conn.close()
+        
+        # Convertir a lista de diccionarios
+        result = []
+        for met in metodologias:
+            result.append({
+                'nombre': met['nombre'] or '',
+                'nombre_en': met.get('nombre_en') or '',
+                'categoria': met['categoria'] or '',
+                'analito': met['analito'] or '',
+                'analito_en': met.get('analito_en') or '',
+                'matriz': met['matriz'] or '',
+                'matriz_en': met.get('matriz_en') or '',
+                'tecnica': met.get('tecnica') or '',
+                'tecnica_en': met.get('tecnica_en') or '',
+                'lod': met.get('limite_deteccion') or '',
+                'loq': met.get('limite_cuantificacion') or '',
+                'acreditada': bool(met.get('acreditada', 0))
+            })
+        
+        # Respuesta con headers para caché
+        response = jsonify(result)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    except Exception as e:
+        app.logger.error(f'Error en API metodologias: {str(e)}')
+        return jsonify({'error': 'Error al cargar metodologías'}), 500
 
 @app.route('/admin/metodologias')
 @login_required

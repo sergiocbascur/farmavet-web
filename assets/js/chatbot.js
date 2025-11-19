@@ -8,6 +8,8 @@ class MetodologiasChatbot {
         this.isOpen = false;
         this.metodologias = [];
         this.conversationHistory = [];
+        this.loadAttempts = 0;
+        this.maxLoadAttempts = 3;
         this.init();
     }
 
@@ -78,38 +80,100 @@ class MetodologiasChatbot {
     }
 
     async loadMetodologias() {
+        // Incrementar contador de intentos
+        this.loadAttempts++;
+        
         try {
-            // Siempre intentar cargar desde la API primero
-            const response = await fetch('/api/metodologias');
+            // Siempre cargar desde la API - esto funciona en todas las páginas
+            const response = await fetch('/api/metodologias', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                cache: 'no-cache'
+            });
+            
             if (response.ok) {
-                this.metodologias = await response.json();
-                console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    if (data.length > 0) {
+                        this.metodologias = data;
+                        console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
+                        this.loadAttempts = 0; // Reset contador en caso de éxito
+                        return;
+                    } else {
+                        console.warn('⚠️ Chatbot: La API devolvió un array vacío');
+                        // Si no hay metodologías, intentar fallback solo en página de servicios
+                        if (document.querySelector('#tabla-metodologias')) {
+                            this.loadFromDOM();
+                            return;
+                        }
+                    }
+                } else {
+                    console.error('❌ Chatbot: La API no devolvió un array válido');
+                }
             } else {
-                // Fallback: cargar desde el DOM si la API no existe
-                this.loadFromDOM();
+                console.error(`❌ Chatbot: Error HTTP ${response.status}:`, response.statusText);
             }
         } catch (error) {
-            console.warn('No se pudo cargar desde API, usando DOM:', error);
-            this.loadFromDOM();
+            console.error('❌ Chatbot: Error al cargar metodologías desde API:', error);
+            
+            // Intentar de nuevo si no hemos alcanzado el límite
+            if (this.loadAttempts < this.maxLoadAttempts) {
+                const delay = this.loadAttempts * 1000; // Delay progresivo: 1s, 2s, 3s
+                console.log(`🔄 Chatbot: Reintentando carga en ${delay/1000} segundos... (intento ${this.loadAttempts}/${this.maxLoadAttempts})`);
+                setTimeout(() => {
+                    this.loadMetodologias();
+                }, delay);
+                return;
+            }
+        }
+        
+        // Si llegamos aquí después de todos los intentos, usar fallback
+        if (this.loadAttempts >= this.maxLoadAttempts) {
+            console.warn(`⚠️ Chatbot: Se agotaron los intentos (${this.maxLoadAttempts}). Intentando fallback...`);
+            
+            // Intentar fallback solo en la página de servicios (donde existe la tabla)
+            if (document.querySelector('#tabla-metodologias')) {
+                console.warn('⚠️ Chatbot: Usando fallback DOM (solo disponible en página de servicios)');
+                this.loadFromDOM();
+            } else {
+                console.error('❌ Chatbot: No se pudieron cargar metodologías. La API no está disponible y no hay tabla en esta página.');
+                this.metodologias = [];
+                // Mostrar mensaje al usuario si intenta buscar
+                this.showErrorMessage = true;
+            }
         }
     }
 
     loadFromDOM() {
-        // Cargar metodologías desde la tabla en el DOM
+        // Fallback: cargar metodologías desde la tabla en el DOM (solo en página de servicios)
         const rows = document.querySelectorAll('#tabla-metodologias tbody tr');
+        if (rows.length === 0) {
+            console.warn('⚠️ Chatbot: No se encontró tabla de metodologías en el DOM');
+            this.metodologias = [];
+            return;
+        }
+        
         this.metodologias = Array.from(rows).map(row => {
             const cells = row.querySelectorAll('td');
             return {
                 nombre: cells[0]?.textContent.trim() || '',
+                nombre_en: '',
                 analito: cells[1]?.textContent.trim() || '',
+                analito_en: '',
                 matriz: cells[2]?.textContent.trim() || '',
+                matriz_en: '',
                 tecnica: cells[3]?.textContent.trim() || '',
+                tecnica_en: '',
                 lod: cells[4]?.textContent.trim() || '',
                 loq: cells[5]?.textContent.trim() || '',
-                acreditada: cells[6]?.textContent.trim() || '',
+                acreditada: cells[6]?.textContent.includes('Sí') || false,
                 categoria: row.dataset.categoria || ''
             };
         });
+        console.log(`⚠️ Chatbot: ${this.metodologias.length} metodologías cargadas desde DOM (fallback)`);
     }
 
     setupEventListeners() {
@@ -227,11 +291,24 @@ class MetodologiasChatbot {
         // Extraer palabras clave de la consulta, eliminando palabras comunes
         const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'de', 'en', 'para', 'con', 'por', 
                           'que', 'qué', 'hacen', 'hace', 'busca', 'buscar', 'metodos', 'metodologias',
-                          'metodología', 'metodologías', 'analisis', 'análisis', 'en', 'de', 'del'];
+                          'metodología', 'metodologías', 'analisis', 'análisis', 'en', 'de', 'del',
+                          'tienen', 'tiene', 'tener', 'metodo', 'metodo', 'uso', 'usan', 'usa',
+                          'tecnica', 'tecnicas', 'tecnología', 'tecnologías'];
         
         const normalized = this.normalizeText(query);
-        const words = normalized.split(/\s+/).filter(w => w.length > 2);
-        return words.filter(word => !stopWords.includes(word));
+        // Extraer palabras de 3+ caracteres, incluyendo términos químicos
+        const words = normalized.split(/\s+/).filter(w => w.length >= 3);
+        
+        // Filtrar stop words pero mantener términos químicos importantes
+        const keywords = words.filter(word => !stopWords.includes(word));
+        
+        // Si no hay keywords pero hay palabras, tomar la primera palabra significativa
+        if (keywords.length === 0 && words.length > 0) {
+            // Tomar la última palabra (probablemente el término buscado)
+            return [words[words.length - 1]];
+        }
+        
+        return keywords;
     }
 
     searchMetodologias(query) {
@@ -250,28 +327,49 @@ class MetodologiasChatbot {
             'gcms': ['gc-ms', 'cromatografia de gases', 'gas chromatography'],
             'hplc': ['cromatografia liquida', 'high performance liquid chromatography'],
             'metodo': ['metodologia', 'tecnica', 'analisis', 'ensayo'],
-            'diquat': ['diquat', 'paraquat', 'herbicida']
+            'diquat': ['diquat', 'paraquat', 'herbicida', 'bipiridilo'],
+            'amprolio': ['amprolio', 'amprolium', 'anticoccidiano', 'antiparasitario']
         };
 
         // Expandir búsqueda con sinónimos
-        const expandedTerms = [normalizedQuery, ...keywords];
+        const expandedTerms = new Set();
+        expandedTerms.add(normalizedQuery);
+        keywords.forEach(kw => expandedTerms.add(kw));
+        
+        // Para cada keyword, buscar en sinónimos y expandir
         for (const keyword of keywords) {
+            // Agregar el keyword original
+            expandedTerms.add(keyword);
+            
+            // Buscar coincidencias exactas o parciales en las claves de sinónimos
             for (const [key, values] of Object.entries(synonyms)) {
                 const normalizedKey = this.normalizeText(key);
-                if (keyword.includes(normalizedKey) || normalizedKey.includes(keyword)) {
-                    expandedTerms.push(...values.map(v => this.normalizeText(v)));
+                
+                // Si el keyword coincide con la clave o viceversa
+                if (keyword === normalizedKey || keyword.includes(normalizedKey) || normalizedKey.includes(keyword)) {
+                    // Agregar todos los sinónimos
+                    values.forEach(v => expandedTerms.add(this.normalizeText(v)));
+                    expandedTerms.add(normalizedKey);
                 }
+                
+                // Si el keyword coincide con alguno de los valores de sinónimos
                 for (const value of values) {
                     const normalizedValue = this.normalizeText(value);
-                    if (keyword.includes(normalizedValue) || normalizedValue.includes(keyword)) {
-                        expandedTerms.push(normalizedKey, ...values.map(v => this.normalizeText(v)));
+                    if (keyword === normalizedValue || keyword.includes(normalizedValue) || normalizedValue.includes(keyword)) {
+                        // Agregar la clave y todos sus sinónimos
+                        expandedTerms.add(normalizedKey);
+                        values.forEach(v => expandedTerms.add(this.normalizeText(v)));
                     }
                 }
             }
         }
+        
+        // Convertir Set a Array
+        const expandedTermsArray = Array.from(expandedTerms);
 
         // Búsqueda semántica mejorada
         const results = this.metodologias.filter(met => {
+            // Crear un texto de búsqueda combinando todos los campos
             const searchFields = [
                 this.normalizeText(met.nombre || ''),
                 this.normalizeText(met.nombre_en || ''),
@@ -284,29 +382,61 @@ class MetodologiasChatbot {
                 this.normalizeText(met.categoria || '')
             ].join(' ');
             
-            // Búsqueda exacta en texto normalizado
-            if (searchFields.includes(normalizedQuery)) return true;
+            // Normalizar también la query completa
+            const cleanQuery = normalizedQuery.replace(/[?¿!¡.,;:]/g, '').trim();
             
-            // Búsqueda con sinónimos expandidos
-            for (const term of expandedTerms) {
-                if (term.length > 2 && searchFields.includes(term)) return true;
+            // 1. Búsqueda exacta: si la query completa está en los campos
+            if (cleanQuery.length >= 3 && searchFields.includes(cleanQuery)) {
+                return true;
             }
             
-            // Búsqueda por palabras clave individuales
+            // 2. Búsqueda con términos expandidos (sinónimos)
+            for (const term of expandedTermsArray) {
+                const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
+                if (cleanTerm.length >= 3 && searchFields.includes(cleanTerm)) {
+                    return true;
+                }
+            }
+            
+            // 3. Búsqueda por palabras clave individuales (más flexible)
             if (keywords.length > 0) {
-                const matchCount = keywords.filter(keyword => {
-                    if (keyword.length <= 2) return false;
-                    return searchFields.includes(keyword);
-                }).length;
-                
-                // Si al menos una palabra clave coincide, incluir el resultado
-                if (matchCount > 0) return true;
+                for (const keyword of keywords) {
+                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                    if (cleanKeyword.length >= 3) {
+                        // Buscar como palabra completa o como substring
+                        // Buscar como palabra completa (entre espacios o al inicio/fin)
+                        const wordRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        if (wordRegex.test(searchFields)) {
+                            return true;
+                        }
+                        // También buscar como substring para términos químicos
+                        if (searchFields.includes(cleanKeyword)) {
+                            return true;
+                        }
+                    }
+                }
             }
             
-            // Búsqueda parcial (substring) para términos cortos importantes
-            for (const keyword of keywords) {
-                if (keyword.length >= 3) {
-                    if (searchFields.includes(keyword)) return true;
+            // 4. Búsqueda de similitud parcial para términos químicos (última opción)
+            // Para términos de 4+ caracteres, buscar si está contenido en cualquier parte
+            if (keywords.length > 0) {
+                for (const keyword of keywords) {
+                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                    if (cleanKeyword.length >= 4) {
+                        // Buscar si el keyword está en algún campo individual (no solo en el texto combinado)
+                        const individualFields = [
+                            this.normalizeText(met.analito || ''),
+                            this.normalizeText(met.analito_en || ''),
+                            this.normalizeText(met.nombre || ''),
+                            this.normalizeText(met.nombre_en || '')
+                        ];
+                        
+                        for (const field of individualFields) {
+                            if (field && field.includes(cleanKeyword)) {
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
             
@@ -317,16 +447,27 @@ class MetodologiasChatbot {
     }
 
     showResults(query, results) {
+        // Verificar si hay metodologías cargadas
+        if (this.metodologias.length === 0) {
+            this.addMessage(`
+                <p>⚠️ No se pudieron cargar las metodologías en este momento.</p>
+                <p>Por favor, intenta recargar la página o contacta al administrador.</p>
+                <p>Si estás en la página de servicios, puedes buscar directamente en la tabla.</p>
+            `);
+            return;
+        }
+        
         if (results.length === 0) {
             this.addMessage(`
                 <p>No encontré metodologías que coincidan con "<strong>${this.escapeHtml(query)}</strong>".</p>
                 <p>Intenta con términos como:</p>
                 <ul class="chatbot-examples">
-                    <li>Nombre del analito (ej: "tetraciclinas", "aflatoxinas")</li>
+                    <li>Nombre del analito (ej: "tetraciclinas", "aflatoxinas", "diquat", "amprolio")</li>
                     <li>Tipo de matriz (ej: "salmón", "carne", "leche")</li>
                     <li>Técnica analítica (ej: "LC-MS/MS", "GC-MS")</li>
                     <li>Categoría (ej: "residuos", "contaminantes")</li>
                 </ul>
+                <p><small>💡 Búsqueda en <strong>${this.metodologias.length}</strong> metodologías disponibles</small></p>
             `);
             return;
         }
@@ -334,21 +475,83 @@ class MetodologiasChatbot {
         // Generar respuesta en formato de frase legible
         let message = '';
         
+        // Función para formatear texto de manera más legible
+        const formatText = (text) => {
+            if (!text) return '';
+            // Convertir "Productos pecuarios" a "productos pecuarios", "HPLC-DAD" se mantiene
+            return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+        };
+        
+        // Función para formatear técnica analítica
+        const formatTecnica = (tecnica) => {
+            if (!tecnica) return 'técnica analítica estándar';
+            // Mantener acrónimos en mayúsculas (LC-MS/MS, HPLC-DAD, etc.)
+            return tecnica;
+        };
+        
+        // Función para formatear matriz de manera más natural
+        const formatMatriz = (matriz) => {
+            if (!matriz) return 'diversas matrices';
+            
+            // Simplificar términos técnicos
+            const replacements = {
+                'productos pecuarios': 'productos de origen animal (carne, leche, huevos)',
+                'matrices pecuarias': 'productos de origen animal',
+                'productos hidrobiológicos': 'productos acuáticos (salmón, trucha, mariscos)',
+                'matrices hidrobiológicas': 'productos acuáticos',
+                'salmón': 'salmón',
+                'trucha': 'trucha',
+                'carne': 'carne',
+                'leche': 'leche',
+                'huevos': 'huevos'
+            };
+            
+            const matrizLower = matriz.toLowerCase();
+            for (const [key, value] of Object.entries(replacements)) {
+                if (matrizLower.includes(key)) {
+                    return value;
+                }
+            }
+            
+            return matriz.toLowerCase();
+        };
+        
         if (results.length === 1) {
             const met = results[0];
-            const acreditada = met.acreditada ? 'acreditada' : 'no acreditada';
-            message = `<p>Sí, tenemos una metodología ${acreditada} para <strong>${this.escapeHtml(met.analito || met.nombre)}</strong> en <strong>${this.escapeHtml(met.matriz)}</strong> usando la técnica <strong>${this.escapeHtml(met.tecnica)}</strong>.</p>`;
+            const analito = formatText(met.analito || met.nombre);
+            const matriz = formatMatriz(met.matriz);
+            const tecnica = formatTecnica(met.tecnica);
+            const acreditada = met.acreditada ? 'acreditada ISO 17025' : 'disponible';
+            
+            message = `<p>Sí, tenemos una metodología ${acreditada} para analizar <strong>${this.escapeHtml(analito)}</strong> en <strong>${this.escapeHtml(matriz)}</strong> mediante <strong>${this.escapeHtml(tecnica)}</strong>.</p>`;
+            
+            // Agregar información adicional si está disponible
+            if (met.lod || met.loq) {
+                message += '<p><small>💡 ';
+                if (met.lod && met.loq) {
+                    message += `Límites: LOD ${met.lod}, LOQ ${met.loq}`;
+                } else if (met.lod) {
+                    message += `Límite de detección: ${met.lod}`;
+                } else if (met.loq) {
+                    message += `Límite de cuantificación: ${met.loq}`;
+                }
+                message += '</small></p>';
+            }
         } else {
             message = `<p>Encontré <strong>${results.length}</strong> metodología${results.length > 1 ? 's' : ''} relacionada${results.length > 1 ? 's' : ''} con tu búsqueda:</p>`;
             message += '<div class="chatbot-results-text">';
             
             results.slice(0, 5).forEach((met, index) => {
-                const acreditada = met.acreditada ? ' (acreditada)' : '';
-                message += `<p>${index + 1}. <strong>${this.escapeHtml(met.analito || met.nombre)}</strong> en ${this.escapeHtml(met.matriz)} mediante ${this.escapeHtml(met.tecnica)}${acreditada}.</p>`;
+                const analito = formatText(met.analito || met.nombre);
+                const matriz = formatMatriz(met.matriz);
+                const tecnica = formatTecnica(met.tecnica);
+                const acreditada = met.acreditada ? ' ✓ acreditada' : '';
+                
+                message += `<p><strong>${index + 1}.</strong> <strong>${this.escapeHtml(analito)}</strong> en ${this.escapeHtml(matriz)} (${this.escapeHtml(tecnica)})${acreditada ? this.escapeHtml(acreditada) : ''}.</p>`;
             });
             
             if (results.length > 5) {
-                message += `<p class="chatbot-more">Y ${results.length - 5} metodología${results.length - 5 > 1 ? 's' : ''} más. <a href="#metodologias-completas" onclick="document.getElementById('chatbot-window').classList.remove('open'); document.getElementById('search-metodologias').value='${this.escapeHtml(query)}'; document.getElementById('search-metodologias').dispatchEvent(new Event('input')); document.getElementById('metodologias-completas').scrollIntoView({behavior: 'smooth'});">Ver todas</a></p>`;
+                message += `<p class="chatbot-more"><strong>Y ${results.length - 5} metodología${results.length - 5 > 1 ? 's' : ''} más.</strong> <a href="#metodologias-completas" onclick="document.getElementById('chatbot-window').classList.remove('open'); document.getElementById('search-metodologias').value='${this.escapeHtml(query)}'; document.getElementById('search-metodologias').dispatchEvent(new Event('input')); document.getElementById('metodologias-completas').scrollIntoView({behavior: 'smooth'});">Ver todas →</a></p>`;
             }
             
             message += '</div>';
@@ -416,8 +619,10 @@ class MetodologiasChatbot {
             'Análisis en leche',
             'Micotoxinas en alimentos',
             'Diquat en salmón',
+            'Amprolio en alimentos',
             'Metodologías para residuos',
-            'Análisis de contaminantes'
+            'Análisis de contaminantes',
+            'Plaguicidas en matrices alimentarias'
         ];
 
         commonQueries.forEach(cq => {
