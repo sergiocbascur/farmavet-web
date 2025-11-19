@@ -3,12 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ _('Servicios Analíticos Acreditados') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>Servicios Analíticos Acreditados ISO 17025 | +70 Metodologías | FARMAVET</title>
     <meta
       name="description"
-      content="Más de 70 metodologías analíticas acreditadas ISO 17025. Residuos de medicamentos veterinarios, contaminantes químicos. Servicios nacionales e internacionales."
+      content="Servicios analíticos acreditados ISO 17025: +70 metodologías para análisis de residuos de antibióticos, plaguicidas, micotoxinas y farmacocinética en alimentos de origen animal. Laboratorio verificador SAG y SERNAPESCA."
     />
+    <meta name="keywords" content="análisis residuos antibióticos, metodologías analíticas acreditadas, análisis micotoxinas alimentos, farmacocinética veterinaria, análisis residuos químicos carne, laboratorio verificador SAG SERNAPESCA, LC-MS/MS multirresiduo, análisis inocuidad alimentos" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://www.laboratoriofarmavet.cl/servicios.html" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -47,11 +50,11 @@
       </div>
       <div class="container nav-container">
         <nav class="main-nav" aria-label="Navegación principal">
-          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links">
-            {{ _('Menú') }}
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
           </button>
           <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
-            <img src="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <img src="{{ url_for('logos', filename='LOGO FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
             <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
           </a>
           <ul class="nav-links" id="nav-links" data-nav-links>
@@ -73,6 +76,7 @@
             </li>
             <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
             <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
             <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
           </ul>
@@ -87,7 +91,7 @@
             <p class="hero-subtitle">{{ _('Servicios analíticos acreditados') }}</p>
             <h1 class="hero-title">{{ _('Más de 70 metodologías para asegurar la inocuidad alimentaria') }}</h1>
             <p class="hero-description">
-              {{ _('Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario certificado bajo ISO 17025 para garantizar resultados confiables y trazables.') }}
+              {{ _('Realizamos análisis de residuos químicos, antibióticos, micotoxinas y contaminantes microbiológicos en carne, leche, peces, huevos y productos procesados, usando metodologías acreditadas ISO 17025. Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario certificado para garantizar resultados confiables y trazables.') }}
             </p>
             <div class="pill-group">
               <span class="pill">{{ _('Matrices hidrobiológicas y pecuarias') }}</span>
@@ -95,17 +99,61 @@
               <span class="pill">{{ _('Asesoría técnica integral') }}</span>
             </div>
           </div>
-          <div class="card">
-            <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
-              {{ _('¿Por qué elegir FARMAVET?') }}
-            </h2>
-            <ul class="footer-links">
-              <li>{{ _('Acreditación ISO 17025 vigente (INN)') }}</li>
-              <li>{{ _('Laboratorio de Verificación oficial SERNAPESCA y SAG') }}</li>
-              <li>{{ _('Equipo con más de 20 años de experiencia en inocuidad alimentaria') }}</li>
-              <li>{{ _('Protocolos de aseguramiento de calidad y cadena de custodia') }}</li>
-            </ul>
+          {# Carrusel de imágenes del hero - usando imágenes de la galería #}
+          {% if imagenes_hero %}
+          <div class="hero-media-wrapper">
+            <div
+              class="hero-media"
+              aria-hidden="true"
+              data-hero-slider
+              data-hero-interval="6000"
+            >
+              {% for imagen in imagenes_hero %}
+              {% if imagen.es_video %}
+              <div data-hero-slide data-hero-label="{{ imagen.titulo or 'Video' }}" data-hero-order="{{ loop.index0 }}" {% if loop.first %}class="is-active"{% endif %}>
+                <video
+                  src="/static/uploads/galeria/{{ imagen.archivo }}"
+                  {% if loop.first %}autoplay{% endif %}
+                  loop
+                  playsinline
+                  controls
+                  controlsList="nodownload"
+                  style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;"
+                ></video>
+              </div>
+              {% else %}
+              <img
+                src="/static/uploads/galeria/{{ imagen.archivo }}"
+                alt="{{ imagen.titulo or 'Imagen del laboratorio' }}"
+                loading="lazy"
+                data-hero-slide
+                data-hero-label="{{ imagen.titulo or 'Imagen' }}"
+                data-hero-order="{{ loop.index0 }}"
+                {% if loop.first %}class="is-active"{% endif %}
+              />
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% if imagenes_hero|length > 1 %}
+            <div class="hero-dots" role="presentation" data-hero-dots></div>
+            {% endif %}
           </div>
+          {% else %}
+          {# Fallback a tarjeta por defecto si no hay imágenes #}
+          <div class="hero-media-wrapper">
+            <div class="card" style="padding: 2rem; background: white; border-radius: 24px; box-shadow: var(--shadow-soft);">
+              <h2 style="margin-top:0; font-family: var(--font-heading); color: var(--color-primary)">
+                {{ _('¿Por qué elegir FARMAVET?') }}
+              </h2>
+              <ul class="footer-links">
+                <li>{{ _('Acreditación ISO 17025 vigente (INN)') }}</li>
+                <li>{{ _('Laboratorio de Verificación oficial SERNAPESCA y SAG') }}</li>
+                <li>{{ _('Equipo con más de 20 años de experiencia en inocuidad alimentaria') }}</li>
+                <li>{{ _('Protocolos de aseguramiento de calidad y cadena de custodia') }}</li>
+              </ul>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </section>
 
@@ -113,7 +161,7 @@
         <div class="container">
           <h2 class="section-title">{{ _('Capacidades analíticas') }}</h2>
           <p class="section-subtitle">
-            {{ _('Nuestros servicios cubren el control de residuos de medicamentos veterinarios, contaminantes químicos y la validación de metodologías en matrices hidrobiológicas, pecuarias y productos derivados.') }}
+            {{ _('Ofrecemos más de 70 metodologías analíticas acreditadas para el control de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos y microbiológicos en matrices hidrobiológicas (salmón, trucha, mariscos), pecuarias (carne, leche, huevos) y productos derivados.') }}
           </p>
           <div class="cards-grid">
             <article class="card">
@@ -190,7 +238,7 @@
               </article>
               <article class="list-card">
                 <h4>{{ _('Pesticidas') }}</h4>
-                <p>{{ _('Organoclorados, organofosforados, carbamatos y nuevas generaciones de plaguicidas.') }}</p>
+                <p>{{ _('Organoclorados, carbamatos y nuevas generaciones de plaguicidas.') }}</p>
               </article>
               <article class="list-card">
                 <h4>{{ _('Otros contaminantes') }}</h4>
@@ -199,28 +247,42 @@
             </div>
           </div>
           <div class="tab-panel" role="tabpanel" id="panel-matrices" aria-labelledby="tab-matrices">
-            <div class="list-grid">
-              <article class="list-card">
-                <h4>{{ _('Productos hidrobiológicos') }}</h4>
-                <p>{{ _('Salmón, trucha, peces de cultivo, mariscos y productos derivados.') }}</p>
-              </article>
-              <article class="list-card">
-                <h4>{{ _('Tejidos animales') }}</h4>
-                <p>{{ _('Músculo, hígado, riñón, grasa, sangre y matrices asociadas a producción pecuaria.') }}</p>
-              </article>
-              <article class="list-card">
-                <h4>{{ _('Productos pecuarios') }}</h4>
-                <p>{{ _('Carnes de ave, cerdo, bovino y productos listos para exportación.') }}</p>
-              </article>
-              <article class="list-card">
-                <h4>{{ _('Leche y lácteos') }}</h4>
-                <p>{{ _('Leche cruda, leche en polvo, quesos y sueros lácteos.') }}</p>
-              </article>
-              <article class="list-card">
-                <h4>{{ _('Matrices alternativas') }}</h4>
-                <p>{{ _('Plumas, deyecciones, alimento animal, agua, biofilms y matrices ambientales.') }}</p>
-              </article>
-            </div>
+            {% set matrices_cards = [
+              {'title': _('Productos hidrobiológicos'), 'desc': _('Salmón, trucha, peces de cultivo, mariscos y productos derivados.')},
+              {'title': _('Tejidos animales'), 'desc': _('Músculo, hígado, riñón, grasa, sangre y matrices asociadas a producción pecuaria.')},
+              {'title': _('Productos pecuarios'), 'desc': _('Carnes de ave, cerdo, bovino y productos listos para exportación.')},
+              {'title': _('Leche y lácteos'), 'desc': _('Leche cruda, leche en polvo, quesos y sueros lácteos.')},
+              {'title': _('Matrices alternativas'), 'desc': _('Plumas, deyecciones, alimento animal, agua, biofilms y matrices ambientales.')}
+            ] %}
+            {% if matrices_cards|length > 4 %}
+              {# Carrusel infinito para más de 4 tarjetas #}
+              <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="5000">
+                <div class="carousel-wrapper">
+                  <div class="carousel-track-infinite" data-carousel-track-infinite>
+                    {% for card in matrices_cards %}
+                    <article class="list-card">
+                      <h4>{{ card.title }}</h4>
+                      <p>{{ card.desc }}</p>
+                    </article>
+                    {% endfor %}
+                  </div>
+                </div>
+                <div class="carousel-nav-infinite">
+                  <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
+                  <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
+                </div>
+              </div>
+            {% else %}
+              {# Grid de 4 columnas para 4 o menos tarjetas #}
+              <div class="list-grid">
+                {% for card in matrices_cards %}
+                <article class="list-card">
+                  <h4>{{ card.title }}</h4>
+                  <p>{{ card.desc }}</p>
+                </article>
+                {% endfor %}
+              </div>
+            {% endif %}
           </div>
           <div class="tab-panel" role="tabpanel" id="panel-metodos" aria-labelledby="tab-metodos">
             <div class="list-grid">
@@ -244,6 +306,92 @@
           </div>
         </div>
       </section>
+
+      {% if metodologias_por_categoria %}
+      <section class="section light" id="metodologias-completas">
+        <div class="container">
+          <h2 class="section-title">{{ _('Metodologías Analíticas Acreditadas') }}</h2>
+          <p class="section-subtitle">
+            {{ _('Busca entre más de 70 metodologías acreditadas ISO 17025. Ingresa el nombre de la metodología, analito o matriz que necesitas analizar.') }}
+          </p>
+          
+          <div class="metodologias-search-wrapper">
+            <div class="metodologias-search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" id="search-metodologias" class="metodologias-search-input" placeholder="{{ _('Buscar metodología, analito, matriz o técnica...') }}" autocomplete="off">
+              <button type="button" class="metodologias-clear-btn" id="clear-search" style="display: none;">
+                <i class="bi bi-x-circle"></i>
+              </button>
+            </div>
+            <div class="metodologias-filters">
+              <button class="metodologias-filter-btn active" data-filter="all">{{ _('Todas') }}</button>
+              {% for cat_key, cat_name in categorias_nombres.items() %}
+                {% if cat_key in metodologias_por_categoria %}
+                  <button class="metodologias-filter-btn" data-filter="{{ cat_key }}">{{ _(cat_name) }}</button>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          
+          <div id="metodologias-empty-state" class="metodologias-empty-state">
+            <i class="bi bi-search"></i>
+            <p>{{ _('Ingresa un término de búsqueda para ver las metodologías disponibles') }}</p>
+          </div>
+          
+          <div id="metodologias-no-results" class="metodologias-no-results" style="display: none;">
+            <i class="bi bi-exclamation-circle"></i>
+            <p>{{ _('No se encontraron metodologías que coincidan con tu búsqueda') }}</p>
+          </div>
+          
+          <div class="metodologias-results" id="metodologias-results" style="display: none;">
+            <div class="metodologias-results-header">
+              <span id="metodologias-count"></span>
+              <button class="metodologias-download-btn" onclick="exportarMetodologiasPDF()">
+                <i class="bi bi-file-earmark-pdf"></i>{{ _('Descargar PDF') }}
+              </button>
+            </div>
+            <div class="table-responsive metodologias-table-wrapper">
+              <table class="metodologias-table" id="tabla-metodologias">
+                <thead>
+                  <tr>
+                    <th>{{ _('Metodología') }}</th>
+                    <th>{{ _('Analito') }}</th>
+                    <th>{{ _('Matriz') }}</th>
+                    <th>{{ _('Técnica') }}</th>
+                    <th>{{ _('LOD') }}</th>
+                    <th>{{ _('LOQ') }}</th>
+                    <th>{{ _('Acreditada') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for cat_key, cat_name in categorias_nombres.items() %}
+                    {% if cat_key in metodologias_por_categoria %}
+                      {% for metodologia in metodologias_por_categoria[cat_key] %}
+                        <tr data-categoria="{{ cat_key }}" style="display: none;">
+                          <td><strong>{{ get_translated_field(metodologia, 'nombre') or metodologia.nombre }}</strong></td>
+                          <td>{{ get_translated_field(metodologia, 'analito') or metodologia.analito }}</td>
+                          <td>{{ get_translated_field(metodologia, 'matriz') or metodologia.matriz }}</td>
+                          <td>{{ get_translated_field(metodologia, 'tecnica') or metodologia.tecnica or '—' }}</td>
+                          <td>{{ metodologia.limite_deteccion or '—' }}</td>
+                          <td>{{ metodologia.limite_cuantificacion or '—' }}</td>
+                          <td>
+                            {% if metodologia.acreditada %}
+                              <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
+                            {% else %}
+                              <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% endif %}
 
       <section class="section" id="servicios-adicionales">
         <div class="container">
@@ -361,6 +509,85 @@
 
     <div class="toast" role="status" aria-live="polite" data-toast></div>
     <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+    {% if metodologias_por_categoria %}
+    <script>
+      const searchInput = document.getElementById('search-metodologias');
+      const clearBtn = document.getElementById('clear-search');
+      const emptyState = document.getElementById('metodologias-empty-state');
+      const noResults = document.getElementById('metodologias-no-results');
+      const results = document.getElementById('metodologias-results');
+      const countSpan = document.getElementById('metodologias-count');
+      const tableRows = document.querySelectorAll('#tabla-metodologias tbody tr');
+      let currentFilter = 'all';
+      
+      function updateResults() {
+        const search = searchInput.value.toLowerCase().trim();
+        const filter = currentFilter;
+        let visibleCount = 0;
+        
+        tableRows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          const categoria = row.dataset.categoria;
+          const matchesSearch = !search || text.includes(search);
+          const matchesFilter = filter === 'all' || categoria === filter;
+          
+          if (matchesSearch && matchesFilter) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Mostrar/ocultar estados
+        if (!search && filter === 'all') {
+          emptyState.style.display = 'block';
+          noResults.style.display = 'none';
+          results.style.display = 'none';
+        } else if (visibleCount === 0) {
+          emptyState.style.display = 'none';
+          noResults.style.display = 'block';
+          results.style.display = 'none';
+        } else {
+          emptyState.style.display = 'none';
+          noResults.style.display = 'none';
+          results.style.display = 'block';
+          const singularText = '{{ _("metodología encontrada") }}';
+          const pluralText = '{{ _("metodologías encontradas") }}';
+          countSpan.textContent = `${visibleCount} ${visibleCount === 1 ? singularText : pluralText}`;
+        }
+        
+        // Mostrar/ocultar botón de limpiar
+        clearBtn.style.display = search ? 'block' : 'none';
+      }
+      
+      // Búsqueda
+      searchInput.addEventListener('input', updateResults);
+      
+      // Botón limpiar
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        updateResults();
+        searchInput.focus();
+      });
+      
+      // Filtrado por categoría
+      document.querySelectorAll('.metodologias-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.metodologias-filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          updateResults();
+        });
+      });
+      
+      // Exportar a PDF
+      function exportarMetodologiasPDF() {
+        alert('{{ _("Función de exportación PDF próximamente disponible. Por ahora puedes copiar la tabla o hacer captura de pantalla.") }}');
+        // TODO: Implementar exportación real con jsPDF o similar
+      }
+    </script>
+    {% endif %}
   </body>
 </html>
 

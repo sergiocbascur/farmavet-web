@@ -233,3 +233,39 @@ msgstr "Laboratorio Verificador SAG"
 
 msgid "Todos los derechos reservados."
 msgstr "Todos los derechos reservados."
+
+msgid "Síguenos en LinkedIn"
+msgstr "Síguenos en LinkedIn"
+
+msgid "Conéctate con nosotros en LinkedIn para conocer nuestras investigaciones, publicaciones y oportunidades profesionales."
+msgstr "Conéctate con nosotros en LinkedIn para conocer nuestras investigaciones, publicaciones y oportunidades profesionales."
+
+msgid "Visitar LinkedIn"
+msgstr "Visitar LinkedIn"
+
+msgid "Se abrirá en una nueva ventana"
+msgstr "Se abrirá en una nueva ventana"
+
+msgid "Ver perfil en LinkedIn"
+msgstr "Ver perfil en LinkedIn"
+
+msgid "Hace 2 días"
+msgstr "Hace 2 días"
+
+msgid "Hace 1 semana"
+msgstr "Hace 1 semana"
+
+msgid "Compartimos nuestros avances en investigación y análisis farmacológicos para la industria veterinaria."
+msgstr "Compartimos nuestros avances en investigación y análisis farmacológicos para la industria veterinaria."
+
+msgid "Nueva publicación científica"
+msgstr "Nueva publicación científica"
+
+msgid "Ver más en LinkedIn"
+msgstr "Ver más en LinkedIn"
+
+msgid "Únete a nuestra comunidad profesional y mantente al día con las últimas investigaciones."
+msgstr "Únete a nuestra comunidad profesional y mantente al día con las últimas investigaciones."
+
+msgid "Ver todas las publicaciones"
+msgstr "Ver todas las publicaciones"

@@ -1,0 +1,88 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Configuración de Redes Sociales{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-share me-2"></i>Configuración de Redes Sociales
+    </h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Configuración gratuita:</strong> Estos feeds utilizan los embeds oficiales gratuitos de Instagram y LinkedIn. No se requieren servicios de pago.
+        </div>
+        
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-instagram me-2"></i>Instagram</h5>
+                </div>
+                
+                <div class="col-md-12">
+                    <label for="instagram_username" class="form-label">Usuario de Instagram <span class="text-muted">(sin @)</span></label>
+                    <input type="text" class="form-control" id="instagram_username" name="instagram_username" 
+                           value="{{ config.instagram_username if config else '' }}" 
+                           placeholder="farmavet_uchile">
+                    <small class="text-muted">
+                        Ingresa solo el nombre de usuario (sin @). Ejemplo: si tu perfil es @farmavet_uchile, ingresa "farmavet_uchile"
+                    </small>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <h5 class="mb-3"><i class="bi bi-linkedin me-2"></i>LinkedIn</h5>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Nota:</strong> Puedes usar el ID de la página de LinkedIn O la URL completa. El ID es más confiable.
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="linkedin_company_id" class="form-label">ID de la Página de LinkedIn <span class="text-muted">(recomendado)</span></label>
+                    <input type="text" class="form-control" id="linkedin_company_id" name="linkedin_company_id" 
+                           value="{{ config.linkedin_company_id if config else '' }}" 
+                           placeholder="12345678">
+                    <small class="text-muted">
+                        Para encontrar el ID: Ve a tu página de LinkedIn → Configuración → Información básica. El ID aparece en la URL o en la sección de configuración.
+                    </small>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="linkedin_page_url" class="form-label">URL de la Página de LinkedIn <span class="text-muted">(alternativa)</span></label>
+                    <input type="url" class="form-control" id="linkedin_page_url" name="linkedin_page_url" 
+                           value="{{ config.linkedin_page_url if config else '' }}" 
+                           placeholder="https://www.linkedin.com/company/farmavet">
+                    <small class="text-muted">
+                        URL completa de tu página de empresa en LinkedIn. Se usará si no hay ID configurado.
+                    </small>
+                </div>
+                
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Guardar Configuración
+                        </button>
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <div class="mt-4">
+            <h6>Instrucciones:</h6>
+            <ul class="small">
+                <li><strong>Instagram:</strong> Solo necesitas el nombre de usuario. El feed se mostrará automáticamente usando el embed oficial de Instagram.</li>
+                <li><strong>LinkedIn:</strong> Puedes usar el ID numérico de tu página (más confiable) o la URL completa. El plugin oficial de LinkedIn se cargará automáticamente.</li>
+                <li>Ambas opciones son <strong>completamente gratuitas</strong> y no requieren servicios de terceros.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,133 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gestión de Galería e Infografías{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-images me-2"></i>Gestión de Galería e Infografías</h2>
+    <a href="{{ url_for('admin_galeria_nuevo') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>Nueva Imagen/Infografía/Video
+    </a>
+</div>
+
+<!-- Filtros por tipo -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="btn-group" role="group" aria-label="Filtros de tipo">
+            <a href="{{ url_for('admin_galeria') }}" class="btn btn-outline-secondary {% if not request.args.get('tipo') %}active{% endif %}">
+                <i class="bi bi-list-ul me-1"></i>Todos
+            </a>
+            <a href="{{ url_for('admin_galeria', tipo='imagen') }}" class="btn btn-outline-primary {% if request.args.get('tipo') == 'imagen' %}active{% endif %}">
+                <i class="bi bi-image me-1"></i>Imágenes
+            </a>
+            <a href="{{ url_for('admin_galeria', tipo='video') }}" class="btn btn-outline-danger {% if request.args.get('tipo') == 'video' %}active{% endif %}">
+                <i class="bi bi-play-circle me-1"></i>Videos
+            </a>
+            <a href="{{ url_for('admin_galeria', tipo='infografia') }}" class="btn btn-outline-warning {% if request.args.get('tipo') == 'infografia' %}active{% endif %}">
+                <i class="bi bi-file-earmark-image me-1"></i>Infografías
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Página</th>
+                        <th>Tipo</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for imagen in imagenes %}
+                    <tr>
+                        <td>
+                            {% if imagen.es_video %}
+                                <div style="width: 80px; height: 60px; background: #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                                    <i class="bi bi-play-circle-fill" style="font-size: 2rem; color: #fff; z-index: 1;"></i>
+                                    <video style="width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0.5;" muted>
+                                        <source src="/static/uploads/galeria/{{ imagen.archivo }}" type="video/mp4">
+                                    </video>
+                                </div>
+                            {% elif imagen.tipo == 'infografia' %}
+                                <img src="/static/uploads/infografias/{{ imagen.archivo }}" 
+                                     alt="{{ imagen.titulo }}" 
+                                     style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                                <img src="/static/uploads/galeria/{{ imagen.archivo }}" 
+                                     alt="{{ imagen.titulo }}" 
+                                     style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                            {% endif %}
+                        </td>
+                        <td><strong>{{ imagen.titulo }}</strong></td>
+                        <td>
+                            {% if imagen.categoria %}
+                                <span class="badge bg-info">{{ imagen.categoria|title }}</span>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if imagen.pagina %}
+                                <span class="badge bg-success">{{ imagen.pagina|title|replace('-', ' ') }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Todas</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if imagen.es_video %}
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-play-circle me-1"></i>Video
+                                </span>
+                            {% elif imagen.tipo == 'infografia' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-file-earmark-image me-1"></i>Infografía
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-image me-1"></i>Imagen
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ imagen.orden }}</td>
+                        <td>
+                            {% if imagen.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_galeria_editar', imagen_id=imagen.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin_galeria_eliminar', imagen_id=imagen.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta imagen?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No hay imágenes registradas. <a href="{{ url_for('admin_galeria_nuevo') }}">Agregar la primera</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

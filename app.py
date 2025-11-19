@@ -3,7 +3,7 @@ Backend Flask para panel de administración de FARMAVET Web
 Permite editar contenido sin tocar código HTML
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, send_file, jsonify
 from flask_babel import Babel, gettext as _, get_locale, lazy_gettext as _l
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -14,6 +14,9 @@ import time
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Configuración
 app = Flask(__name__)
@@ -26,8 +29,8 @@ if not _secret_key or _secret_key == 'farmavet-web-secret-key-change-in-producti
     print("   Para producción, configura SECRET_KEY como variable de entorno.")
 app.secret_key = _secret_key
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size (para videos)
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'pdf', 'mp4', 'webm', 'mov'}
 
 # Configuración de seguridad
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)  # Sesión expira en 2 horas
@@ -122,7 +125,11 @@ os.makedirs('static/uploads/testimonios', exist_ok=True)
 os.makedirs('static/uploads/noticias', exist_ok=True)
 os.makedirs('static/uploads/equipo', exist_ok=True)
 os.makedirs('static/uploads/clientes', exist_ok=True)
+os.makedirs('static/uploads/certificados', exist_ok=True)
 os.makedirs('static/uploads/hero-media', exist_ok=True)
+os.makedirs('static/uploads/galeria', exist_ok=True)
+os.makedirs('static/uploads/infografias', exist_ok=True)
+os.makedirs('static/uploads/proyectos', exist_ok=True)
 
 # Base de datos
 # En producción, usar instance/ para que Flask lo maneje correctamente
@@ -298,6 +305,40 @@ def init_db():
     except:
         pass
     
+    # Campos adicionales para proyectos FONDECYT/FONDEF
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN codigo_proyecto TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN año_inicio INTEGER')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN año_fin INTEGER')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN investigadores TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN presupuesto TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN resultados TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN estado TEXT DEFAULT "en_curso"')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN financiador TEXT')
+    except:
+        pass
+    
     # Campos de traducción para publicaciones
     try:
         conn.execute('ALTER TABLE publicaciones ADD COLUMN titulo_en TEXT')
@@ -305,6 +346,40 @@ def init_db():
         pass
     try:
         conn.execute('ALTER TABLE publicaciones ADD COLUMN descripcion_en TEXT')
+    except:
+        pass
+    
+    # Campos adicionales para publicaciones científicas
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN doi TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN autores TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN volumen TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN numero TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN paginas TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN tipo_publicacion TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN factor_impacto TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE publicaciones ADD COLUMN base_datos TEXT')
     except:
         pass
     
@@ -367,6 +442,19 @@ def init_db():
         conn.execute('ALTER TABLE equipo ADD COLUMN biografia_en TEXT')
     except:
         pass  # La columna ya existe
+    
+    # Tabla de configuración de redes sociales (gratuito)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS configuracion_redes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            instagram_username TEXT,  -- Usuario de Instagram (sin @)
+            linkedin_company_id TEXT,  -- ID numérico de la página de LinkedIn
+            linkedin_page_url TEXT,  -- URL completa de la página de LinkedIn (alternativa)
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     
     # Agregar columnas si no existen (para bases de datos existentes)
     try:
@@ -440,6 +528,16 @@ def init_db():
     # Agregar columna de ajustes si no existe
     try:
         conn.execute('ALTER TABLE hero_media ADD COLUMN imagenes_ajustes TEXT')
+    except:
+        pass
+    
+    # Agregar campo para referenciar imágenes de la galería
+    try:
+        conn.execute('ALTER TABLE hero_media ADD COLUMN usar_galeria INTEGER DEFAULT 0')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE hero_media ADD COLUMN categoria_galeria TEXT')
     except:
         pass
     
@@ -558,6 +656,19 @@ def init_db():
         )
     ''')
     
+    # Tabla de correos de destino para formulario de contacto
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS correos_contacto (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tipo_consulta TEXT NOT NULL,  -- 'analisis', 'servicios', 'capacitacion', 'investigacion', 'otra'
+            email TEXT NOT NULL,
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(tipo_consulta, email)
+        )
+    ''')
+    
     # Tabla de proyectos destacados
     conn.execute('''
         CREATE TABLE IF NOT EXISTS proyectos (
@@ -573,6 +684,12 @@ def init_db():
         )
     ''')
     
+    # Agregar campo imagen a proyectos si no existe
+    try:
+        conn.execute('ALTER TABLE proyectos ADD COLUMN imagen TEXT')
+    except:
+        pass
+    
     # Tabla de publicaciones científicas
     conn.execute('''
         CREATE TABLE IF NOT EXISTS publicaciones (
@@ -583,6 +700,97 @@ def init_db():
             año TEXT,  -- '2025', '2024', etc.
             enlace TEXT,
             tags TEXT,  -- JSON array de tags
+            orden INTEGER DEFAULT 0,
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Tabla de preguntas frecuentes (FAQ)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS faq (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pregunta TEXT NOT NULL,
+            pregunta_en TEXT,
+            respuesta TEXT NOT NULL,
+            respuesta_en TEXT,
+            categoria TEXT,  -- 'servicios', 'proceso', 'tiempos', 'costos', 'tecnicas', 'certificaciones'
+            orden INTEGER DEFAULT 0,
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Tabla de galería de imágenes del laboratorio e infografías
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS galeria_imagenes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            descripcion TEXT,
+            archivo TEXT NOT NULL,  -- Nombre del archivo
+            categoria TEXT,  -- 'laboratorio', 'equipamiento', 'personal', 'proceso', 'infografia', 'instalaciones'
+            tipo TEXT DEFAULT 'imagen',  -- 'imagen' o 'infografia'
+            orden INTEGER DEFAULT 0,
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Agregar campo pagina a galeria_imagenes si no existe
+    try:
+        conn.execute('ALTER TABLE galeria_imagenes ADD COLUMN pagina TEXT')
+    except:
+        pass
+    
+    # Agregar campo es_video a galeria_imagenes si no existe
+    try:
+        conn.execute('ALTER TABLE galeria_imagenes ADD COLUMN es_video INTEGER DEFAULT 0')
+    except:
+        pass
+    
+    # Tabla de certificados y reconocimientos
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS certificados (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            titulo_en TEXT,
+            organismo TEXT NOT NULL,  -- 'ISO', 'OMSA', 'SAG', 'SERNAPESCA', 'INN', etc.
+            numero_certificado TEXT,
+            fecha_emision TEXT,
+            fecha_vencimiento TEXT,
+            imagen TEXT,  -- Ruta a imagen del certificado
+            enlace_externo TEXT,  -- URL a certificado oficial si existe
+            descripcion TEXT,
+            descripcion_en TEXT,
+            orden INTEGER DEFAULT 0,
+            activo INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Tabla de metodologías analíticas
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS metodologias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            codigo TEXT,  -- Código interno de la metodología
+            nombre TEXT NOT NULL,  -- Nombre de la metodología
+            nombre_en TEXT,
+            categoria TEXT NOT NULL,  -- 'residuos', 'contaminantes', 'microbiologia', 'otros'
+            analito TEXT NOT NULL,  -- Sustancia que se analiza
+            analito_en TEXT,
+            matriz TEXT NOT NULL,  -- Tipo de muestra (carne, leche, pescado, etc.)
+            matriz_en TEXT,
+            tecnica TEXT,  -- LC-MS/MS, GC-MS, HPLC, etc.
+            tecnica_en TEXT,
+            limite_deteccion TEXT,  -- LOD
+            limite_cuantificacion TEXT,  -- LOQ
+            norma_referencia TEXT,  -- Norma o guía que sigue
+            vigencia TEXT,  -- Fecha de vigencia de la acreditación
+            acreditada INTEGER DEFAULT 1,  -- Si está acreditada ISO 17025
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -732,31 +940,35 @@ def get_language():
 @app.route('/')
 @app.route('/index.html')
 def index():
-    # SIEMPRE usar template si existe, nunca archivo estático
-    if os.path.exists('templates/index.html'):
-        conn = get_db()
-        estadisticas = conn.execute('''
-            SELECT * FROM estadisticas WHERE activo = 1 
-            ORDER BY orden, id
-        ''').fetchall()
-        noticias = conn.execute('''
-            SELECT * FROM noticias WHERE activa = 1 
-            ORDER BY destacada DESC, fecha DESC, id DESC LIMIT 3
-        ''').fetchall()
-        clientes = conn.execute('''
-            SELECT * FROM clientes WHERE activo = 1 AND mostrar_en_index = 1 
-            ORDER BY orden, id
-        ''').fetchall()
-        tarjetas_destacadas = conn.execute('''
-            SELECT * FROM tarjetas_destacadas WHERE pagina = 'index' AND activo = 1 
-            ORDER BY orden, id
-        ''').fetchall()
-        conn.close()
-        lang = get_language()
-        locale = get_locale()
-        return render_template('index.html', estadisticas=estadisticas, noticias=noticias, clientes=clientes, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
-    else:
-        return "Página no encontrada. El template debe existir en templates/index.html", 404
+    # SIEMPRE usar template, Flask lo buscará automáticamente en templates/
+    conn = get_db()
+    estadisticas = conn.execute('''
+        SELECT * FROM estadisticas WHERE activo = 1 
+        ORDER BY orden, id
+    ''').fetchall()
+    noticias = conn.execute('''
+        SELECT * FROM noticias WHERE activa = 1 
+        ORDER BY destacada DESC, fecha DESC, id DESC LIMIT 3
+    ''').fetchall()
+    clientes = conn.execute('''
+        SELECT * FROM clientes WHERE activo = 1 AND mostrar_en_index = 1 
+        ORDER BY orden, id
+    ''').fetchall()
+    tarjetas_destacadas = conn.execute('''
+        SELECT * FROM tarjetas_destacadas WHERE pagina = 'index' AND activo = 1 
+        ORDER BY orden, id
+    ''').fetchall()
+    # Cargar imágenes de la galería para el hero slider
+    imagenes_hero = conn.execute('''
+        SELECT * FROM galeria_imagenes 
+        WHERE activo = 1 AND (pagina = 'index' OR pagina IS NULL OR pagina = '')
+        ORDER BY orden, id DESC
+        LIMIT 10
+    ''').fetchall()
+    conn.close()
+    lang = get_language()
+    locale = get_locale()
+    return render_template('index.html', estadisticas=estadisticas, noticias=noticias, clientes=clientes, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
 
 @app.route('/equipo')
 @app.route('/equipo.html')
@@ -904,8 +1116,15 @@ def equipo_page():
         SELECT * FROM tarjetas_destacadas WHERE pagina = 'equipo' AND activo = 1 
         ORDER BY orden, id
     ''').fetchall()
+    # Cargar imágenes de la galería para el hero slider
+    imagenes_hero = conn.execute('''
+        SELECT * FROM galeria_imagenes 
+        WHERE activo = 1 AND pagina = 'equipo'
+        ORDER BY orden, id DESC
+        LIMIT 10
+    ''').fetchall()
     conn.close()
-    return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+    return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
 
 @app.route('/<page>.html')
 def page(page):
@@ -916,8 +1135,9 @@ def page(page):
     
     # Verificar primero si existe template (para evitar servir archivos estáticos con Jinja2)
     template_file = f'{page}.html'
+    template_path = os.path.join(app.root_path, 'templates', template_file)
     
-    if os.path.exists(f'templates/{template_file}'):
+    if os.path.exists(template_path):
         # Páginas que necesitan datos de la BD
         if page == 'docencia':
             conn = get_db()
@@ -933,8 +1153,15 @@ def page(page):
                 SELECT * FROM tarjetas_destacadas WHERE pagina = 'docencia' AND activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND pagina = 'docencia'
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
             conn.close()
-            return render_template('docencia.html', programas=programas, testimonios=testimonios, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+            return render_template('docencia.html', programas=programas, testimonios=testimonios, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         elif page == 'noticias':
             conn = get_db()
@@ -950,8 +1177,35 @@ def page(page):
                 SELECT * FROM tarjetas_destacadas WHERE pagina = 'noticias' AND activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'noticias' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
+            # Cargar configuración de redes sociales
+            config_redes = conn.execute('''
+                SELECT * FROM configuracion_redes WHERE activo = 1 LIMIT 1
+            ''').fetchone()
+            instagram_username = None
+            linkedin_company_id = None
+            linkedin_page_url = None
+            if config_redes:
+                try:
+                    instagram_username = config_redes['instagram_username'] if config_redes['instagram_username'] else None
+                except (KeyError, IndexError):
+                    instagram_username = None
+                try:
+                    linkedin_company_id = config_redes['linkedin_company_id'] if config_redes['linkedin_company_id'] else None
+                except (KeyError, IndexError):
+                    linkedin_company_id = None
+                try:
+                    linkedin_page_url = config_redes['linkedin_page_url'] if config_redes['linkedin_page_url'] else None
+                except (KeyError, IndexError):
+                    linkedin_page_url = None
             conn.close()
-            return render_template('noticias.html', noticias=noticias, eventos=eventos, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+            return render_template('noticias.html', noticias=noticias, eventos=eventos, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, instagram_username=instagram_username, linkedin_company_id=linkedin_company_id, linkedin_page_url=linkedin_page_url, lang=lang, locale=locale)
         
         elif page == 'equipo':
             # SIEMPRE usar template, nunca archivo estático
@@ -1071,8 +1325,15 @@ def page(page):
                 SELECT * FROM tarjetas_destacadas WHERE pagina = 'equipo' AND activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND pagina = 'equipo'
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
             conn.close()
-            return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+            return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         elif page == 'convenios':
             conn = get_db()
@@ -1080,8 +1341,15 @@ def page(page):
                 SELECT * FROM convenios WHERE activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'convenios' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
             conn.close()
-            return render_template('convenios.html', convenios=convenios, lang=lang, locale=locale)
+            return render_template('convenios.html', convenios=convenios, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         elif page == 'casa-omsa':
             conn = get_db()
@@ -1093,8 +1361,15 @@ def page(page):
                 SELECT * FROM tarjetas_destacadas WHERE pagina = 'casa-omsa' AND activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'casa-omsa' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
             conn.close()
-            return render_template('casa-omsa.html', aliados_casa_omsa=aliados_casa_omsa, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+            return render_template('casa-omsa.html', aliados_casa_omsa=aliados_casa_omsa, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         elif page == 'investigacion':
             conn = get_db()
@@ -1110,20 +1385,120 @@ def page(page):
                 SELECT * FROM tarjetas_destacadas WHERE pagina = 'investigacion' AND activo = 1 
                 ORDER BY orden, id
             ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'investigacion' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
             conn.close()
-            return render_template('investigacion.html', proyectos=proyectos, publicaciones=publicaciones, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+            return render_template('investigacion.html', proyectos=proyectos, publicaciones=publicaciones, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+        
+        elif page == 'faq':
+            conn = get_db()
+            faqs = conn.execute('''
+                SELECT * FROM faq WHERE activo = 1 
+                ORDER BY categoria, orden, id
+            ''').fetchall()
+            tarjetas_destacadas = conn.execute('''
+                SELECT * FROM tarjetas_destacadas WHERE pagina = 'faq' AND activo = 1 
+                ORDER BY orden, id
+            ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'faq' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
+            conn.close()
+            # Organizar FAQs por categoría
+            faqs_por_categoria = {}
+            categorias_nombres = {
+                'servicios': 'Servicios',
+                'proceso': 'Proceso',
+                'tiempos': 'Tiempos y Plazos',
+                'costos': 'Costos',
+                'tecnicas': 'Técnicas y Metodologías',
+                'certificaciones': 'Certificaciones'
+            }
+            for faq in faqs:
+                categoria = faq['categoria'] or 'general'
+                if categoria not in faqs_por_categoria:
+                    faqs_por_categoria[categoria] = []
+                faqs_por_categoria[categoria].append(faq)
+            return render_template('faq.html', faqs_por_categoria=faqs_por_categoria, categorias_nombres=categorias_nombres, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+        
+        elif page == 'quienes-somos':
+            conn = get_db()
+            certificados = conn.execute('''
+                SELECT * FROM certificados WHERE activo = 1 
+                ORDER BY organismo, orden, id
+            ''').fetchall()
+            tarjetas_destacadas = conn.execute('''
+                SELECT * FROM tarjetas_destacadas WHERE pagina = 'quienes-somos' AND activo = 1 
+                ORDER BY orden, id
+            ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'quienes-somos' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
+            conn.close()
+            return render_template('quienes-somos.html', certificados=certificados, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+        
+        elif page == 'servicios':
+            conn = get_db()
+            metodologias = conn.execute('''
+                SELECT * FROM metodologias WHERE activo = 1 
+                ORDER BY categoria, orden, nombre
+            ''').fetchall()
+            tarjetas_destacadas = conn.execute('''
+                SELECT * FROM tarjetas_destacadas WHERE pagina = 'servicios' AND activo = 1 
+                ORDER BY orden, id
+            ''').fetchall()
+            # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
+            imagenes_hero = conn.execute('''
+                SELECT * FROM galeria_imagenes 
+                WHERE activo = 1 AND (pagina = 'servicios' OR pagina IS NULL OR pagina = '')
+                ORDER BY orden, id DESC
+                LIMIT 10
+            ''').fetchall()
+            conn.close()
+            # Organizar metodologías por categoría
+            metodologias_por_categoria = {}
+            categorias_nombres = {
+                'residuos': 'Residuos de Medicamentos Veterinarios',
+                'contaminantes': 'Contaminantes Químicos',
+                'microbiologia': 'Microbiología',
+                'otros': 'Otros Análisis'
+            }
+            for metodologia in metodologias:
+                categoria = metodologia['categoria'] or 'otros'
+                if categoria not in metodologias_por_categoria:
+                    metodologias_por_categoria[categoria] = []
+                metodologias_por_categoria[categoria].append(metodologia)
+            return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         # Si existe template pero no necesita datos especiales, renderizarlo con lang
-        # Incluir tarjetas destacadas para todas las páginas
+        # Incluir tarjetas destacadas e imágenes hero para todas las páginas
         conn = get_db()
         tarjetas_destacadas = conn.execute('''
             SELECT * FROM tarjetas_destacadas WHERE pagina = ? AND activo = 1 
             ORDER BY orden, id
         ''', (page,)).fetchall()
-        # Debug temporal: verificar qué se está consultando
-        # print(f"DEBUG: Página '{page}', Tarjetas encontradas: {len(tarjetas_destacadas)}")
+        # Cargar imágenes de la galería para el hero slider
+        imagenes_hero = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            WHERE activo = 1 AND (pagina = ? OR pagina IS NULL OR pagina = '')
+            ORDER BY orden, id DESC
+            LIMIT 10
+        ''', (page,)).fetchall()
         conn.close()
-        return render_template(template_file, tarjetas_destacadas=tarjetas_destacadas, lang=lang, locale=locale)
+        return render_template(template_file, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
     
     # Si NO existe template, servir archivo estático (solo si no tiene Jinja2)
     elif os.path.exists(f'{page}.html'):
@@ -1460,6 +1835,525 @@ def admin_testimonio_eliminar(testimonio_id):
     flash('Testimonio eliminado', 'success')
     return redirect(url_for('admin_testimonios'))
 
+# Gestión de FAQ
+@app.route('/admin/faq')
+@login_required
+def admin_faq():
+    conn = get_db()
+    faqs = conn.execute('SELECT * FROM faq ORDER BY categoria, orden, id DESC').fetchall()
+    conn.close()
+    return render_template('admin/faq.html', faqs=faqs)
+
+@app.route('/admin/faq/nuevo', methods=['GET', 'POST'])
+@login_required
+def admin_faq_nuevo():
+    if request.method == 'POST':
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO faq (pregunta, pregunta_en, respuesta, respuesta_en, categoria, orden, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            request.form.get('pregunta'),
+            request.form.get('pregunta_en', '').strip() or None,
+            request.form.get('respuesta'),
+            request.form.get('respuesta_en', '').strip() or None,
+            request.form.get('categoria'),
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0
+        ))
+        conn.commit()
+        conn.close()
+        flash('FAQ creada correctamente', 'success')
+        return redirect(url_for('admin_faq'))
+    
+    return render_template('admin/faq_form.html')
+
+@app.route('/admin/faq/<int:faq_id>/editar', methods=['GET', 'POST'])
+@login_required
+def admin_faq_editar(faq_id):
+    conn = get_db()
+    
+    if request.method == 'POST':
+        conn.execute('''
+            UPDATE faq 
+            SET pregunta=?, pregunta_en=?, respuesta=?, respuesta_en=?, 
+                categoria=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+        ''', (
+            request.form.get('pregunta'),
+            request.form.get('pregunta_en', '').strip() or None,
+            request.form.get('respuesta'),
+            request.form.get('respuesta_en', '').strip() or None,
+            request.form.get('categoria'),
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0,
+            faq_id
+        ))
+        conn.commit()
+        conn.close()
+        flash('FAQ actualizada correctamente', 'success')
+        return redirect(url_for('admin_faq'))
+    
+    faq = conn.execute('SELECT * FROM faq WHERE id = ?', (faq_id,)).fetchone()
+    conn.close()
+    
+    if not faq:
+        flash('FAQ no encontrada', 'error')
+        return redirect(url_for('admin_faq'))
+    
+    return render_template('admin/faq_form.html', faq=dict(faq))
+
+@app.route('/admin/faq/<int:faq_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_faq_eliminar(faq_id):
+    conn = get_db()
+    conn.execute('DELETE FROM faq WHERE id = ?', (faq_id,))
+    conn.commit()
+    conn.close()
+    flash('FAQ eliminada', 'success')
+    return redirect(url_for('admin_faq'))
+
+# Gestión de Certificados
+@app.route('/admin/certificados')
+@login_required
+def admin_certificados():
+    conn = get_db()
+    certificados = conn.execute('SELECT * FROM certificados ORDER BY organismo, orden, id DESC').fetchall()
+    conn.close()
+    return render_template('admin/certificados.html', certificados=certificados)
+
+@app.route('/admin/certificados/nuevo', methods=['GET', 'POST'])
+@login_required
+def admin_certificado_nuevo():
+    if request.method == 'POST':
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO certificados (titulo, titulo_en, organismo, numero_certificado, fecha_emision, fecha_vencimiento, imagen, enlace_externo, descripcion, descripcion_en, orden, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            request.form.get('titulo'),
+            request.form.get('titulo_en', '').strip() or None,
+            request.form.get('organismo'),
+            request.form.get('numero_certificado', '').strip() or None,
+            request.form.get('fecha_emision', '').strip() or None,
+            request.form.get('fecha_vencimiento', '').strip() or None,
+            request.form.get('imagen', '').strip() or None,
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('enlace_externo', '')),
+            request.form.get('descripcion', '').strip() or None,
+            request.form.get('descripcion_en', '').strip() or None,
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0
+        ))
+        conn.commit()
+        conn.close()
+        flash('Certificado creado correctamente', 'success')
+        return redirect(url_for('admin_certificados'))
+    
+    return render_template('admin/certificado_form.html')
+
+@app.route('/admin/certificados/<int:certificado_id>/editar', methods=['GET', 'POST'])
+@login_required
+def admin_certificado_editar(certificado_id):
+    conn = get_db()
+    
+    if request.method == 'POST':
+        conn.execute('''
+            UPDATE certificados 
+            SET titulo=?, titulo_en=?, organismo=?, numero_certificado=?, fecha_emision=?, fecha_vencimiento=?, 
+                imagen=?, enlace_externo=?, descripcion=?, descripcion_en=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+        ''', (
+            request.form.get('titulo'),
+            request.form.get('titulo_en', '').strip() or None,
+            request.form.get('organismo'),
+            request.form.get('numero_certificado', '').strip() or None,
+            request.form.get('fecha_emision', '').strip() or None,
+            request.form.get('fecha_vencimiento', '').strip() or None,
+            request.form.get('imagen', '').strip() or None,
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('enlace_externo', '')),
+            request.form.get('descripcion', '').strip() or None,
+            request.form.get('descripcion_en', '').strip() or None,
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0,
+            certificado_id
+        ))
+        conn.commit()
+        conn.close()
+        flash('Certificado actualizado correctamente', 'success')
+        return redirect(url_for('admin_certificados'))
+    
+    certificado = conn.execute('SELECT * FROM certificados WHERE id = ?', (certificado_id,)).fetchone()
+    conn.close()
+    
+    if not certificado:
+        flash('Certificado no encontrado', 'error')
+        return redirect(url_for('admin_certificados'))
+    
+    return render_template('admin/certificado_form.html', certificado=dict(certificado))
+
+@app.route('/admin/certificados/<int:certificado_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_certificado_eliminar(certificado_id):
+    conn = get_db()
+    conn.execute('DELETE FROM certificados WHERE id = ?', (certificado_id,))
+    conn.commit()
+    conn.close()
+    flash('Certificado eliminado', 'success')
+    return redirect(url_for('admin_certificados'))
+
+# Gestión de Metodologías Analíticas
+@app.route('/admin/metodologias')
+@login_required
+def admin_metodologias():
+    conn = get_db()
+    metodologias = conn.execute('SELECT * FROM metodologias ORDER BY categoria, orden, id DESC').fetchall()
+    conn.close()
+    return render_template('admin/metodologias.html', metodologias=metodologias)
+
+@app.route('/admin/metodologias/nuevo', methods=['GET', 'POST'])
+@login_required
+def admin_metodologia_nuevo():
+    if request.method == 'POST':
+        conn = get_db()
+        conn.execute('''
+            INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                                     tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
+                                     vigencia, acreditada, orden, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            request.form.get('codigo', '').strip() or None,
+            request.form.get('nombre'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
+            request.form.get('categoria'),
+            request.form.get('analito'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
+            request.form.get('matriz'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
+            request.form.get('tecnica', '').strip() or None,
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
+            request.form.get('limite_deteccion', '').strip() or None,
+            request.form.get('limite_cuantificacion', '').strip() or None,
+            request.form.get('norma_referencia', '').strip() or None,
+            request.form.get('vigencia', '').strip() or None,
+            1 if request.form.get('acreditada') == 'on' else 0,
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0
+        ))
+        conn.commit()
+        conn.close()
+        flash('Metodología creada correctamente', 'success')
+        return redirect(url_for('admin_metodologias'))
+    
+    return render_template('admin/metodologia_form.html')
+
+@app.route('/admin/metodologias/<int:metodologia_id>/editar', methods=['GET', 'POST'])
+@login_required
+def admin_metodologia_editar(metodologia_id):
+    conn = get_db()
+    
+    if request.method == 'POST':
+        conn.execute('''
+            UPDATE metodologias 
+            SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
+                tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
+                vigencia=?, acreditada=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+        ''', (
+            request.form.get('codigo', '').strip() or None,
+            request.form.get('nombre'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
+            request.form.get('categoria'),
+            request.form.get('analito'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
+            request.form.get('matriz'),
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
+            request.form.get('tecnica', '').strip() or None,
+            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
+            request.form.get('limite_deteccion', '').strip() or None,
+            request.form.get('limite_cuantificacion', '').strip() or None,
+            request.form.get('norma_referencia', '').strip() or None,
+            request.form.get('vigencia', '').strip() or None,
+            1 if request.form.get('acreditada') == 'on' else 0,
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0,
+            metodologia_id
+        ))
+        conn.commit()
+        conn.close()
+        flash('Metodología actualizada correctamente', 'success')
+        return redirect(url_for('admin_metodologias'))
+    
+    metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
+    conn.close()
+    
+    if not metodologia:
+        flash('Metodología no encontrada', 'error')
+        return redirect(url_for('admin_metodologias'))
+    
+    return render_template('admin/metodologia_form.html', metodologia=metodologia)
+
+@app.route('/admin/metodologias/<int:metodologia_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_metodologia_eliminar(metodologia_id):
+    conn = get_db()
+    conn.execute('DELETE FROM metodologias WHERE id = ?', (metodologia_id,))
+    conn.commit()
+    conn.close()
+    flash('Metodología eliminada', 'success')
+    return redirect(url_for('admin_metodologias'))
+
+# ============================================
+# GESTIÓN DE GALERÍA DE IMÁGENES E INFOGRAFÍAS
+# ============================================
+
+@app.route('/admin/galeria')
+@login_required
+def admin_galeria():
+    conn = get_db()
+    tipo_filtro = request.args.get('tipo', '').strip()
+    
+    if tipo_filtro == 'video':
+        # Filtrar solo videos
+        imagenes = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            WHERE es_video = 1 
+            ORDER BY es_video DESC, tipo, categoria, orden, id DESC
+        ''').fetchall()
+    elif tipo_filtro == 'imagen':
+        # Filtrar solo imágenes (no videos, no infografías)
+        imagenes = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            WHERE es_video = 0 AND (tipo IS NULL OR tipo = 'imagen' OR tipo = '')
+            ORDER BY es_video DESC, tipo, categoria, orden, id DESC
+        ''').fetchall()
+    elif tipo_filtro == 'infografia':
+        # Filtrar solo infografías
+        imagenes = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            WHERE tipo = 'infografia' 
+            ORDER BY es_video DESC, tipo, categoria, orden, id DESC
+        ''').fetchall()
+    else:
+        # Mostrar todos
+        imagenes = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            ORDER BY es_video DESC, tipo, categoria, orden, id DESC
+        ''').fetchall()
+    
+    conn.close()
+    return render_template('admin/galeria.html', imagenes=imagenes)
+
+@app.route('/admin/galeria/nuevo', methods=['GET', 'POST'])
+@login_required
+def admin_galeria_nuevo():
+    if request.method == 'POST':
+        conn = get_db()
+        file = request.files.get('archivo')
+        
+        if not file or file.filename == '':
+            flash('Debes seleccionar un archivo', 'error')
+            return render_template('admin/galeria_form.html')
+        
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = timestamp + filename
+            
+            tipo = request.form.get('tipo', 'imagen')
+            folder = 'infografias' if tipo == 'infografia' else 'galeria'
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], folder)
+            os.makedirs(upload_path, exist_ok=True)
+            
+            filepath = os.path.join(upload_path, filename)
+            file.save(filepath)
+            
+            # Detectar si es video
+            extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+            es_video = 1 if extension in ['mp4', 'webm', 'mov'] else 0
+            
+            conn.execute('''
+                INSERT INTO galeria_imagenes (titulo, descripcion, archivo, categoria, tipo, pagina, orden, activo, es_video)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                request.form.get('titulo'),
+                request.form.get('descripcion', '').strip() or None,
+                filename,
+                request.form.get('categoria', '').strip() or None,
+                tipo,
+                request.form.get('pagina', '').strip() or None,
+                int(request.form.get('orden', 0)),
+                1 if request.form.get('activo') == 'on' else 0,
+                es_video
+            ))
+            conn.commit()
+            conn.close()
+            flash('Imagen agregada correctamente', 'success')
+            return redirect(url_for('admin_galeria'))
+        else:
+            flash('Tipo de archivo no permitido', 'error')
+            return render_template('admin/galeria_form.html')
+    
+    return render_template('admin/galeria_form.html')
+
+@app.route('/admin/galeria/<int:imagen_id>/editar', methods=['GET', 'POST'])
+@login_required
+def admin_galeria_editar(imagen_id):
+    conn = get_db()
+    
+    if request.method == 'POST':
+        file = request.files.get('archivo')
+        imagen = conn.execute('SELECT * FROM galeria_imagenes WHERE id = ?', (imagen_id,)).fetchone()
+        
+        filename = imagen['archivo']  # Mantener el archivo actual por defecto
+        
+        # Si se sube un nuevo archivo, reemplazar el anterior
+        if file and file.filename != '':
+            if allowed_file(file.filename):
+                # Eliminar archivo anterior si existe
+                tipo_actual = imagen['tipo']
+                folder_actual = 'infografias' if tipo_actual == 'infografia' else 'galeria'
+                old_filepath = os.path.join(app.config['UPLOAD_FOLDER'], folder_actual, imagen['archivo'])
+                if os.path.exists(old_filepath):
+                    try:
+                        os.remove(old_filepath)
+                    except:
+                        pass
+                
+                # Guardar nuevo archivo
+                new_filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                new_filename = timestamp + new_filename
+                
+                tipo = request.form.get('tipo', 'imagen')
+                folder = 'infografias' if tipo == 'infografia' else 'galeria'
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], folder)
+                os.makedirs(upload_path, exist_ok=True)
+                
+                filepath = os.path.join(upload_path, new_filename)
+                file.save(filepath)
+                filename = new_filename
+            else:
+                flash('Tipo de archivo no permitido', 'error')
+                return redirect(url_for('admin_galeria_editar', imagen_id=imagen_id))
+        
+        # Detectar si es video (usar el archivo nuevo o el actual)
+        archivo_actual = filename
+        extension = archivo_actual.rsplit('.', 1)[1].lower() if '.' in archivo_actual else ''
+        es_video = 1 if extension in ['mp4', 'webm', 'mov'] else 0
+        
+        conn.execute('''
+            UPDATE galeria_imagenes 
+            SET titulo=?, descripcion=?, archivo=?, categoria=?, tipo=?, pagina=?, orden=?, activo=?, es_video=?, updated_at=CURRENT_TIMESTAMP
+            WHERE id=?
+        ''', (
+            request.form.get('titulo'),
+            request.form.get('descripcion', '').strip() or None,
+            filename,
+            request.form.get('categoria', '').strip() or None,
+            request.form.get('tipo', 'imagen'),
+            request.form.get('pagina', '').strip() or None,
+            int(request.form.get('orden', 0)),
+            1 if request.form.get('activo') == 'on' else 0,
+            es_video,
+            imagen_id
+        ))
+        conn.commit()
+        conn.close()
+        flash('Imagen actualizada correctamente', 'success')
+        return redirect(url_for('admin_galeria'))
+    
+    imagen = conn.execute('SELECT * FROM galeria_imagenes WHERE id = ?', (imagen_id,)).fetchone()
+    conn.close()
+    
+    if not imagen:
+        flash('Imagen no encontrada', 'error')
+        return redirect(url_for('admin_galeria'))
+    
+    return render_template('admin/galeria_form.html', imagen=dict(imagen))
+
+@app.route('/admin/galeria/<int:imagen_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_galeria_eliminar(imagen_id):
+    conn = get_db()
+    imagen = conn.execute('SELECT * FROM galeria_imagenes WHERE id = ?', (imagen_id,)).fetchone()
+    
+    if imagen:
+        # Eliminar archivo físico
+        tipo = imagen['tipo']
+        folder = 'infografias' if tipo == 'infografia' else 'galeria'
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], folder, imagen['archivo'])
+        if os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except:
+                pass
+        
+        conn.execute('DELETE FROM galeria_imagenes WHERE id = ?', (imagen_id,))
+        conn.commit()
+    
+    conn.close()
+    flash('Imagen eliminada', 'success')
+    return redirect(url_for('admin_galeria'))
+
+@app.route('/static/uploads/proyectos/<path:filename>')
+def serve_proyecto_image(filename):
+    """Sirve imágenes de proyectos"""
+    upload_folder = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], 'proyectos'))
+    file_path = os.path.join(upload_folder, filename)
+    file_path = os.path.normpath(file_path)
+    upload_folder = os.path.normpath(upload_folder)
+    
+    if not file_path.startswith(upload_folder):
+        return "Acceso denegado", 403
+    
+    if os.path.exists(file_path):
+        return send_file(file_path)
+    return "Archivo no encontrado", 404
+
+@app.route('/static/uploads/galeria/<path:filename>')
+@app.route('/static/uploads/infografias/<path:filename>')
+def serve_galeria_image(filename):
+    """Sirve imágenes de la galería e infografías"""
+    # Determinar la carpeta basándose en la ruta
+    if 'infografias' in request.path:
+        folder = 'infografias'
+    else:
+        folder = 'galeria'
+    
+    upload_folder = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], folder))
+    file_path = os.path.join(upload_folder, filename)
+    
+    # Normalizar rutas para seguridad
+    file_path = os.path.normpath(file_path)
+    upload_folder = os.path.normpath(upload_folder)
+    
+    # Verificar que el archivo está dentro del directorio permitido
+    if not file_path.startswith(upload_folder):
+        return "Acceso denegado", 403
+    
+    if os.path.exists(file_path):
+        return send_file(file_path)
+    return "Archivo no encontrado", 404
+
+@app.route('/galeria/<path:filename>')
+def serve_galeria_image_simple(filename):
+    """Ruta simplificada para servir imágenes de la galería - busca en ambas carpetas"""
+    # Buscar primero en galeria, luego en infografias
+    for folder in ['galeria', 'infografias']:
+        upload_folder = os.path.abspath(os.path.join(app.config['UPLOAD_FOLDER'], folder))
+        file_path = os.path.join(upload_folder, filename)
+        file_path = os.path.normpath(file_path)
+        upload_folder = os.path.normpath(upload_folder)
+        
+        if file_path.startswith(upload_folder) and os.path.exists(file_path):
+            return send_file(file_path)
+    
+    return "Archivo no encontrado", 404
+
 # Gestor de imágenes
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -1488,15 +2382,42 @@ def upload_file():
         filepath = os.path.join(upload_path, filename)
         file.save(filepath)
         
-        # Retornar URL absoluta para que funcione desde cualquier dominio
-        url = f'{request.host_url.rstrip("/")}/static/uploads/{folder}/{filename}'
+        # Retornar URL relativa para que funcione correctamente
+        url = f'/static/uploads/{folder}/{filename}'
         return jsonify({'url': url, 'filename': filename})
     
     return jsonify({'error': 'Tipo de archivo no permitido'}), 400
 
 @app.route('/static/uploads/<path:filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+    """Sirve archivos subidos desde static/uploads"""
+    try:
+        # Construir la ruta completa del archivo usando ruta absoluta
+        upload_folder = os.path.abspath(app.config['UPLOAD_FOLDER'])
+        file_path = os.path.join(upload_folder, filename)
+        
+        # Normalizar la ruta para evitar problemas con ../
+        file_path = os.path.normpath(file_path)
+        upload_folder = os.path.normpath(upload_folder)
+        
+        # Verificar que el archivo está dentro del directorio de uploads (seguridad)
+        if not file_path.startswith(upload_folder):
+            return "Acceso denegado", 403
+        
+        # Verificar que el archivo existe
+        if not os.path.exists(file_path):
+            # Intentar con ruta relativa también
+            rel_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(rel_path):
+                file_path = os.path.abspath(rel_path)
+            else:
+                return f"Archivo no encontrado: {filename}<br>Ruta absoluta probada: {file_path}<br>Ruta relativa probada: {rel_path}", 404
+        
+        # Usar send_file para mayor control
+        return send_file(file_path, as_attachment=False)
+    except Exception as e:
+        import traceback
+        return f"Error al servir archivo: {str(e)}<br><pre>{traceback.format_exc()}</pre>", 500
 
 # ============================================
 # GESTIÓN DE NOTICIAS
@@ -2006,9 +2927,24 @@ def admin_proyectos():
 def admin_proyecto_nuevo():
     if request.method == 'POST':
         conn = get_db()
+        # Manejar imagen si se sube
+        imagen_filename = None
+        if 'imagen' in request.files:
+            file = request.files['imagen']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                filename = timestamp + filename
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'proyectos')
+                os.makedirs(upload_path, exist_ok=True)
+                filepath = os.path.join(upload_path, filename)
+                file.save(filepath)
+                imagen_filename = filename
+        
         conn.execute('''
-            INSERT INTO proyectos (titulo, descripcion, tipo, enlace, orden, activo, titulo_en, descripcion_en, tipo_en)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO proyectos (titulo, descripcion, tipo, enlace, orden, activo, titulo_en, descripcion_en, tipo_en,
+                                   codigo_proyecto, año_inicio, año_fin, investigadores, presupuesto, resultados, estado, financiador, imagen)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             request.form.get('titulo'),
             request.form.get('descripcion'),
@@ -2018,7 +2954,16 @@ def admin_proyecto_nuevo():
             1 if request.form.get('activo') == 'on' else 0,
             request.form.get('titulo_en', '').strip() or None,
             request.form.get('descripcion_en', '').strip() or None,
-            request.form.get('tipo_en', '').strip() or None
+            request.form.get('tipo_en', '').strip() or None,
+            request.form.get('codigo_proyecto', '').strip() or None,
+            int(request.form.get('año_inicio')) if request.form.get('año_inicio') else None,
+            int(request.form.get('año_fin')) if request.form.get('año_fin') else None,
+            request.form.get('investigadores', '').strip() or None,
+            request.form.get('presupuesto', '').strip() or None,
+            request.form.get('resultados', '').strip() or None,
+            request.form.get('estado', 'en_curso'),
+            request.form.get('financiador', '').strip() or None,
+            imagen_filename
         ))
         conn.commit()
         conn.close()
@@ -2033,10 +2978,43 @@ def admin_proyecto_editar(proyecto_id):
     conn = get_db()
     
     if request.method == 'POST':
+        # Manejar imagen si se sube
+        proyecto_actual = conn.execute('SELECT * FROM proyectos WHERE id = ?', (proyecto_id,)).fetchone()
+        # sqlite3.Row no tiene .get(), usar acceso directo con manejo de errores
+        imagen_filename = None
+        if proyecto_actual:
+            try:
+                imagen_filename = proyecto_actual['imagen']
+            except (KeyError, IndexError):
+                imagen_filename = None
+        
+        if 'imagen' in request.files:
+            file = request.files['imagen']
+            if file and file.filename != '' and allowed_file(file.filename):
+                # Eliminar imagen anterior si existe
+                if imagen_filename:
+                    old_filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'proyectos', imagen_filename)
+                    if os.path.exists(old_filepath):
+                        try:
+                            os.remove(old_filepath)
+                        except:
+                            pass
+                
+                # Guardar nueva imagen
+                filename = secure_filename(file.filename)
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                filename = timestamp + filename
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'], 'proyectos')
+                os.makedirs(upload_path, exist_ok=True)
+                filepath = os.path.join(upload_path, filename)
+                file.save(filepath)
+                imagen_filename = filename
+        
         conn.execute('''
             UPDATE proyectos 
             SET titulo=?, descripcion=?, tipo=?, enlace=?, orden=?, activo=?, 
-                titulo_en=?, descripcion_en=?, tipo_en=?, updated_at=CURRENT_TIMESTAMP
+                titulo_en=?, descripcion_en=?, tipo_en=?, updated_at=CURRENT_TIMESTAMP,
+                codigo_proyecto=?, año_inicio=?, año_fin=?, investigadores=?, presupuesto=?, resultados=?, estado=?, financiador=?, imagen=?
             WHERE id=?
         ''', (
             request.form.get('titulo'),
@@ -2048,6 +3026,15 @@ def admin_proyecto_editar(proyecto_id):
             request.form.get('titulo_en', '').strip() or None,
             request.form.get('descripcion_en', '').strip() or None,
             request.form.get('tipo_en', '').strip() or None,
+            request.form.get('codigo_proyecto', '').strip() or None,
+            int(request.form.get('año_inicio')) if request.form.get('año_inicio') else None,
+            int(request.form.get('año_fin')) if request.form.get('año_fin') else None,
+            request.form.get('investigadores', '').strip() or None,
+            request.form.get('presupuesto', '').strip() or None,
+            request.form.get('resultados', '').strip() or None,
+            request.form.get('estado', 'en_curso'),
+            request.form.get('financiador', '').strip() or None,
+            imagen_filename,
             proyecto_id
         ))
         conn.commit()
@@ -2096,8 +3083,9 @@ def admin_publicacion_nuevo():
         tags_json = json.dumps([tag.strip() for tag in tags.split(',') if tag.strip()])
         
         conn.execute('''
-            INSERT INTO publicaciones (titulo, descripcion, revista, año, enlace, tags, orden, activo, titulo_en, descripcion_en)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO publicaciones (titulo, descripcion, revista, año, enlace, tags, orden, activo, titulo_en, descripcion_en,
+                                     doi, autores, volumen, numero, paginas, tipo_publicacion, factor_impacto, base_datos)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             request.form.get('titulo'),
             request.form.get('descripcion'),
@@ -2108,7 +3096,15 @@ def admin_publicacion_nuevo():
             int(request.form.get('orden', 0)),
             1 if request.form.get('activo') == 'on' else 0,
             request.form.get('titulo_en', '').strip() or None,
-            request.form.get('descripcion_en', '').strip() or None
+            request.form.get('descripcion_en', '').strip() or None,
+            request.form.get('doi', '').strip() or None,
+            request.form.get('autores', '').strip() or None,
+            request.form.get('volumen', '').strip() or None,
+            request.form.get('numero', '').strip() or None,
+            request.form.get('paginas', '').strip() or None,
+            request.form.get('tipo_publicacion', '').strip() or None,
+            request.form.get('factor_impacto', '').strip() or None,
+            request.form.get('base_datos', '').strip() or None
         ))
         conn.commit()
         conn.close()
@@ -2129,7 +3125,8 @@ def admin_publicacion_editar(publicacion_id):
         conn.execute('''
             UPDATE publicaciones 
             SET titulo=?, descripcion=?, revista=?, año=?, enlace=?, tags=?, orden=?, activo=?, 
-                titulo_en=?, descripcion_en=?, updated_at=CURRENT_TIMESTAMP
+                titulo_en=?, descripcion_en=?, updated_at=CURRENT_TIMESTAMP,
+                doi=?, autores=?, volumen=?, numero=?, paginas=?, tipo_publicacion=?, factor_impacto=?, base_datos=?
             WHERE id=?
         ''', (
             request.form.get('titulo'),
@@ -2142,6 +3139,14 @@ def admin_publicacion_editar(publicacion_id):
             1 if request.form.get('activo') == 'on' else 0,
             request.form.get('titulo_en', '').strip() or None,
             request.form.get('descripcion_en', '').strip() or None,
+            request.form.get('doi', '').strip() or None,
+            request.form.get('autores', '').strip() or None,
+            request.form.get('volumen', '').strip() or None,
+            request.form.get('numero', '').strip() or None,
+            request.form.get('paginas', '').strip() or None,
+            request.form.get('tipo_publicacion', '').strip() or None,
+            request.form.get('factor_impacto', '').strip() or None,
+            request.form.get('base_datos', '').strip() or None,
             publicacion_id
         ))
         conn.commit()
@@ -2446,17 +3451,398 @@ def admin_evento_eliminar(evento_id):
     flash('Evento eliminado', 'success')
     return redirect(url_for('admin_eventos'))
 
-# Inicializar base de datos automáticamente (también para Gunicorn)
-# Solo inicializar si no existe la base de datos o si está vacía
-try:
+# ============================================
+# GESTIÓN DE CORREOS DE CONTACTO
+# ============================================
+
+def enviar_correo_contacto(nombre, email, telefono, tipo_consulta, mensaje, institucion=None):
+    """
+    Envía un correo con la consulta del formulario de contacto
+    a los correos configurados para ese tipo de consulta
+    """
+    # Obtener correos de destino para este tipo de consulta
     conn = get_db()
-    # Intentar consultar una tabla para verificar si la BD está inicializada
-    conn.execute('SELECT 1 FROM admins LIMIT 1').fetchone()
+    correos_destino = conn.execute(
+        'SELECT email FROM correos_contacto WHERE tipo_consulta = ? AND activo = 1',
+        (tipo_consulta,)
+    ).fetchall()
     conn.close()
-except (sqlite3.OperationalError, sqlite3.DatabaseError):
-    # La base de datos no existe o no está inicializada
-    init_db()
-    print("✅ Base de datos inicializada automáticamente")
+    
+    if not correos_destino:
+        return False, "No hay correos configurados para este tipo de consulta"
+    
+    # Configuración SMTP desde variables de entorno
+    smtp_host = os.environ.get('SMTP_HOST', '')
+    smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+    smtp_user = os.environ.get('SMTP_USER', '')
+    smtp_password = os.environ.get('SMTP_PASSWORD', '')
+    smtp_from = os.environ.get('SMTP_FROM', smtp_user)
+    
+    if not smtp_host or not smtp_user or not smtp_password:
+        return False, "Configuración SMTP no encontrada"
+    
+    # Mapeo de tipos de consulta a nombres legibles
+    tipos_consulta = {
+        'analisis': 'Solicitud de análisis',
+        'servicios': 'Consulta sobre servicios',
+        'capacitacion': 'Capacitación y docencia',
+        'investigacion': 'Investigación y colaboración',
+        'otra': 'Otra consulta'
+    }
+    
+    tipo_nombre = tipos_consulta.get(tipo_consulta, tipo_consulta)
+    
+    # Crear mensaje
+    msg = MIMEMultipart()
+    msg['From'] = smtp_from
+    msg['To'] = ', '.join([row['email'] for row in correos_destino])
+    msg['Subject'] = f'Nueva consulta: {tipo_nombre} - FARMAVET'
+    msg['Reply-To'] = email
+    
+    # Cuerpo del mensaje
+    cuerpo = f"""
+Nueva consulta recibida desde el formulario de contacto de FARMAVET
+
+Tipo de consulta: {tipo_nombre}
+Nombre: {nombre}
+Email: {email}
+Teléfono: {telefono or 'No proporcionado'}
+Institución/Empresa: {institucion or 'No proporcionado'}
+
+Mensaje:
+{mensaje}
+
+---
+Este correo fue enviado automáticamente desde el sitio web de FARMAVET.
+Para responder, use el email del remitente: {email}
+"""
+    
+    msg.attach(MIMEText(cuerpo, 'plain', 'utf-8'))
+    
+    # Enviar correo
+    try:
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.send_message(msg)
+        server.quit()
+        return True, "Correo enviado correctamente"
+    except Exception as e:
+        return False, f"Error al enviar correo: {str(e)}"
+
+@app.route('/contacto/enviar', methods=['POST'])
+@csrf_required
+def contacto_enviar():
+    """Procesa el formulario de contacto y envía correos"""
+    nombre = request.form.get('nombre', '').strip()
+    email = request.form.get('email', '').strip()
+    telefono = request.form.get('telefono', '').strip()
+    institucion = request.form.get('institucion', '').strip()
+    tipo_consulta = request.form.get('tipo', '').strip()
+    mensaje = request.form.get('mensaje', '').strip()
+    
+    # Validaciones
+    if not nombre or not email or not tipo_consulta or not mensaje:
+        flash('Por favor completa todos los campos requeridos', 'error')
+        return redirect('/contacto.html#contacto-form')
+    
+    # Validar formato de email
+    if '@' not in email or '.' not in email.split('@')[1]:
+        flash('Por favor ingresa un email válido', 'error')
+        return redirect('/contacto.html#contacto-form')
+    
+    # Enviar correo
+    exito, mensaje_resultado = enviar_correo_contacto(nombre, email, telefono, tipo_consulta, mensaje, institucion)
+    
+    if exito:
+        flash('Tu consulta ha sido enviada correctamente. Nos pondremos en contacto contigo pronto.', 'success')
+    else:
+        flash(f'Hubo un error al enviar tu consulta. Por favor intenta nuevamente o contáctanos directamente. Error: {mensaje_resultado}', 'error')
+    
+    return redirect('/contacto.html#contacto-form')
+
+@app.route('/admin/redes-sociales', methods=['GET', 'POST'])
+@login_required
+@csrf_required
+def admin_redes_sociales():
+    """Configuración de redes sociales para feeds (gratuito)"""
+    conn = get_db()
+    
+    if request.method == 'POST':
+        instagram_username = request.form.get('instagram_username', '').strip()
+        linkedin_company_id = request.form.get('linkedin_company_id', '').strip()
+        linkedin_page_url = request.form.get('linkedin_page_url', '').strip()
+        
+        # Limpiar @ si lo incluyeron
+        if instagram_username and instagram_username.startswith('@'):
+            instagram_username = instagram_username[1:]
+        
+        # Verificar si ya existe configuración
+        config_existente = conn.execute('SELECT * FROM configuracion_redes WHERE activo = 1 LIMIT 1').fetchone()
+        
+        if config_existente:
+            # Actualizar existente
+            conn.execute('''
+                UPDATE configuracion_redes 
+                SET instagram_username = ?, linkedin_company_id = ?, linkedin_page_url = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (instagram_username or None, linkedin_company_id or None, linkedin_page_url or None, config_existente['id']))
+        else:
+            # Crear nueva
+            conn.execute('''
+                INSERT INTO configuracion_redes (instagram_username, linkedin_company_id, linkedin_page_url, activo)
+                VALUES (?, ?, ?, 1)
+            ''', (instagram_username or None, linkedin_company_id or None, linkedin_page_url or None))
+        
+        conn.commit()
+        conn.close()
+        flash('Configuración de redes sociales actualizada correctamente', 'success')
+        return redirect(url_for('admin_redes_sociales'))
+    
+    # GET: Mostrar formulario
+    config = conn.execute('SELECT * FROM configuracion_redes WHERE activo = 1 LIMIT 1').fetchone()
+    conn.close()
+    return render_template('admin/redes_sociales.html', config=config)
+
+@app.route('/admin/correos-contacto')
+@login_required
+def admin_correos_contacto():
+    """Lista los correos configurados para cada tipo de consulta"""
+    conn = get_db()
+    
+    # Obtener todos los correos agrupados por tipo
+    correos = conn.execute('''
+        SELECT id, tipo_consulta, email, activo, created_at
+        FROM correos_contacto
+        ORDER BY tipo_consulta, email
+    ''').fetchall()
+    
+    # Agrupar por tipo
+    correos_por_tipo = {}
+    tipos_consulta = {
+        'analisis': 'Solicitud de análisis',
+        'servicios': 'Consulta sobre servicios',
+        'capacitacion': 'Capacitación y docencia',
+        'investigacion': 'Investigación y colaboración',
+        'otra': 'Otra consulta'
+    }
+    
+    for tipo in tipos_consulta.keys():
+        correos_por_tipo[tipo] = [row for row in correos if row['tipo_consulta'] == tipo]
+    
+    conn.close()
+    return render_template('admin/correos_contacto.html', correos_por_tipo=correos_por_tipo, tipos_consulta=tipos_consulta)
+
+@app.route('/admin/correos-contacto/nuevo', methods=['GET', 'POST'])
+@login_required
+@csrf_required
+def admin_correo_contacto_nuevo():
+    """Agrega un nuevo correo de destino"""
+    if request.method == 'POST':
+        tipo_consulta = request.form.get('tipo_consulta', '').strip()
+        email = request.form.get('email', '').strip()
+        activo = 1 if request.form.get('activo') == 'on' else 0
+        
+        if not tipo_consulta or not email:
+            flash('Todos los campos son requeridos', 'error')
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', tipos_consulta=tipos_consulta)
+        
+        # Validar formato de email
+        if '@' not in email or '.' not in email.split('@')[1]:
+            flash('Por favor ingresa un email válido', 'error')
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', tipos_consulta=tipos_consulta)
+        
+        conn = get_db()
+        try:
+            conn.execute('''
+                INSERT INTO correos_contacto (tipo_consulta, email, activo, updated_at)
+                VALUES (?, ?, ?, ?)
+            ''', (tipo_consulta, email, activo, datetime.now().isoformat()))
+            conn.commit()
+            conn.close()
+            flash('Correo agregado correctamente', 'success')
+            return redirect(url_for('admin_correos_contacto'))
+        except sqlite3.IntegrityError:
+            conn.close()
+            flash('Este correo ya está configurado para este tipo de consulta', 'error')
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', tipos_consulta=tipos_consulta)
+    
+    tipos_consulta = {
+        'analisis': 'Solicitud de análisis',
+        'servicios': 'Consulta sobre servicios',
+        'capacitacion': 'Capacitación y docencia',
+        'investigacion': 'Investigación y colaboración',
+        'otra': 'Otra consulta'
+    }
+    return render_template('admin/correo_contacto_form.html', tipos_consulta=tipos_consulta)
+
+@app.route('/admin/correos-contacto/<int:correo_id>/editar', methods=['GET', 'POST'])
+@login_required
+@csrf_required
+def admin_correo_contacto_editar(correo_id):
+    """Edita un correo de destino"""
+    conn = get_db()
+    
+    if request.method == 'POST':
+        tipo_consulta = request.form.get('tipo_consulta', '').strip()
+        email = request.form.get('email', '').strip()
+        activo = 1 if request.form.get('activo') == 'on' else 0
+        
+        if not tipo_consulta or not email:
+            flash('Todos los campos son requeridos', 'error')
+            correo = conn.execute('SELECT * FROM correos_contacto WHERE id = ?', (correo_id,)).fetchone()
+            conn.close()
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', correo=correo, tipos_consulta=tipos_consulta)
+        
+        # Validar formato de email
+        if '@' not in email or '.' not in email.split('@')[1]:
+            flash('Por favor ingresa un email válido', 'error')
+            correo = conn.execute('SELECT * FROM correos_contacto WHERE id = ?', (correo_id,)).fetchone()
+            conn.close()
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', correo=correo, tipos_consulta=tipos_consulta)
+        
+        try:
+            conn.execute('''
+                UPDATE correos_contacto
+                SET tipo_consulta = ?, email = ?, activo = ?, updated_at = ?
+                WHERE id = ?
+            ''', (tipo_consulta, email, activo, datetime.now().isoformat(), correo_id))
+            conn.commit()
+            conn.close()
+            flash('Correo actualizado correctamente', 'success')
+            return redirect(url_for('admin_correos_contacto'))
+        except sqlite3.IntegrityError:
+            conn.close()
+            flash('Este correo ya está configurado para este tipo de consulta', 'error')
+            correo = conn.execute('SELECT * FROM correos_contacto WHERE id = ?', (correo_id,)).fetchone()
+            tipos_consulta = {
+                'analisis': 'Solicitud de análisis',
+                'servicios': 'Consulta sobre servicios',
+                'capacitacion': 'Capacitación y docencia',
+                'investigacion': 'Investigación y colaboración',
+                'otra': 'Otra consulta'
+            }
+            return render_template('admin/correo_contacto_form.html', correo=correo, tipos_consulta=tipos_consulta)
+    
+    correo = conn.execute('SELECT * FROM correos_contacto WHERE id = ?', (correo_id,)).fetchone()
+    conn.close()
+    
+    if not correo:
+        flash('Correo no encontrado', 'error')
+        return redirect(url_for('admin_correos_contacto'))
+    
+    tipos_consulta = {
+        'analisis': 'Solicitud de análisis',
+        'servicios': 'Consulta sobre servicios',
+        'capacitacion': 'Capacitación y docencia',
+        'investigacion': 'Investigación y colaboración',
+        'otra': 'Otra consulta'
+    }
+    return render_template('admin/correo_contacto_form.html', correo=correo, tipos_consulta=tipos_consulta)
+
+@app.route('/admin/correos-contacto/<int:correo_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_correo_contacto_eliminar(correo_id):
+    """Elimina un correo de destino"""
+    conn = get_db()
+    conn.execute('DELETE FROM correos_contacto WHERE id = ?', (correo_id,))
+    conn.commit()
+    conn.close()
+    flash('Correo eliminado', 'success')
+    return redirect(url_for('admin_correos_contacto'))
+
+# Inicializar base de datos automáticamente (también para Gunicorn)
+# ============================================
+# SEO: SITEMAP Y ROBOTS.TXT
+# ============================================
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Genera sitemap.xml dinámico para SEO"""
+    from flask import Response
+    from datetime import datetime
+    
+    base_url = "https://www.laboratoriofarmavet.cl"
+    pages = [
+        {'loc': '/', 'changefreq': 'weekly', 'priority': '1.0'},
+        {'loc': '/quienes-somos.html', 'changefreq': 'monthly', 'priority': '0.9'},
+        {'loc': '/servicios.html', 'changefreq': 'weekly', 'priority': '1.0'},
+        {'loc': '/investigacion.html', 'changefreq': 'weekly', 'priority': '0.9'},
+        {'loc': '/docencia.html', 'changefreq': 'monthly', 'priority': '0.8'},
+        {'loc': '/casa-omsa.html', 'changefreq': 'monthly', 'priority': '0.8'},
+        {'loc': '/noticias.html', 'changefreq': 'weekly', 'priority': '0.7'},
+        {'loc': '/faq.html', 'changefreq': 'monthly', 'priority': '0.8'},
+        {'loc': '/contacto.html', 'changefreq': 'monthly', 'priority': '0.9'},
+    ]
+    
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    
+    for page in pages:
+        sitemap_xml += '  <url>\n'
+        sitemap_xml += f'    <loc>{base_url}{page["loc"]}</loc>\n'
+        sitemap_xml += f'    <changefreq>{page["changefreq"]}</changefreq>\n'
+        sitemap_xml += f'    <priority>{page["priority"]}</priority>\n'
+        sitemap_xml += '  </url>\n'
+    
+    sitemap_xml += '</urlset>'
+    
+    return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    """Genera robots.txt para SEO"""
+    from flask import Response
+    
+    robots_txt = """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /static/uploads/
+
+Sitemap: https://www.laboratoriofarmavet.cl/sitemap.xml
+"""
+    return Response(robots_txt, mimetype='text/plain')
+
+# Ejecutar init_db() siempre para asegurar que todas las tablas existan
+# (usa CREATE TABLE IF NOT EXISTS, así que es seguro)
+init_db()
+print("✅ Base de datos verificada e inicializada")
 
 if __name__ == '__main__':
     print("✅ Base de datos inicializada")

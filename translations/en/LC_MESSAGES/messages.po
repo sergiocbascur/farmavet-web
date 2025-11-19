@@ -1153,6 +1153,42 @@ msgstr "LinkedIn Feed"
 msgid "El feed de LinkedIn aparecerá aquí una vez configurado"
 msgstr "LinkedIn feed will appear here once configured"
 
+msgid "Síguenos en LinkedIn"
+msgstr "Follow us on LinkedIn"
+
+msgid "Conéctate con nosotros en LinkedIn para conocer nuestras investigaciones, publicaciones y oportunidades profesionales."
+msgstr "Connect with us on LinkedIn to learn about our research, publications and professional opportunities."
+
+msgid "Visitar LinkedIn"
+msgstr "Visit LinkedIn"
+
+msgid "Se abrirá en una nueva ventana"
+msgstr "Will open in a new window"
+
+msgid "Ver perfil en LinkedIn"
+msgstr "View LinkedIn profile"
+
+msgid "Hace 2 días"
+msgstr "2 days ago"
+
+msgid "Hace 1 semana"
+msgstr "1 week ago"
+
+msgid "Compartimos nuestros avances en investigación y análisis farmacológicos para la industria veterinaria."
+msgstr "We share our advances in research and pharmacological analysis for the veterinary industry."
+
+msgid "Nueva publicación científica"
+msgstr "New scientific publication"
+
+msgid "Ver más en LinkedIn"
+msgstr "See more on LinkedIn"
+
+msgid "Únete a nuestra comunidad profesional y mantente al día con las últimas investigaciones."
+msgstr "Join our professional community and stay up to date with the latest research."
+
+msgid "Ver todas las publicaciones"
+msgstr "View all posts"
+
 msgid "Próximos eventos"
 msgstr "Upcoming events"
 
@@ -1554,4 +1590,148 @@ msgstr "Contact research team"
 
 msgid "Laboratorio de Farmacología Veterinaria, Universidad de Chile. Investigamos para generar conocimiento aplicado en inocuidad alimentaria."
 msgstr "Veterinary Pharmacology Laboratory, University of Chile. We research to generate applied knowledge in food safety."
+
+msgid "IF"
+msgstr "IF"
+
+msgid "Vol."
+msgstr "Vol."
+
+msgid "pp."
+msgstr "pp."
+
+msgid "DOI"
+msgstr "DOI"
+
+msgid "Investigación aplicada en farmacología veterinaria, inocuidad alimentaria y resistencia antimicrobiana, financiada por FONDECYT, FONDEF y organismos internacionales."
+msgstr "Applied research in veterinary pharmacology, food safety, and antimicrobial resistance, funded by FONDECYT, FONDEF, and international organizations."
+
+msgid "En Curso"
+msgstr "In Progress"
+
+msgid "Investigadores"
+msgstr "Researchers"
+
+msgid "Resultados y logros"
+msgstr "Results and achievements"
+
+msgid "Completado"
+msgstr "Completed"
+
+msgid "Activo"
+msgstr "Active"
+
+msgid "Desde"
+msgstr "From"
+
+msgid "Hasta"
+msgstr "Until"
+
+msgid "Proyectos destacados"
+msgstr "Featured Projects"
+
+msgid "Analistas Químicos"
+msgstr "Chemical Analysts"
+
+msgid "Son el pilar técnico en la ejecución y validación de metodologías analíticas para diversas matrices veterinarias; trabajan directamente en el laboratorio y tienen entrenamiento en química analítica y farmacología."
+msgstr "They are the technical pillar in the execution and validation of analytical methodologies for various veterinary matrices; they work directly in the laboratory and have training in analytical chemistry and pharmacology."
+
+msgid "Técnicos Químicos"
+msgstr "Chemical Technicians"
+
+msgid "Apoyan la labor de los analistas: realizan preparaciones, controles de calidad, manejo de equipamiento y aseguran la correcta ejecución de procedimientos normalizados."
+msgstr "They support the work of analysts: perform preparations, quality controls, equipment management, and ensure the correct execution of standardized procedures."
+
+msgid "Médicos Veterinarios / Doctores"
+msgstr "Veterinary Doctors / Doctors"
+
+msgid "Profesionales responsables de la interpretación normativa, gestión de clientes del área pecuaria-acuícola y liderazgo científico dentro del laboratorio, incluyendo la dirección y representación ante organismos reguladores."
+msgstr "Professionals responsible for regulatory interpretation, management of clients in the livestock-aquaculture area, and scientific leadership within the laboratory, including direction and representation before regulatory bodies."
+
+msgid "Administración y Apoyo"
+msgstr "Administration and Support"
+
+msgid "Este grupo abarca roles claves como secretarias (gestión administrativa y atención interna/externa), contabilidad (manejo financiero y presupuestario), y encargados de calidad (auditorías, acreditación y gestión técnica)."
+msgstr "This group encompasses key roles such as secretaries (administrative management and internal/external attention), accounting (financial and budgetary management), and quality managers (audits, accreditation, and technical management)."
+
+msgid "Especialistas en química y medicina veterinaria"
+msgstr "Specialists in chemistry and veterinary medicine"
+
+msgid "Nuestros Números"
+msgstr "Our Numbers"
+
+msgid "Datos que respaldan nuestra trayectoria y compromiso con la excelencia"
+msgstr "Data that supports our trajectory and commitment to excellence"
+
+msgid "Años con acreditación ISO 17025 continua (desde 2004)"
+msgstr "Years with continuous ISO 17025 accreditation (since 2004)"
+
+msgid "Metodologías analíticas acreditadas"
+msgstr "Accredited analytical methodologies"
+
+msgid "Centro Colaborador OMSA único en Latinoamérica"
+msgstr "Unique OMSA Collaborating Center in Latin America"
+
+msgid "Acreditación ISO 17025 desde 2004"
+msgstr "ISO 17025 Accreditation since 2004"
+
+msgid "+70 metodologías acreditadas"
+msgstr "+70 accredited methodologies"
+
+msgid "ISO 17025"
+msgstr "ISO 17025"
+
+msgid "Obtenemos por primera vez la acreditación ISO 17025 del INN, iniciando un camino de mejora continua y ampliación del alcance metodológico. Mantenemos esta acreditación de forma continua desde entonces (+20 años)."
+msgstr "We obtain ISO 17025 accreditation from INN for the first time, beginning a path of continuous improvement and expansion of methodological scope. We have maintained this accreditation continuously since then (+20 years)."
+
+msgid "FARMAVET es el Laboratorio de Farmacología Veterinaria de la Universidad de Chile, instituido como Centro Colaborador de OMSA (Organización Mundial de Sanidad Animal) — único en Latinoamérica en su categoría. Desde 1995, brindamos servicios analíticos de excelencia para garantizar la inocuidad de alimentos de origen animal."
+msgstr "FARMAVET is the Veterinary Pharmacology Laboratory of the University of Chile, established as a Collaborating Center of OMSA (World Organisation for Animal Health) — unique in Latin America in its category. Since 1995, we provide analytical services of excellence to guarantee the safety of food of animal origin."
+
+msgid "Excelencia científica al servicio de la salud pública"
+msgstr "Scientific excellence at the service of public health"
+
+msgid "Realizamos análisis de residuos químicos, antibióticos, micotoxinas y contaminantes microbiológicos en carne, leche, peces, huevos y productos procesados, usando metodologías acreditadas ISO 17025. Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario certificado para garantizar resultados confiables y trazables."
+msgstr "We perform analysis of chemical residues, antibiotics, mycotoxins, and microbiological contaminants in meat, milk, fish, eggs, and processed products, using ISO 17025 accredited methodologies. We have state-of-the-art infrastructure (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) and a certified multidisciplinary team to guarantee reliable and traceable results."
+
+msgid "Ofrecemos más de 70 metodologías analíticas acreditadas para el control de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos y microbiológicos en matrices hidrobiológicas (salmón, trucha, mariscos), pecuarias (carne, leche, huevos) y productos derivados."
+msgstr "We offer more than 70 accredited analytical methodologies for the control of residues of veterinary drugs, antibiotics, mycotoxins, chemical and microbiological contaminants in hydrobiological matrices (salmon, trout, shellfish), livestock matrices (meat, milk, eggs), and derived products."
+
+msgid "Metodologías Analíticas Acreditadas"
+msgstr "Accredited Analytical Methodologies"
+
+msgid "Busca entre más de 70 metodologías acreditadas ISO 17025. Ingresa el nombre de la metodología, analito o matriz que necesitas analizar."
+msgstr "Search among more than 70 ISO 17025 accredited methodologies. Enter the name of the methodology, analyte, or matrix you need to analyze."
+
+msgid "Buscar metodología, analito, matriz o técnica..."
+msgstr "Search methodology, analyte, matrix or technique..."
+
+msgid "Todas"
+msgstr "All"
+
+msgid "Ingresa un término de búsqueda para ver las metodologías disponibles"
+msgstr "Enter a search term to see available methodologies"
+
+msgid "No se encontraron metodologías que coincidan con tu búsqueda"
+msgstr "No methodologies found matching your search"
+
+msgid "metodología encontrada"
+msgstr "methodology found"
+
+msgid "metodologías encontradas"
+msgstr "methodologies found"
+
+msgid "Descargar PDF"
+msgstr "Download PDF"
+
+msgid "Residuos de Medicamentos Veterinarios"
+msgstr "Veterinary Drug Residues"
+
+msgid "Contaminantes Químicos"
+msgstr "Chemical Contaminants"
+
+msgid "Microbiología"
+msgstr "Microbiology"
+
+msgid "Otros Análisis"
+msgstr "Other Analyses"
 

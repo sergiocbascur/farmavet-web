@@ -29,6 +29,7 @@
                     <li><a href="{{ url_for('admin_dashboard') }}" {% if request.endpoint == 'admin_dashboard' %}class="active"{% endif %}><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
                     <li><a href="{{ url_for('admin_programas') }}" {% if 'programa' in request.endpoint %}class="active"{% endif %}><i class="bi bi-book me-2"></i>Programas</a></li>
                     <li><a href="{{ url_for('admin_testimonios') }}" {% if 'testimonio' in request.endpoint %}class="active"{% endif %}><i class="bi bi-chat-quote me-2"></i>Testimonios</a></li>
+                    <li><a href="{{ url_for('admin_faq') }}" {% if 'faq' in request.endpoint %}class="active"{% endif %}><i class="bi bi-question-circle me-2"></i>FAQ</a></li>
                     <li><a href="{{ url_for('admin_noticias') }}" {% if 'noticia' in request.endpoint %}class="active"{% endif %}><i class="bi bi-newspaper me-2"></i>Noticias</a></li>
                     <li><a href="{{ url_for('admin_eventos') }}" {% if 'evento' in request.endpoint %}class="active"{% endif %}><i class="bi bi-calendar-event me-2"></i>Eventos</a></li>
                     <li><a href="{{ url_for('admin_organigrama') }}" {% if 'organigrama' in request.endpoint %}class="active"{% endif %}><i class="bi bi-diagram-3 me-2"></i>Organigrama</a></li>
@@ -37,7 +38,12 @@
                     <li><a href="{{ url_for('admin_proyectos') }}" {% if 'proyecto' in request.endpoint %}class="active"{% endif %}><i class="bi bi-folder me-2"></i>Proyectos Destacados</a></li>
                     <li><a href="{{ url_for('admin_publicaciones') }}" {% if 'publicacion' in request.endpoint %}class="active"{% endif %}><i class="bi bi-journal-text me-2"></i>Publicaciones Científicas</a></li>
                     <li><a href="{{ url_for('admin_estadisticas') }}" {% if 'estadistica' in request.endpoint %}class="active"{% endif %}><i class="bi bi-bar-chart me-2"></i>Estadísticas</a></li>
+                    <li><a href="{{ url_for('admin_certificados') }}" {% if 'certificado' in request.endpoint %}class="active"{% endif %}><i class="bi bi-award me-2"></i>Certificados</a></li>
+                    <li><a href="{{ url_for('admin_metodologias') }}" {% if 'metodologia' in request.endpoint %}class="active"{% endif %}><i class="bi bi-clipboard-data me-2"></i>Metodologías Analíticas</a></li>
+                    <li><a href="{{ url_for('admin_galeria') }}" {% if 'galeria' in request.endpoint %}class="active"{% endif %}><i class="bi bi-images me-2"></i>Galería e Infografías</a></li>
                     <li><a href="{{ url_for('admin_tarjetas_destacadas') }}" {% if 'tarjeta_destacada' in request.endpoint or 'tarjetas_destacadas' in request.endpoint %}class="active"{% endif %}><i class="bi bi-card-text me-2"></i>Tarjetas Destacadas</a></li>
+                    <li><a href="{{ url_for('admin_correos_contacto') }}" {% if 'correo_contacto' in request.endpoint %}class="active"{% endif %}><i class="bi bi-envelope me-2"></i>Correos de Contacto</a></li>
+                    <li><a href="{{ url_for('admin_redes_sociales') }}" {% if 'redes_sociales' in request.endpoint %}class="active"{% endif %}><i class="bi bi-share me-2"></i>Redes Sociales</a></li>
                     <li><hr style="border-color: rgba(255,255,255,0.1); margin: 1rem 0;"></li>
                     <li><a href="{{ url_for('admin_cambiar_contrasena') }}" {% if 'cambiar_contrasena' in request.endpoint %}class="active"{% endif %}><i class="bi bi-key me-2"></i>Cambiar Contraseña</a></li>
                     <li><a href="/" target="_blank"><i class="bi bi-globe me-2"></i>Ver sitio web</a></li>
