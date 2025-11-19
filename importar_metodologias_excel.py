@@ -326,15 +326,55 @@ def import_from_excel(excel_path, db_path, dry_run=False):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Uso: python importar_metodologias_excel.py <archivo_excel> [--dry-run]")
+        print("Uso: python importar_metodologias_excel.py <archivo_excel> [--dry-run] [--yes]")
         print("\nEjemplo:")
         print("  python importar_metodologias_excel.py 'RESUMEN CLIENTES-LAB.xlsx'")
         print("  python importar_metodologias_excel.py 'RESUMEN CLIENTES-LAB.xlsx' --dry-run")
+        print("  python importar_metodologias_excel.py '/ruta/completa/al/archivo.xlsx'")
         sys.exit(1)
     
     excel_path = sys.argv[1]
     dry_run = '--dry-run' in sys.argv or '-n' in sys.argv
     skip_confirm = '--yes' in sys.argv or '-y' in sys.argv or dry_run
+    
+    # Si el archivo no existe, intentar buscar en ubicaciones comunes
+    if not os.path.exists(excel_path):
+        print(f"⚠️  No se encontró el archivo: {excel_path}")
+        print("\nBuscando en ubicaciones comunes...")
+        
+        # Buscar en el directorio actual y subdirectorios
+        posibles_nombres = [
+            'RESUMEN CLIENTES-LAB.xlsx',
+            'resumen clientes-lab.xlsx',
+            'RESUMEN_CLIENTES_LAB.xlsx',
+            'resumen_clientes_lab.xlsx'
+        ]
+        
+        encontrado = False
+        for nombre in posibles_nombres:
+            # Buscar en directorio actual
+            if os.path.exists(nombre):
+                excel_path = nombre
+                encontrado = True
+                print(f"✅ Encontrado: {os.path.abspath(excel_path)}")
+                break
+            
+            # Buscar en directorio padre
+            parent_path = os.path.join('..', nombre)
+            if os.path.exists(parent_path):
+                excel_path = parent_path
+                encontrado = True
+                print(f"✅ Encontrado: {os.path.abspath(excel_path)}")
+                break
+        
+        if not encontrado:
+            print("\n❌ No se encontró el archivo Excel en ubicaciones comunes.")
+            print("\nOpciones:")
+            print("  1. Especifica la ruta completa del archivo:")
+            print("     python importar_metodologias_excel.py '/ruta/completa/RESUMEN CLIENTES-LAB.xlsx'")
+            print("  2. Copia el archivo al directorio actual del script")
+            print(f"     Directorio actual: {os.getcwd()}")
+            sys.exit(1)
     
     if dry_run:
         print("[DRY RUN] No se modificara la base de datos\n")
