@@ -555,10 +555,9 @@
                     />
                   </div>
                   {% else %}
-                  <img
-                    src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}"
-                    alt="{{ get_translated_field(evento, 'titulo', evento.titulo) }}"
-                  />
+                  <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #999;">
+                    <i class="bi bi-calendar-event" style="font-size: 3rem;"></i>
+                  </div>
                   {% endif %}
                   <div class="news-body">
                     <span class="news-meta">
