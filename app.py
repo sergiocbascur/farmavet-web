@@ -2311,6 +2311,9 @@ REGLAS OBLIGATORIAS:
 4. Si la pregunta no está en la información proporcionada, responde: "Para consultas específicas sobre metodologías de FARMAVET, contacta directamente con el laboratorio."
 5. Responde de manera MUY CONCISA: máximo 1-2 oraciones
 6. NO agregues información que no esté en la lista proporcionada
+7. NO incluyas referencias a citas, notas, fuentes o números entre corchetes como [1], [2], etc.
+8. NO uses formato de citas como <...> o [...]
+9. Responde en texto plano, sin referencias adicionales
 
 INFORMACIÓN DISPONIBLE DE FARMAVET:
 {local_context}
