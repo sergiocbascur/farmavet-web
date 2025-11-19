@@ -2288,30 +2288,28 @@ a.logo-card:focus {
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border-radius: 999px;
   font-weight: 600;
+  font-size: 0.85rem;
+  background-color: rgba(35, 115, 186, 0.1);
+  color: var(--color-primary);
+}
+
+/* Badges en el footer - estilo sutil integrado */
+.site-footer .badge {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 0.875rem;
-  background-color: rgba(255, 255, 255, 0.95);
-  color: var(--color-primary-dark);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 1rem;
   transition: all 0.2s ease;
 }
 
-/* Badges en el footer - mejor contraste */
-.site-footer .badge {
-  background-color: rgba(255, 255, 255, 0.98);
-  color: var(--color-primary-dark);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  font-size: 0.9rem;
-  padding: 0.6rem 1.2rem;
-}
-
 .site-footer .badge:hover {
-  background-color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .media-gallery {
