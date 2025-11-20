@@ -2449,7 +2449,8 @@ def api_chatbot_search():
             for grupo in list(grupos.values())[:20]:  # Máximo 20 grupos para incluir todas las variantes
                 analitos_str = ', '.join(grupo['analitos'][:5])
                 if len(grupo['analitos']) > 5:
-                    analitos_str += f" y {len(grupo['analitos']) - 5} más"
+                    # No dar número específico para evitar imprecisiones, usar "varios más"
+                    analitos_str += " y varios más"
                 
                 lod_range = ""
                 if grupo['lods']:
