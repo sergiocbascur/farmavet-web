@@ -804,7 +804,7 @@ class MetodologiasChatbot {
                 }
             }
             
-            // FILTRO CRÍTICO: Solo mantener metodologías con coincidencia DIRECTA en analito o nombre
+            // FILTRO CRÍTICO: Solo mantener metodologías con coincidencia DIRECTA y RELEVANTE en analito o nombre
             // Descarta completamente metodologías que solo coinciden en matriz o técnica
             // También descarta coincidencias muy débiles o irrelevantes
             let hasMatchInAnalitoOrNombre = false;
@@ -813,11 +813,9 @@ class MetodologiasChatbot {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 3) {
-                        // Verificar coincidencia directa en analito o nombre (substring o palabra completa)
-                        // NO usar coincidencias muy débiles como solo una letra común
                         const keywordLen = cleanKeyword.length;
                         
-                        // Coincidencia exacta o como palabra completa (máxima confianza)
+                        // PRIORIDAD 1: Coincidencia exacta o como palabra completa (máxima confianza)
                         const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         
@@ -827,13 +825,34 @@ class MetodologiasChatbot {
                             break;
                         }
                         
-                        // Coincidencia como substring pero solo si la keyword es significativa (>=4 caracteres)
-                        // Esto evita coincidencias falsas con palabras cortas comunes
+                        // PRIORIDAD 2: Coincidencia como substring pero solo si la keyword es significativa (>=4 caracteres)
+                        // Y solo si la coincidencia es al inicio o es una palabra significativa (no al final de otra palabra)
+                        // Esto evita coincidencias falsas como "tetraciclina" encontrando "betalactamico" por compartir "lact"
                         if (keywordLen >= 4) {
-                            if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
-                                nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                            // Verificar coincidencia en nombre o analito como substring significativo
+                            // Solo si comienza la palabra o es una palabra completa
+                            const startsWithKeyword = (str) => {
+                                const words = str.split(/\s+/);
+                                return words.some(word => 
+                                    word.toLowerCase().startsWith(cleanKeyword.toLowerCase()) ||
+                                    word.toLowerCase().includes(cleanKeyword.toLowerCase()) &&
+                                    cleanKeyword.length >= word.length * 0.5 // Al menos 50% de la palabra
+                                );
+                            };
+                            
+                            if (startsWithKeyword(nombreNorm) || startsWithKeyword(nombreEnNorm) ||
+                                startsWithKeyword(analitoNorm) || startsWithKeyword(analitoEnNorm)) {
                                 hasMatchInAnalitoOrNombre = true;
                                 break;
+                            }
+                            
+                            // Fallback: substring directo solo si la keyword es >= 5 caracteres (más específica)
+                            if (keywordLen >= 5) {
+                                if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
+                                    nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                                    hasMatchInAnalitoOrNombre = true;
+                                    break;
+                                }
                             }
                         }
                         
