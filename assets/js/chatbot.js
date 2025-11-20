@@ -880,18 +880,24 @@ class MetodologiasChatbot {
                         }
                         
                         // Si la keyword es corta (< 4 caracteres), ser más estricto
-                        // Para evitar coincidencias falsas como "beta" en "beta-hch"
+                        // Para evitar coincidencias falsas como "beta" en "beta-hch" cuando se busca "betalactamicos"
                         if (keywordLen < 4) {
-                            // Solo aceptar si es palabra completa y no está dentro de otra palabra
+                            // Solo aceptar si está en el nombre completo del método O si forma parte de una palabra más larga en el nombre
                             // Ej: "beta" debe coincidir con "beta-lactamicos" pero NO con "beta-hch" si se busca "betalactamicos"
-                            // Para keywords cortas, requerir que sea al inicio de una palabra compuesta
-                            const strictRegex = new RegExp(`(^|\\s|-)${escapedKeyword}(-|\\s|$)`, 'i');
-                            if ((strictRegex.test(analitoNorm) || strictRegex.test(analitoEnNorm) ||
-                                 strictRegex.test(nombreNorm) || strictRegex.test(nombreEnNorm)) &&
-                                // Asegurar que NO sea solo "beta" en "beta-hch" si se busca algo más largo
-                                (cleanKeyword.length >= 4 || !analitoNorm.match(/beta[^a-z]/i) || nombreNorm.includes(cleanKeyword))) {
-                                hasMatchInAnalitoOrNombre = true;
-                                break;
+                            // Verificar que esté en el nombre completo del método (no solo en analito corto)
+                            if (nombreNorm.includes(cleanKeyword)) {
+                                // Si está en el nombre, verificar que no sea parte de otra palabra no relacionada
+                                // Ej: "beta" en "betalactamicos" está bien, pero "beta" solo en "beta-hch" no si se busca "betalactamicos"
+                                const nombreWords = nombreNorm.split(/\s+/);
+                                const hasRelevantMatch = nombreWords.some(word => {
+                                    // Verificar si la palabra contiene la keyword al inicio
+                                    return word.startsWith(cleanKeyword) && word.length > cleanKeyword.length;
+                                });
+                                
+                                if (hasRelevantMatch || nombreNorm.includes(cleanKeyword + '-') || nombreNorm.includes(cleanKeyword + ' ')) {
+                                    hasMatchInAnalitoOrNombre = true;
+                                    break;
+                                }
                             }
                         }
                         
