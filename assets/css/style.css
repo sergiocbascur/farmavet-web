@@ -2313,18 +2313,83 @@ a.logo-card:focus {
     flex: 0 0 100%;
     max-width: 100%;
   }
+  .clientes-grid {
+    gap: 1rem;
+  }
+  
   .clientes-grid .logo-card {
-    flex: 0 0 100%; /* 1 logo per row */
-    max-width: 100%;
+    flex: 0 0 calc((100% - 1rem) / 2); /* 2 logos per row en móvil */
+    max-width: calc((100% - 1rem) / 2);
+    padding: 1.5rem 1rem;
+    min-height: 120px;
   }
 
   .infinite-carousel .list-card,
   .infinite-carousel .card {
     flex: 0 0 calc(100% - 2rem);
   }
+  
   .infinite-carousel .logo-card {
-    flex: 0 0 calc(100% - 2rem);
-    width: calc(100% - 2rem);
+    flex: 0 0 calc((100% - 1rem) / 2); /* 2 logos visibles en móvil */
+    width: calc((100% - 1rem) / 2);
+    min-width: calc((100% - 1rem) / 2);
+    padding: 1.5rem 1rem;
+    min-height: 120px;
+  }
+  
+  /* Mejorar logos en móvil */
+  .logo-card img {
+    max-height: 100px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Mejorar botones de navegación del carrusel en móvil */
+  .carousel-nav-infinite {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 0 1rem;
+  }
+  
+  .carousel-nav-btn {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    font-size: 1.5rem !important;
+    background-color: rgba(35, 115, 186, 0.15) !important;
+    border: 2px solid var(--color-primary) !important;
+    box-shadow: 0 2px 8px rgba(35, 115, 186, 0.2) !important;
+  }
+  
+  .carousel-nav-btn:active {
+    transform: scale(0.9) !important;
+    background-color: var(--color-primary) !important;
+    color: var(--color-white) !important;
+  }
+  
+  /* Permitir scroll horizontal táctil en carrusel */
+  .infinite-carousel .carousel-track-infinite {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 1rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar-track {
+    background: rgba(35, 115, 186, 0.05);
+    border-radius: 2px;
+  }
+  
+  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar-thumb {
+    background: rgba(35, 115, 186, 0.3);
+    border-radius: 2px;
   }
   .infinite-carousel .org-member-card {
     flex: 0 0 100%;
