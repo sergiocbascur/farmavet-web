@@ -260,13 +260,23 @@ class MetodologiasChatbot {
             
             // SISTEMA HÍBRIDO: Búsqueda local primero (GRATIS), Perplexity solo si es necesario
             
-            // DETECTAR PREGUNTAS DE SEGUIMIENTO: Si la pregunta menciona matrices/condiciones y hay contexto previo
-            // También detectar preguntas con negación sobre matrices: "no hacen en X?", "en X no hacen?", "en X no?"
-            const isFollowUpQuery = /\b(en|de|para|con|sin|tambien|ademas|otras|otros|matrices|matriz)\b/i.test(query);
+            // DETECTAR PREGUNTAS DE SEGUIMIENTO: Solo si es realmente una pregunta relacionada con el tema anterior
+            // No considerar como seguimiento si la pregunta menciona un tema completamente diferente
+            // Ej: "en que matrices?" después de "hacen organoclorados?" → seguimiento ✓
+            // Ej: "hacen dioxinas?" después de "hacen esteroides?" → NO es seguimiento ✗
+            // Ej: "y hacen melamina?" después de "hacen esteroides?" → NO es seguimiento ✗
+            const isExplicitFollowUp = /^(en|de|para|con|sin)\s+\w+\s*(hacen|tienen|analizan|no)?\s*\??$/i.test(query) ||
+                                       /^(en|de|para|con|sin|que|cuantos|cuales)\s+(matrices?|matriz|matrices)\s*\??$/i.test(query) ||
+                                       /\b(tambien|ademas|otras|otros)\s+(hacen|tienen|analizan|matrices?)\b/i.test(query);
             const isNegativeFollowUp = /\b(no|sin)\s+(hacen|tienen|analizan)\b/i.test(query) || 
                                        /\b(en|de|para)\s+\w+\s+no\s+(hacen|tienen|analizan)\b/i.test(query) ||
                                        /^(en|de|para)\s+\w+\s+no\s*(hacen|tienen|analizan)?\s*\??$/i.test(query) ||
                                        /^(en|de|para)\s+\w+\s+no\s*\??$/i.test(query); // "en harina no?"
+            
+            // Solo considerar como seguimiento si es explícitamente una pregunta de seguimiento
+            // O si es negativa sobre matrices (ej: "en harina no hacen?")
+            const isFollowUpQuery = isExplicitFollowUp || isNegativeFollowUp;
+            
             const hasPreviousContext = this.lastQuery && this.lastResults && this.lastResults.length > 0;
             
             // Si es pregunta de seguimiento y hay contexto previo, combinar la búsqueda
