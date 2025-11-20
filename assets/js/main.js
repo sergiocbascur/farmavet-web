@@ -69,15 +69,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Click handler for mobile (only on the toggle link, not sub-menu links)
     dropdownToggle.addEventListener("click", (e) => {
+      // En móvil, siempre prevenir navegación y solo abrir/cerrar submenú
       if (window.innerWidth <= 1024) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         const isExpanded = item.getAttribute("aria-expanded") === "true";
         item.setAttribute("aria-expanded", String(!isExpanded));
         // No navegar, solo abrir/cerrar submenú
         return false;
       }
-    });
+    }, true); // Usar capture phase para interceptar antes que otros handlers
 
     // Close dropdown when clicking on direct links (mobile)
     if (dropdownLinks) {
