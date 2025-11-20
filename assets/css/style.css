@@ -5160,6 +5160,17 @@ input[type="button"],
   .metodologias-table-mobile:empty {
     display: none !important;
   }
+}
+
+/* Mostrar tabla en escritorio, ocultar cards */
+@media (min-width: 769px) {
+  .metodologias-table-wrapper {
+    display: block !important;
+  }
+  
+  .metodologias-table-mobile {
+    display: none !important;
+  }
   
   .metodologias-table-mobile .metodologia-card {
     background-color: var(--color-white) !important;
