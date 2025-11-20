@@ -2624,26 +2624,48 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural e intelig
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
-        app.logger.debug(f'Chatbot Perplexity: Payload (sin API key): {json.dumps({k: v for k, v in payload.items() if k != "messages" or True})}')
+        app.logger.debug(f'Chatbot Perplexity: Payload model: {payload["model"]}, messages count: {len(payload["messages"])}')
         
-        try:
-            response = requests.post(perplexity_url, headers=headers, json=payload, timeout=15)
-            
-            # Si el modelo falla, intentar con uno alternativo
-            if response.status_code == 400:
-                error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
-                if 'model' in str(error_data).lower() or 'invalid' in str(error_data).lower():
-                    app.logger.warning('Chatbot Perplexity: Modelo no disponible, intentando alternativo...')
-                    # Intentar con modelo alternativo
-                    payload["model"] = "llama-3.1-sonar-small-128k-online"
-                    response = requests.post(perplexity_url, headers=headers, json=payload, timeout=15)
+        # Intentar primero con sonar-pro (modelo más reciente y potente)
+        models_to_try = [
+            "sonar-pro",  # Modelo más reciente, mejor para razonamiento
+            "sonar",      # Modelo rápido
+            "llama-3.1-sonar-small-128k-online",  # Modelo legacy
+            "llama-3.1-70b-instruct"  # Último recurso
+        ]
+        
+        response = None
+        last_error = None
+        
+        for model_name in models_to_try:
+            try:
+                payload["model"] = model_name
+                app.logger.info(f'Chatbot Perplexity: Intentando con modelo {model_name}...')
+                response = requests.post(perplexity_url, headers=headers, json=payload, timeout=20)
+                
+                if response.status_code == 200:
+                    app.logger.info(f'Chatbot Perplexity: Éxito con modelo {model_name}')
+                    break
+                elif response.status_code == 400:
+                    error_data = {}
+                    try:
+                        error_data = response.json() if response.headers.get('content-type', '').startswith('application/json') else {}
+                    except:
+                        error_text = response.text[:500]
+                        app.logger.warning(f'Chatbot Perplexity: Error 400 con modelo {model_name}: {error_text}')
                     
-        except requests.exceptions.RequestException as e:
-            app.logger.error(f'Chatbot Perplexity: Error de conexión: {str(e)}')
-            return jsonify({
-                'error': 'Error de conexión con Perplexity',
-                'details': str(e) if app.debug else 'No se pudo conectar al servicio'
-            }), 503
+                    last_error = error_data.get('error', {}).get('message', f'Error 400 con modelo {model_name}')
+                    app.logger.warning(f'Chatbot Perplexity: Modelo {model_name} falló (400), intentando siguiente...')
+                    continue
+                else:
+                    app.logger.warning(f'Chatbot Perplexity: Error {response.status_code} con modelo {model_name}')
+                    last_error = f'Error {response.status_code}'
+                    continue
+                    
+            except requests.exceptions.RequestException as e:
+                app.logger.error(f'Chatbot Perplexity: Error de conexión con modelo {model_name}: {str(e)}')
+                last_error = str(e)
+                continue
         
         if response.status_code == 200:
             result = response.json()
