@@ -2671,6 +2671,14 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                 last_error = str(e)
                 continue
         
+        # Verificar si todos los modelos fallaron
+        if not response:
+            app.logger.error(f'Chatbot Perplexity: Todos los modelos fallaron. Último error: {last_error}')
+            return jsonify({
+                'error': 'Error al procesar la consulta con Perplexity',
+                'details': f'No se pudo procesar con ningún modelo disponible. Último error: {last_error}' if app.debug else 'Error al procesar la consulta'
+            }), 503
+        
         if response.status_code == 200:
             result = response.json()
             
