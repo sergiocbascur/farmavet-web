@@ -2409,9 +2409,9 @@ def api_chatbot_search():
             else:
                 conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta DE SEGUIMIENTO se refiere AL MISMO TEMA ({previous_tema}), especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', 'que limites tiene?', DEBES interpretar que se refiere AL TEMA ANTERIOR ({previous_tema}), NO a otro tema diferente.\n- RESPUESTA OBLIGATORIA: Si la pregunta es sobre matrices, límites, o variantes, busca información específica sobre {previous_tema} en el contexto proporcionado, NO sobre otros analitos o métodos."
         
-        # SISTEMA DE 3 CAPAS:
-        # 1. Ollama (local, gratis) - PRIORIDAD ALTA
-        # 2. DeepSeek (económico) - FALLBACK
+        # SISTEMA DE 3 CAPAS (OPTIMIZADO):
+        # 1. DeepSeek (económico, confiable, rápido) - PRIORIDAD ALTA
+        # 2. Ollama (local, gratis, menos confiable) - FALLBACK
         # 3. Sin IA (búsqueda local básica) - ÚLTIMO RECURSO
         
         ollama_url = os.environ.get('OLLAMA_API_URL', '').strip()
@@ -2763,8 +2763,85 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
         deepseek_failed = False
         perplexity_failed = False
         
-        # CAPA 1: Intentar Ollama primero (gratis, local)
-        if use_ollama:
+        # CAPA 1: Intentar DeepSeek primero (económico, confiable, rápido)
+        if use_deepseek:
+            app.logger.info('Chatbot: Usando DeepSeek como primera opción...')
+            deepseek_api_url = "https://api.deepseek.com/v1/chat/completions"
+            
+            headers = {
+                "Authorization": f"Bearer {deepseek_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_message[:3000]  # Reducido para acelerar
+                    },
+                    {
+                        "role": "user",
+                        "content": query
+                    }
+                ],
+                "temperature": 0.2,  # Reducido para respuestas más rápidas
+                "max_tokens": 120  # Reducido para respuestas más rápidas
+            }
+            
+            app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
+            
+            try:
+                response = requests.post(deepseek_api_url, headers=headers, json=payload, timeout=20)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if 'choices' in result and len(result['choices']) > 0:
+                        answer = result['choices'][0]['message']['content']
+                        
+                        # Limpiar la respuesta: remover cualquier fragmento del prompt que pueda haberse filtrado
+                        answer = answer.strip()
+                        lines = answer.split('\n')
+                        cleaned_lines = []
+                        for line in lines:
+                            line = line.strip()
+                            # Filtrar líneas que son instrucciones del prompt
+                            if not line.startswith('- Ejemplo:') and \
+                               not line.startswith('- Responde:') and \
+                               not line.startswith('Ejemplo:') and \
+                               not line.startswith('Responde:') and \
+                               not line.startswith('REGLA:') and \
+                               not line.startswith('INSTRUCCIÓN:') and \
+                               not 'Ejemplo:' in line[:20] and \
+                               not 'Responde:' in line[:20]:
+                                cleaned_lines.append(line)
+                        
+                        answer = '\n'.join(cleaned_lines).strip()
+                        
+                        app.logger.info(f'Chatbot DeepSeek: Respuesta recibida ({len(answer)} caracteres)')
+                        
+                        return jsonify({
+                            'answer': answer,
+                            'sources': [],
+                            'query': query
+                        })
+                    else:
+                        app.logger.warning('Chatbot DeepSeek: Respuesta sin choices')
+                        deepseek_failed = True
+                else:
+                    error_text = response.text[:500]
+                    app.logger.error(f'Chatbot DeepSeek: Error {response.status_code}: {error_text}')
+                    deepseek_failed = True
+                    
+            except requests.exceptions.RequestException as e:
+                app.logger.error(f'Chatbot DeepSeek: Error de conexión: {str(e)}')
+                deepseek_failed = True
+        else:
+            deepseek_failed = True
+        
+        # CAPA 2: Si DeepSeek falló, intentar Ollama (local, gratis)
+        if deepseek_failed and use_ollama:
             ollama_model = os.environ.get('OLLAMA_MODEL', 'llama3.2:3b')
             ollama_api_url = f"{ollama_url}/api/chat"
             
@@ -2847,82 +2924,7 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
         else:
             ollama_failed = True
         
-        # CAPA 2: Si Ollama falló, intentar DeepSeek (económico)
-        if ollama_failed and use_deepseek:
-            app.logger.info('Chatbot: Ollama no disponible, intentando DeepSeek...')
-            deepseek_api_url = "https://api.deepseek.com/v1/chat/completions"
-            
-            headers = {
-                "Authorization": f"Bearer {deepseek_api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_message[:3000]  # Reducido de 4000 a 3000 para acelerar
-                    },
-                    {
-                        "role": "user",
-                        "content": query
-                    }
-                ],
-                "temperature": 0.2,  # Reducido para respuestas más rápidas
-                "max_tokens": 120  # Reducido de 150 a 120 para respuestas más rápidas
-            }
-            
-            app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
-            
-            try:
-                response = requests.post(deepseek_api_url, headers=headers, json=payload, timeout=20)
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    
-                    if 'choices' in result and len(result['choices']) > 0:
-                        answer = result['choices'][0]['message']['content']
-                        
-                        # Limpiar la respuesta: remover cualquier fragmento del prompt que pueda haberse filtrado
-                        answer = answer.strip()
-                        lines = answer.split('\n')
-                        cleaned_lines = []
-                        for line in lines:
-                            line = line.strip()
-                            # Filtrar líneas que son instrucciones del prompt
-                            if not line.startswith('- Ejemplo:') and \
-                               not line.startswith('- Responde:') and \
-                               not line.startswith('Ejemplo:') and \
-                               not line.startswith('Responde:') and \
-                               not line.startswith('REGLA:') and \
-                               not line.startswith('INSTRUCCIÓN:') and \
-                               not 'Ejemplo:' in line[:20] and \
-                               not 'Responde:' in line[:20]:
-                                cleaned_lines.append(line)
-                        
-                        answer = '\n'.join(cleaned_lines).strip()
-                        
-                        app.logger.info(f'Chatbot DeepSeek: Respuesta recibida ({len(answer)} caracteres)')
-                        
-                        return jsonify({
-                            'answer': answer,
-                            'sources': [],
-                            'query': query
-                        })
-                    else:
-                        app.logger.warning('Chatbot DeepSeek: Respuesta sin choices')
-                        deepseek_failed = True
-                else:
-                    error_text = response.text[:500]
-                    app.logger.error(f'Chatbot DeepSeek: Error {response.status_code}: {error_text}')
-                    deepseek_failed = True
-                    
-            except requests.exceptions.RequestException as e:
-                app.logger.error(f'Chatbot DeepSeek: Error de conexión: {str(e)}')
-                deepseek_failed = True
-        else:
-            deepseek_failed = True
+            app.logger.info('Chatbot: DeepSeek no disponible, intentando Ollama...')
         
         # CAPA 3 (OPCIONAL): Si Ollama y DeepSeek fallaron, usar Perplexity como último recurso (si está configurado)
         if ollama_failed and deepseek_failed and use_perplexity:
