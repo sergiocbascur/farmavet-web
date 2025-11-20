@@ -1398,13 +1398,16 @@ a.logo-card:focus {
 }
 
 /* Contenedor de botones dentro de cards debe empujar al final - selector más específico */
-.infinite-carousel .card > div:has(.cta-button-green),
-.infinite-carousel .card > div:has(.cta-button),
 .infinite-carousel .card > div:last-child {
   margin-top: auto !important;
   padding-top: 1rem !important;
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
+}
+
+/* Asegurar que el contenedor con botones verdes se alinee */
+.infinite-carousel .card .cta-button-green {
+  margin-top: 0 !important;
 }
 
 /* Asegurar que el párrafo de descripción no crezca demasiado */
