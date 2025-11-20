@@ -272,17 +272,42 @@ class MetodologiasChatbot {
             
             // SISTEMA HÍBRIDO: Búsqueda local primero (GRATIS), Perplexity solo si es necesario
             
+            // DETECTAR PREGUNTAS DE SEGUIMIENTO: Si la pregunta menciona matrices/condiciones y hay contexto previo
+            const isFollowUpQuery = /\b(en|de|para|con|sin|no|tambien|ademas|otras|otros|matrices|matriz)\b/i.test(query);
+            const hasPreviousContext = this.lastQuery && this.lastResults && this.lastResults.length > 0;
+            
+            // Si es pregunta de seguimiento y hay contexto previo, combinar la búsqueda
+            let searchQuery = query;
+            let combinedResults = [];
+            
+            if (isFollowUpQuery && hasPreviousContext) {
+                // Extraer términos del contexto previo (ej: "organoclorados")
+                const previousKeywords = this.lastQuery.toLowerCase();
+                // Combinar con la nueva pregunta (ej: "organoclorados en harina")
+                searchQuery = `${previousKeywords} ${query}`;
+                console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
+            }
+            
             // 1. Realizar búsqueda local primero
-            const results = await this.searchMetodologias(query);
+            const results = await this.searchMetodologias(searchQuery);
+            
+            // Si hay contexto previo y pocos resultados, incluir resultados previos
+            if (hasPreviousContext && results.length < 3) {
+                combinedResults = [...this.lastResults, ...results];
+            } else {
+                combinedResults = results;
+            }
             
             // 2. Detectar si la pregunta es simple o compleja
             const isComplexQuery = /\b(no|sin|excepto|ademas|tambien|y|o|pero|si|cuando|como|que|por que|porque|porque|explique|comparar|diferencias|similar|diferente|mejor|peor|recomendar|sugerir)\b/i.test(query);
             const needsReasoning = /\b(por que|porque|como funciona|que significa|explique|diferencia|comparar|recomendar)\b/i.test(query);
             
             // 3. Si hay resultados locales Y la pregunta es simple (no compleja), usar solo búsqueda local
-            if (results.length > 0 && !isComplexQuery && !needsReasoning) {
+            if (combinedResults.length > 0 && !isComplexQuery && !needsReasoning && !isFollowUpQuery) {
                 // Pregunta simple con resultados claros → responder directamente con búsqueda local (GRATIS)
-                this.showResults(query, results);
+                this.showResults(query, combinedResults);
+                this.lastResults = combinedResults;
+                this.lastQuery = query;
                 return;
             }
             
@@ -290,7 +315,7 @@ class MetodologiasChatbot {
             // - No hay resultados locales, O
             // - La pregunta es compleja/requiere razonamiento, O
             // - Es pregunta de seguimiento que requiere contexto
-            await this.searchWithPerplexity(query, results.length > 0, false, results);
+            await this.searchWithPerplexity(query, combinedResults.length > 0, false, combinedResults, hasPreviousContext ? this.lastQuery : null);
         }, 500);
     }
 
@@ -1208,10 +1233,10 @@ class MetodologiasChatbot {
         this.addMessage(message);
     }
 
-    async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false, localResults = []) {
+    async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false, localResults = [], previousQuery = null) {
         const typingId = this.showTyping();
         try {
-            console.log('🔄 Chatbot: Buscando con Perplexity API...');
+            console.log('🔄 Chatbot: Buscando con IA (Ollama/DeepSeek)...');
             const perplexityResponse = await fetch('/api/chatbot/search', {
                 method: 'POST',
                 headers: {
@@ -1220,7 +1245,8 @@ class MetodologiasChatbot {
                 body: JSON.stringify({ 
                     query: query,
                     include_local: includeLocal,
-                    local_results: localResults  // Pasar resultados locales como contexto
+                    local_results: localResults,  // Pasar resultados locales como contexto
+                    previous_query: previousQuery  // Pasar pregunta anterior para contexto de conversación
                 })
             });
             

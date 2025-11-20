@@ -2373,9 +2373,15 @@ def api_chatbot_search():
         query = data.get('query', '').strip()
         include_local = data.get('include_local', True)  # Incluir contexto local
         local_results = data.get('local_results', [])  # Resultados de búsqueda local para contexto
+        previous_query = data.get('previous_query', None)  # Pregunta anterior para contexto de conversación
         
         if not query:
             return jsonify({'error': 'Query vacía'}), 400
+        
+        # Construir contexto de conversación si hay pregunta anterior
+        conversation_context = ""
+        if previous_query:
+            conversation_context = f"\n\nCONTEXTO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario preguntó: \"{previous_query}\"\n- Ahora pregunta: \"{query}\"\n- Esta pregunta se refiere al mismo tema que la anterior, especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', interpreta que se refiere al tema de la pregunta anterior."
         
         # SISTEMA DE 3 CAPAS:
         # 1. Ollama (local, gratis) - PRIORIDAD ALTA
@@ -2721,9 +2727,9 @@ IMPORTANTE:
 - Menos es más. Responde lo esencial de forma natural pero breve.
 
 Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de manera natural, inteligente, conversacional PERO CONCISA:
-"""
+{conversation_context}"""
         
-        system_message = context
+        system_message = context + conversation_context
         
         # Variables de control del sistema de 3 capas
         ollama_failed = False
