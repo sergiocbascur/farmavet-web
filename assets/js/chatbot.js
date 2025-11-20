@@ -437,6 +437,37 @@ class MetodologiasChatbot {
         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     }
     
+    // Extraer nombre base de una metodología (sin matriz específica en el nombre)
+    // Ej: "ORGANOCLORADOS MUSCULO" -> "ORGANOCLORADOS"
+    // Ej: "ORGANOCLORADOS ACEITE" -> "ORGANOCLORADOS"
+    // Ej: "ESTEROIDES Y ESTILBENOS" -> "ESTEROIDES Y ESTILBENOS" (sin cambios)
+    extraerNombreBase(nombreCompleto) {
+        if (!nombreCompleto) return '';
+        
+        const nombreNorm = this.normalizeText(nombreCompleto);
+        const palabrasMatriz = ['harina', 'salmon', 'aceite', 'musculo', 'carne', 'leche', 'huevo', 'pecuarios', 'hidrobiologicos'];
+        
+        // Dividir el nombre en palabras
+        const palabras = nombreNorm.split(/\s+/);
+        
+        // Filtrar palabras que son matrices conocidas
+        const palabrasBase = palabras.filter(palabra => !palabrasMatriz.includes(palabra.toLowerCase()));
+        
+        // Si quedan palabras, reconstruir el nombre base
+        if (palabrasBase.length > 0) {
+            // Reconstruir con capitalización apropiada
+            return palabrasBase.map((palabra, index) => {
+                if (index === 0) {
+                    return palabra.charAt(0).toUpperCase() + palabra.slice(1);
+                }
+                return palabra;
+            }).join(' ').toUpperCase();
+        }
+        
+        // Si todas las palabras eran matrices, devolver el nombre original
+        return nombreCompleto;
+    }
+    
     // Formatear lista de analitos de forma natural con capitalización correcta
     formatAnalitos(analitos) {
         if (!analitos || analitos.length === 0) return 'varios analitos';
@@ -1146,11 +1177,11 @@ class MetodologiasChatbot {
         })
         .filter(item => item.score > 0) // Solo mantener resultados con score > 0
         .sort((a, b) => {
-            // Si son del mismo método base (ej: ambos "organoclorados"), agrupar juntos
-            const nombreA = a.nombre ? a.nombre.split(/\s+/)[0] : '';
-            const nombreB = b.nombre ? b.nombre.split(/\s+/)[0] : '';
+            // Extraer nombre base (sin matriz específica) para agrupar variantes
+            const nombreA = a.nombre ? this.extraerNombreBase(a.nombre).toLowerCase() : '';
+            const nombreB = b.nombre ? this.extraerNombreBase(b.nombre).toLowerCase() : '';
             
-            // Si tienen el mismo nombre base, mantener juntos
+            // Si tienen el mismo nombre base, mantener juntos (todas las variantes)
             if (nombreA && nombreB && nombreA === nombreB) {
                 // Dentro del mismo grupo, ordenar por score
                 return b.score - a.score;
@@ -1163,7 +1194,7 @@ class MetodologiasChatbot {
             // Si tienen el mismo número de keywords, ordenar por score descendente
             return b.score - a.score;
         })
-        .slice(0, 30) // Aumentar límite a 30 para incluir más variantes del mismo método
+        .slice(0, 50) // Aumentar límite a 50 para incluir TODAS las variantes del mismo método (ej: organoclorados en músculo, aceite, harina)
         .map(item => item.metodologia); // Devolver solo las metodologías
 
         return scoredResults;
@@ -1255,28 +1286,41 @@ class MetodologiasChatbot {
             return;
         }
 
-        // Agrupar metodologías similares (mismo método, misma matriz, misma técnica, etc.)
+        // Agrupar metodologías por nombre base (sin matriz en la clave de agrupación)
+        // Esto permite que metodologías con el mismo nombre pero diferentes matrices se agrupen
+        // Ej: "ESTEROIDES Y ESTILBENOS" con diferentes analitos se muestra como una sola metodología
         const grupos = {};
         
         results.forEach(met => {
-            // Crear clave de agrupación: nombre del método + matriz + técnica + acreditada
-            const nombre = this.normalizeText(met.nombre || '');
+            // Extraer nombre base (sin matriz específica en el nombre)
+            // Ej: "ORGANOCLORADOS MUSCULO" -> nombre base: "ORGANOCLORADOS"
+            // Ej: "ESTEROIDES Y ESTILBENOS" -> nombre base: "ESTEROIDES Y ESTILBENOS"
+            const nombreCompleto = met.nombre || '';
+            const nombreBase = this.extraerNombreBase(nombreCompleto);
+            const nombre = this.normalizeText(nombreBase);
             const matriz = this.normalizeText(met.matriz || '');
             const tecnica = this.normalizeText(met.tecnica || '');
             const acreditada = met.acreditada || false;
             
-            const grupoKey = `${nombre}|${matriz}|${tecnica}|${acreditada}`;
+            // Agrupar por nombre base + técnica + acreditada (SIN matriz en la clave)
+            // Esto permite que "ESTEROIDES Y ESTILBENOS" con diferentes analitos se agrupe
+            const grupoKey = `${nombre}|${tecnica}|${acreditada}`;
             
             if (!grupos[grupoKey]) {
                 grupos[grupoKey] = {
-                    nombre: met.nombre || '',
-                    matriz: met.matriz || '',
+                    nombre: nombreBase, // Usar nombre base sin matriz específica
+                    matrices: [], // Lista de matrices donde se aplica
                     tecnica: met.tecnica || '',
                     acreditada: acreditada,
                     analitos: [],
                     lods: [],
                     loqs: []
                 };
+            }
+            
+            // Agregar matriz si no está ya en la lista
+            if (matriz && !grupos[grupoKey].matrices.includes(met.matriz)) {
+                grupos[grupoKey].matrices.push(met.matriz);
             }
             
             // Agregar analito y límites
