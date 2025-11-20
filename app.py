@@ -2386,18 +2386,16 @@ def api_chatbot_search():
                 'message': 'La funcionalidad de búsqueda inteligente no está disponible'
             }), 503
         
+        # Detectar si es consulta general
+        is_general_query = any(word in query.lower() for word in ['horario', 'contacto', 'email', 'correo', 'telefono', 'direccion', 'ubicacion', 'donde'])
+        
         # Obtener información del contexto local (metodologías, servicios, contacto, FAQ, etc.)
+        # OPTIMIZACIÓN: Reducir contexto para ahorrar tokens
         local_context = ""
         
-        # SIEMPRE incluir información de contacto (necesaria para consultas generales)
-        local_context += "\n\nINFORMACIÓN DE CONTACTO DE FARMAVET:"
-        local_context += "\n- Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile"
-        local_context += "\n- Teléfono: +56 2 2978 XXXX"
-        local_context += "\n- Email general: farmavet@uchile.cl"
-        local_context += "\n- Email programas académicos: postitulo@veterinaria.uchile.cl"
-        local_context += "\n- Horario: Lunes a viernes, 09:00 a 17:30 hrs"
-        local_context += "\n- Atención presencial con agendamiento previo"
-        local_context += "\n- Para enviar consultas, usar el formulario de contacto en la página de contacto"
+        # Información de contacto (solo para consultas generales o cuando no hay resultados locales)
+        if not local_results or is_general_query:
+            local_context += "\n\nCONTACTO:\nEmail: farmavet@uchile.cl\nHorario: L-V 09:00-17:30 hrs"
         
         # Si hay resultados locales, agregarlos como contexto relevante
         if local_results and len(local_results) > 0:
@@ -2632,11 +2630,10 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
             "Content-Type": "application/json"
         }
         
-        # Verificar que el system_message no sea demasiado largo
-        # Perplexity permite hasta ~32000 tokens en el contexto, pero limitamos a 8000 caracteres para ser seguros
-        if len(system_message) > 8000:
-            app.logger.warning(f'Chatbot Perplexity: System message demasiado largo ({len(system_message)} caracteres), truncando...')
-            system_message = system_message[:8000] + "..."
+        # OPTIMIZACIÓN: Limitar contexto a 3000 caracteres para ahorrar tokens (reducido de 8000)
+        if len(system_message) > 3000:
+            app.logger.warning(f'Chatbot Perplexity: Contexto demasiado largo ({len(system_message)} caracteres), truncando...')
+            system_message = system_message[:3000] + "..."
         
         # Modelos disponibles de Perplexity (ordenados por preferencia):
         # - sonar-pro (más potente, mejor razonamiento)
@@ -2656,8 +2653,8 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                     "content": query
                 }
             ],
-            "temperature": 0.3,  # Un poco más alto para respuestas más naturales
-            "max_tokens": 500
+            "temperature": 0.3,
+            "max_tokens": 200  # OPTIMIZACIÓN: Reducido de 500 a 200 tokens para ahorrar
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')

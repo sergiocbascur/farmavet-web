@@ -266,15 +266,27 @@ class MetodologiasChatbot {
                 return;
             }
             
-            // Usar Perplexity como motor principal de razonamiento
-            // La búsqueda local solo proporciona contexto relevante
+            // SISTEMA HÍBRIDO: Búsqueda local primero (GRATIS), Perplexity solo si es necesario
             
-            // Realizar búsqueda local para obtener contexto relevante (opcional)
+            // 1. Realizar búsqueda local primero
             const results = await this.searchMetodologias(query);
             
-            // Usar Perplexity siempre, pasando los resultados locales como contexto
-            // Esto permite que Perplexity razone de manera inteligente sobre la pregunta
-            await this.searchWithPerplexity(query, true, false, results);
+            // 2. Detectar si la pregunta es simple o compleja
+            const isComplexQuery = /\b(no|sin|excepto|ademas|tambien|y|o|pero|si|cuando|como|que|por que|porque|porque|explique|comparar|diferencias|similar|diferente|mejor|peor|recomendar|sugerir)\b/i.test(query);
+            const needsReasoning = /\b(por que|porque|como funciona|que significa|explique|diferencia|comparar|recomendar)\b/i.test(query);
+            
+            // 3. Si hay resultados locales Y la pregunta es simple (no compleja), usar solo búsqueda local
+            if (results.length > 0 && !isComplexQuery && !needsReasoning) {
+                // Pregunta simple con resultados claros → responder directamente con búsqueda local (GRATIS)
+                this.showResults(query, results);
+                return;
+            }
+            
+            // 4. Solo usar Perplexity si:
+            // - No hay resultados locales, O
+            // - La pregunta es compleja/requiere razonamiento, O
+            // - Es pregunta de seguimiento que requiere contexto
+            await this.searchWithPerplexity(query, results.length > 0, false, results);
         }, 500);
     }
 
