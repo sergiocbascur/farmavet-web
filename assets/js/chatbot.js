@@ -302,11 +302,29 @@ class MetodologiasChatbot {
             // 1. Realizar búsqueda local primero
             const results = await this.searchMetodologias(searchQuery);
             
-            // Si hay contexto previo y pocos resultados, incluir resultados previos
-            if (hasPreviousContext && results.length < 3) {
-                combinedResults = [...this.lastResults, ...results];
+            // Solo usar contexto previo si es realmente una pregunta de seguimiento
+            // Y si los resultados actuales están relacionados con el tema anterior
+            // No usar contexto si la nueva pregunta es sobre un tema completamente diferente
+            if (hasPreviousContext && (isFollowUpQuery || isNegativeFollowUp) && results.length < 3) {
+                // Solo incluir resultados previos si hay al menos un resultado nuevo relacionado
+                // O si la pregunta es claramente de seguimiento (ej: "en que matrices?")
+                combinedResults = [...results, ...this.lastResults.slice(0, 2)];
             } else {
                 combinedResults = results;
+            }
+            
+            // Si hay resultados pero son de un tema diferente al anterior, limpiar contexto
+            if (results.length > 0 && !isFollowUpQuery && !isNegativeFollowUp) {
+                // Resetear contexto si la nueva pregunta es sobre un tema diferente
+                // Verificar si hay alguna relación entre los resultados actuales y el contexto previo
+                const currentTopic = this.extractMainTopic(query);
+                const previousTopic = this.lastQuery ? this.extractMainTopic(this.lastQuery) : '';
+                
+                // Si los temas son diferentes, no usar contexto
+                if (previousTopic && currentTopic && previousTopic !== currentTopic) {
+                    combinedResults = results; // Solo usar resultados actuales
+                    // No limpiar this.lastResults aquí para no perder el contexto completamente
+                }
             }
             
             // 2. Detectar si la pregunta es simple o compleja
@@ -545,6 +563,26 @@ class MetodologiasChatbot {
         return false;
     }
 
+    // Extraer el tema principal de una consulta (palabra más importante)
+    extractMainTopic(query) {
+        if (!query) return '';
+        
+        const normalized = this.normalizeText(query);
+        const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'de', 'en', 'para', 'con', 'por', 
+                          'que', 'qué', 'hacen', 'hace', 'busca', 'buscar', 'metodos', 'metodologias',
+                          'metodología', 'metodologías', 'analisis', 'análisis', 'del', 'y', 'o',
+                          'tienen', 'tiene', 'tener', 'metodo', 'metodo', 'uso', 'usan', 'usa',
+                          'tecnica', 'tecnicas', 'tecnología', 'tecnologías', 'hacen', 'hace'];
+        
+        // Extraer palabras de 4+ caracteres (más significativas)
+        const words = normalized.split(/\s+/)
+            .filter(w => w.length >= 4)
+            .filter(w => !stopWords.includes(w));
+        
+        // Devolver la primera palabra significativa (el tema principal)
+        return words.length > 0 ? words[0] : '';
+    }
+    
     extractKeywords(query) {
         // Extraer palabras clave de la consulta, eliminando palabras comunes
         const stopWords = ['el', 'la', 'los', 'las', 'un', 'una', 'de', 'en', 'para', 'con', 'por', 
