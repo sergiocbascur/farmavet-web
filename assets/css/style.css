@@ -2329,27 +2329,53 @@ a.logo-card:focus {
     flex: 0 0 calc(100% - 2rem);
   }
   
+  /* Carrusel infinito - asegurar visibilidad en móvil */
+  .infinite-carousel {
+    width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  .carousel-wrapper {
+    width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  .carousel-track-infinite {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem;
+    width: auto !important;
+    min-width: 100% !important;
+  }
+  
   .infinite-carousel .logo-card {
-    flex: 0 0 calc((100% - 1rem) / 2); /* 2 logos visibles en móvil */
-    width: calc((100% - 1rem) / 2);
-    min-width: calc((100% - 1rem) / 2);
+    flex: 0 0 calc((100% - 1rem) / 2) !important; /* 2 logos visibles en móvil */
+    width: calc((100% - 1rem) / 2) !important;
+    min-width: calc((100% - 1rem) / 2) !important;
+    max-width: calc((100% - 1rem) / 2) !important;
     padding: 1.5rem 1rem;
     min-height: 120px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
   }
   
   /* Mejorar logos en móvil */
   .logo-card img {
     max-height: 100px !important;
     max-width: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* Mejorar botones de navegación del carrusel en móvil */
   .carousel-nav-infinite {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     gap: 1rem;
     margin-top: 1.5rem;
     padding: 0 1rem;
+    z-index: 10;
   }
   
   .carousel-nav-btn {
@@ -2361,35 +2387,15 @@ a.logo-card:focus {
     background-color: rgba(35, 115, 186, 0.15) !important;
     border: 2px solid var(--color-primary) !important;
     box-shadow: 0 2px 8px rgba(35, 115, 186, 0.2) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: grid !important;
   }
   
   .carousel-nav-btn:active {
     transform: scale(0.9) !important;
     background-color: var(--color-primary) !important;
     color: var(--color-white) !important;
-  }
-  
-  /* Permitir scroll horizontal táctil en carrusel */
-  .infinite-carousel .carousel-track-infinite {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 1rem;
-    padding-bottom: 0.5rem;
-  }
-  
-  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar-track {
-    background: rgba(35, 115, 186, 0.05);
-    border-radius: 2px;
-  }
-  
-  .infinite-carousel .carousel-track-infinite::-webkit-scrollbar-thumb {
-    background: rgba(35, 115, 186, 0.3);
-    border-radius: 2px;
   }
   .infinite-carousel .org-member-card {
     flex: 0 0 100%;
@@ -4435,6 +4441,11 @@ input[type="button"],
   }
   
   .desktop-only {
+    display: none !important;
+  }
+  
+  /* Ocultar header-actions (login e idioma) en móvil en todas las páginas */
+  .header-actions {
     display: none !important;
   }
   

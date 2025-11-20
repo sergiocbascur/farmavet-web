@@ -71,8 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
     dropdownToggle.addEventListener("click", (e) => {
       if (window.innerWidth <= 1024) {
         e.preventDefault();
+        e.stopPropagation();
         const isExpanded = item.getAttribute("aria-expanded") === "true";
         item.setAttribute("aria-expanded", String(!isExpanded));
+        // No navegar, solo abrir/cerrar submenú
+        return false;
       }
     });
 
