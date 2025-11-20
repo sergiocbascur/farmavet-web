@@ -550,7 +550,30 @@ class MetodologiasChatbot {
                           'tienen', 'tiene', 'tener', 'metodo', 'metodo', 'uso', 'usan', 'usa',
                           'tecnica', 'tecnicas', 'tecnología', 'tecnologías'];
         
+        // Palabras compuestas conocidas que NO deben dividirse
+        const compoundWords = ['betalactamicos', 'betalactamico', 'beta-lactamicos', 'beta-lactamico',
+                              'organoclorados', 'organofosforados', 'tetraciclinas', 'aminoglucosidos',
+                              'macrolidos', 'organoclorado', 'organofosforado', 'tetraciclina', 
+                              'aminoglucoside', 'macrolido'];
+        
         const normalized = this.normalizeText(query);
+        
+        // Primero verificar si hay palabras compuestas conocidas
+        const foundCompounds = [];
+        for (const compound of compoundWords) {
+            if (normalized.includes(compound)) {
+                foundCompounds.push(compound);
+            }
+        }
+        
+        // Si se encontraron palabras compuestas, usarlas como keywords
+        if (foundCompounds.length > 0) {
+            // Combinar con otras palabras significativas
+            const words = normalized.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
+            const allKeywords = [...foundCompounds, ...words.filter(w => !foundCompounds.some(c => w.includes(c)))];
+            return allKeywords;
+        }
+        
         // Extraer palabras de 3+ caracteres, incluyendo términos químicos
         const words = normalized.split(/\s+/).filter(w => w.length >= 3);
         
