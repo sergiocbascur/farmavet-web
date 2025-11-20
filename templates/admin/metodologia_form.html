@@ -44,13 +44,6 @@
                 </div>
                 
                 <div class="col-md-6">
-                    <label for="analito" class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="analito" name="analito" 
-                           value="{{ metodologia.analito if metodologia else '' }}" required
-                           placeholder="Ej: Tetraciclinas, Mercurio, E. coli">
-                </div>
-                
-                <div class="col-md-6">
                     <label for="matriz" class="form-label">Matriz <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" id="matriz" name="matriz" 
                            value="{{ metodologia.matriz if metodologia else '' }}" required
@@ -71,18 +64,59 @@
                            placeholder="Ej: SANTE/11312/2021, CODEX, FDA">
                 </div>
                 
-                <div class="col-md-6">
-                    <label for="limite_deteccion" class="form-label">Límite de Detección (LOD)</label>
-                    <input type="text" class="form-control" id="limite_deteccion" name="limite_deteccion" 
-                           value="{{ metodologia.limite_deteccion if metodologia else '' }}" 
-                           placeholder="Ej: 0.5 µg/kg">
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="bi bi-flask me-2"></i>Analitos</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnAgregarAnalito">
+                            <i class="bi bi-plus-circle me-1"></i>Agregar Analito
+                        </button>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Puedes agregar múltiples analitos para esta metodología. Cada analito puede tener sus propios límites de detección y cuantificación.
+                    </div>
                 </div>
                 
-                <div class="col-md-6">
-                    <label for="limite_cuantificacion" class="form-label">Límite de Cuantificación (LOQ)</label>
-                    <input type="text" class="form-control" id="limite_cuantificacion" name="limite_cuantificacion" 
-                           value="{{ metodologia.limite_cuantificacion if metodologia else '' }}" 
-                           placeholder="Ej: 1.0 µg/kg">
+                <!-- Contenedor para analitos dinámicos -->
+                <div id="analitos-container" class="col-12">
+                    <!-- Primer analito (requerido) -->
+                    <div class="analito-item card mb-3" data-analito-index="0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0"><i class="bi bi-flask me-2"></i>Analito 1 <span class="text-danger">*</span></h6>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-analito" style="display: none;">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="analitos[0][analito]" 
+                                           value="{{ metodologia.analito if metodologia else '' }}" required
+                                           placeholder="Ej: Tetraciclinas, Aflatoxina B1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite de Detección (LOD)</label>
+                                    <input type="text" class="form-control" name="analitos[0][limite_deteccion]" 
+                                           value="{{ metodologia.limite_deteccion if metodologia else '' }}" 
+                                           placeholder="Ej: 0.5 µg/kg">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite de Cuantificación (LOQ)</label>
+                                    <input type="text" class="form-control" name="analitos[0][limite_cuantificacion]" 
+                                           value="{{ metodologia.limite_cuantificacion if metodologia else '' }}" 
+                                           placeholder="Ej: 1.0 µg/kg">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
+                                    <input type="text" class="form-control" name="analitos[0][analito_en]" 
+                                           value="{{ metodologia.analito_en if metodologia and metodologia.analito_en and metodologia.analito_en != 'None' else '' }}" 
+                                           placeholder="Analyte in English">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="col-md-6">
@@ -119,12 +153,6 @@
                            placeholder="Method name in English">
                 </div>
                 
-                <div class="col-md-6">
-                    <label for="analito_en" class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
-                    <input type="text" class="form-control" id="analito_en" name="analito_en" 
-                           value="{{ metodologia.analito_en if metodologia and metodologia.analito_en and metodologia.analito_en != 'None' else '' }}" 
-                           placeholder="Analyte in English">
-                </div>
                 
                 <div class="col-md-6">
                     <label for="matriz_en" class="form-label">Matriz (English) <span class="text-muted">(opcional)</span></label>
@@ -174,6 +202,105 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let analitoIndex = 1; // Empezar desde 1 porque el primero ya existe (índice 0)
+    const analitosContainer = document.getElementById('analitos-container');
+    const btnAgregarAnalito = document.getElementById('btnAgregarAnalito');
+    
+    // Función para agregar un nuevo analito
+    btnAgregarAnalito.addEventListener('click', function() {
+        const nuevoAnalito = document.createElement('div');
+        nuevoAnalito.className = 'analito-item card mb-3';
+        nuevoAnalito.setAttribute('data-analito-index', analitoIndex);
+        nuevoAnalito.innerHTML = `
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0"><i class="bi bi-flask me-2"></i>Analito ${analitoIndex + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-analito">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="analitos[${analitoIndex}][analito]" required
+                               placeholder="Ej: Tetraciclinas, Aflatoxina B1">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Límite de Detección (LOD)</label>
+                        <input type="text" class="form-control" name="analitos[${analitoIndex}][limite_deteccion]" 
+                               placeholder="Ej: 0.5 µg/kg">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Límite de Cuantificación (LOQ)</label>
+                        <input type="text" class="form-control" name="analitos[${analitoIndex}][limite_cuantificacion]" 
+                               placeholder="Ej: 1.0 µg/kg">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
+                        <input type="text" class="form-control" name="analitos[${analitoIndex}][analito_en]" 
+                               placeholder="Analyte in English">
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        analitosContainer.appendChild(nuevoAnalito);
+        analitoIndex++;
+        
+        // Actualizar números de analitos
+        actualizarNumerosAnalitos();
+        
+        // Agregar evento de eliminación al nuevo botón
+        nuevoAnalito.querySelector('.btn-eliminar-analito').addEventListener('click', function() {
+            nuevoAnalito.remove();
+            actualizarNumerosAnalitos();
+        });
+    });
+    
+    // Función para eliminar analito (delegación de eventos)
+    analitosContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-eliminar-analito')) {
+            const analitoItem = e.target.closest('.analito-item');
+            const totalAnalitos = analitosContainer.querySelectorAll('.analito-item').length;
+            
+            // No permitir eliminar si solo hay un analito
+            if (totalAnalitos > 1) {
+                analitoItem.remove();
+                actualizarNumerosAnalitos();
+            } else {
+                alert('Debe haber al menos un analito');
+            }
+        }
+    });
+    
+    // Función para actualizar los números de los analitos
+    function actualizarNumerosAnalitos() {
+        const analitos = analitosContainer.querySelectorAll('.analito-item');
+        analitos.forEach((item, index) => {
+            const titulo = item.querySelector('h6');
+            if (titulo) {
+                titulo.innerHTML = `<i class="bi bi-flask me-2"></i>Analito ${index + 1} <span class="text-danger">*</span>`;
+            }
+            
+            // Mostrar/ocultar botón eliminar según la cantidad
+            const btnEliminar = item.querySelector('.btn-eliminar-analito');
+            if (btnEliminar) {
+                if (analitos.length > 1) {
+                    btnEliminar.style.display = '';
+                } else {
+                    btnEliminar.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Inicializar estado de botones
+    actualizarNumerosAnalitos();
+});
+</script>
 {% endblock %}
 
 

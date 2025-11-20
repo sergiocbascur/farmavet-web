@@ -20,6 +20,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import logging
 import requests
+import re
 
 # Configuración de logging
 logging.basicConfig(
@@ -1544,7 +1545,7 @@ def page(page):
                 LIMIT 10
             ''').fetchall()
             conn.close()
-            # Organizar metodologías por categoría
+            # Organizar metodologías por categoría y agrupar por similitudes
             metodologias_por_categoria = {}
             categorias_nombres = {
                 'residuos': 'Residuos de Medicamentos Veterinarios',
@@ -1552,11 +1553,66 @@ def page(page):
                 'microbiologia': 'Microbiología',
                 'otros': 'Otros Análisis'
             }
+            
+            # Función para crear clave de agrupación (sin analito)
+            def get_group_key(metodologia):
+                nombre = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
+                matriz = get_translated_field(metodologia, 'matriz') or metodologia['matriz'] or ''
+                tecnica = get_translated_field(metodologia, 'tecnica') or metodologia['tecnica'] or ''
+                lod = metodologia['limite_deteccion'] or ''
+                loq = metodologia['limite_cuantificacion'] or ''
+                acreditada = metodologia['acreditada'] or False
+                return (nombre, matriz, tecnica, lod, loq, acreditada)
+            
+            # Agrupar metodologías por nombre de método
+            metodologias_agrupadas = {}
             for metodologia in metodologias:
                 categoria = metodologia['categoria'] or 'otros'
-                if categoria not in metodologias_por_categoria:
-                    metodologias_por_categoria[categoria] = []
-                metodologias_por_categoria[categoria].append(metodologia)
+                if categoria not in metodologias_agrupadas:
+                    metodologias_agrupadas[categoria] = {}
+                
+                # Usar nombre del método como clave principal
+                nombre_metodo = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
+                
+                if nombre_metodo not in metodologias_agrupadas[categoria]:
+                    metodologias_agrupadas[categoria][nombre_metodo] = {}
+                
+                # Crear clave de agrupación (mismo método, misma matriz, técnica, LOD, LOQ)
+                group_key = get_group_key(metodologia)
+                
+                if group_key not in metodologias_agrupadas[categoria][nombre_metodo]:
+                    metodologias_agrupadas[categoria][nombre_metodo][group_key] = []
+                
+                metodologias_agrupadas[categoria][nombre_metodo][group_key].append(metodologia)
+            
+            # Convertir a lista para el template
+            metodologias_por_categoria = {}
+            for categoria, metodos in metodologias_agrupadas.items():
+                metodologias_por_categoria[categoria] = []
+                for nombre_metodo, grupos in metodos.items():
+                    for group_key, items in grupos.items():
+                        # Si hay más de un analito con los mismos valores (excepto analito), agrupar
+                        if len(items) > 1:
+                            # Extraer analitos únicos
+                            analitos_unicos = []
+                            for item in items:
+                                analito = get_translated_field(item, 'analito') or item['analito'] or ''
+                                if analito and analito not in analitos_unicos:
+                                    analitos_unicos.append(analito)
+                            metodologias_por_categoria[categoria].append({
+                                'agrupado': True,
+                                'metodologias': items,
+                                'analitos': analitos_unicos,
+                                'metodologia_representativa': items[0]  # Primera metodología como representante
+                            })
+                        else:
+                            # Un solo analito
+                            metodologias_por_categoria[categoria].append({
+                                'agrupado': False,
+                                'metodologias': items,
+                                'analitos': [get_translated_field(items[0], 'analito') or items[0]['analito'] or ''],
+                                'metodologia_representativa': items[0]
+                            })
             return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         # Si existe template pero no necesita datos especiales, renderizarlo con lang
@@ -2550,33 +2606,108 @@ def admin_metodologias():
 def admin_metodologia_nuevo():
     if request.method == 'POST':
         conn = get_db()
-        conn.execute('''
-            INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                                     tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
-                                     vigencia, acreditada, orden, activo)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            request.form.get('codigo', '').strip() or None,
-            request.form.get('nombre'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
-            request.form.get('categoria'),
-            request.form.get('analito'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
-            request.form.get('matriz'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
-            request.form.get('tecnica', '').strip() or None,
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
-            request.form.get('limite_deteccion', '').strip() or None,
-            request.form.get('limite_cuantificacion', '').strip() or None,
-            request.form.get('norma_referencia', '').strip() or None,
-            request.form.get('vigencia', '').strip() or None,
-            1 if request.form.get('acreditada') == 'on' else 0,
-            int(request.form.get('orden', 0)),
-            1 if request.form.get('activo') == 'on' else 0
-        ))
+        
+        # Datos comunes para todos los analitos
+        codigo = request.form.get('codigo', '').strip() or None
+        nombre = request.form.get('nombre')
+        nombre_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', ''))
+        categoria = request.form.get('categoria')
+        matriz = request.form.get('matriz')
+        matriz_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', ''))
+        tecnica = request.form.get('tecnica', '').strip() or None
+        tecnica_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', ''))
+        norma_referencia = request.form.get('norma_referencia', '').strip() or None
+        vigencia = request.form.get('vigencia', '').strip() or None
+        acreditada = 1 if request.form.get('acreditada') == 'on' else 0
+        orden = int(request.form.get('orden', 0))
+        activo = 1 if request.form.get('activo') == 'on' else 0
+        
+        # Obtener analitos del formulario (pueden venir como array o como campos simples)
+        analitos_data = []
+        
+        # Buscar todos los keys que siguen el patrón analitos[índice][campo]
+        analitos_dict = {}
+        for key in request.form:
+            match = re.match(r'analitos\[(\d+)\]\[(\w+)\]', key)
+            if match:
+                index = int(match.group(1))
+                field = match.group(2)
+                
+                if index not in analitos_dict:
+                    analitos_dict[index] = {}
+                
+                value = request.form.get(key, '').strip() or None
+                if field == 'analito_en' and value:
+                    # Normalizar valores vacíos o 'none'
+                    value = None if value.strip().lower() in ['none', ''] else value.strip()
+                
+                analitos_dict[index][field] = value
+        
+        # Convertir dict a lista ordenada
+        if analitos_dict:
+            max_index = max(analitos_dict.keys())
+            for i in range(max_index + 1):
+                if i in analitos_dict:
+                    analitos_data.append(analitos_dict[i])
+        
+        # Si no hay analitos en formato array, usar formato simple (compatibilidad hacia atrás)
+        if not analitos_data:
+            analito = request.form.get('analito', '').strip()
+            analito_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', ''))
+            limite_deteccion = request.form.get('limite_deteccion', '').strip() or None
+            limite_cuantificacion = request.form.get('limite_cuantificacion', '').strip() or None
+            
+            if analito:
+                analitos_data.append({
+                    'analito': analito,
+                    'analito_en': analito_en,
+                    'limite_deteccion': limite_deteccion,
+                    'limite_cuantificacion': limite_cuantificacion
+                })
+        
+        # Insertar cada analito como una metodología separada
+        if not analitos_data:
+            flash('Debe ingresar al menos un analito', 'error')
+            return render_template('admin/metodologia_form.html')
+        
+        created_count = 0
+        for analito_data in analitos_data:
+            if not analito_data.get('analito'):
+                continue  # Saltar analitos sin nombre
+            
+            conn.execute('''
+                INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                                         tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
+                                         vigencia, acreditada, orden, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                codigo,
+                nombre,
+                nombre_en,
+                categoria,
+                analito_data.get('analito'),
+                analito_data.get('analito_en'),
+                matriz,
+                matriz_en,
+                tecnica,
+                tecnica_en,
+                analito_data.get('limite_deteccion'),
+                analito_data.get('limite_cuantificacion'),
+                norma_referencia,
+                vigencia,
+                acreditada,
+                orden,
+                activo
+            ))
+            created_count += 1
+        
         conn.commit()
         conn.close()
-        flash('Metodología creada correctamente', 'success')
+        
+        if created_count > 1:
+            flash(f'Metodología creada con {created_count} analitos correctamente', 'success')
+        else:
+            flash('Metodología creada correctamente', 'success')
         return redirect(url_for('admin_metodologias'))
     
     return render_template('admin/metodologia_form.html')

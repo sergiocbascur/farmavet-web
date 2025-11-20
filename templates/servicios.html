@@ -445,16 +445,23 @@
                 <tbody>
                   {% for cat_key, cat_name in categorias_nombres.items() %}
                     {% if cat_key in metodologias_por_categoria %}
-                      {% for metodologia in metodologias_por_categoria[cat_key] %}
+                      {% for grupo in metodologias_por_categoria[cat_key] %}
+                        {% set met = grupo.metodologia_representativa %}
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
-                          <td><strong>{{ get_translated_field(metodologia, 'nombre') or metodologia.nombre }}</strong></td>
-                          <td>{{ get_translated_field(metodologia, 'analito') or metodologia.analito }}</td>
-                          <td>{{ get_translated_field(metodologia, 'matriz') or metodologia.matriz }}</td>
-                          <td>{{ get_translated_field(metodologia, 'tecnica') or metodologia.tecnica or '—' }}</td>
-                          <td>{{ metodologia.limite_deteccion or '—' }}</td>
-                          <td>{{ metodologia.limite_cuantificacion or '—' }}</td>
+                          <td><strong>{{ get_translated_field(met, 'nombre') or met.nombre }}</strong></td>
                           <td>
-                            {% if metodologia.acreditada %}
+                            {% if grupo.agrupado %}
+                              {{ grupo.analitos|join(', ') }}
+                            {% else %}
+                              {{ get_translated_field(met, 'analito') or met.analito }}
+                            {% endif %}
+                          </td>
+                          <td>{{ get_translated_field(met, 'matriz') or met.matriz }}</td>
+                          <td>{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}</td>
+                          <td>{{ met.limite_deteccion or '—' }}</td>
+                          <td>{{ met.limite_cuantificacion or '—' }}</td>
+                          <td>
+                            {% if met.acreditada %}
                               <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
                             {% else %}
                               <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
