@@ -2804,6 +2804,28 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                     
                     if 'message' in result and 'content' in result['message']:
                         answer = result['message']['content']
+                        
+                        # Limpiar la respuesta: remover cualquier fragmento del prompt que pueda haberse filtrado
+                        # Esto evita que el prompt aparezca en la respuesta del usuario
+                        answer = answer.strip()
+                        # Remover líneas que parecen ser del prompt (ej: "- Ejemplo:", "- Responde:", etc.)
+                        lines = answer.split('\n')
+                        cleaned_lines = []
+                        for line in lines:
+                            line = line.strip()
+                            # Filtrar líneas que son instrucciones del prompt
+                            if not line.startswith('- Ejemplo:') and \
+                               not line.startswith('- Responde:') and \
+                               not line.startswith('Ejemplo:') and \
+                               not line.startswith('Responde:') and \
+                               not line.startswith('REGLA:') and \
+                               not line.startswith('INSTRUCCIÓN:') and \
+                               not 'Ejemplo:' in line[:20] and \
+                               not 'Responde:' in line[:20]:
+                                cleaned_lines.append(line)
+                        
+                        answer = '\n'.join(cleaned_lines).strip()
+                        
                         app.logger.info(f'Chatbot Ollama: Respuesta recibida ({len(answer)} caracteres)')
                         
                         return jsonify({
@@ -2861,6 +2883,26 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                     
                     if 'choices' in result and len(result['choices']) > 0:
                         answer = result['choices'][0]['message']['content']
+                        
+                        # Limpiar la respuesta: remover cualquier fragmento del prompt que pueda haberse filtrado
+                        answer = answer.strip()
+                        lines = answer.split('\n')
+                        cleaned_lines = []
+                        for line in lines:
+                            line = line.strip()
+                            # Filtrar líneas que son instrucciones del prompt
+                            if not line.startswith('- Ejemplo:') and \
+                               not line.startswith('- Responde:') and \
+                               not line.startswith('Ejemplo:') and \
+                               not line.startswith('Responde:') and \
+                               not line.startswith('REGLA:') and \
+                               not line.startswith('INSTRUCCIÓN:') and \
+                               not 'Ejemplo:' in line[:20] and \
+                               not 'Responde:' in line[:20]:
+                                cleaned_lines.append(line)
+                        
+                        answer = '\n'.join(cleaned_lines).strip()
+                        
                         app.logger.info(f'Chatbot DeepSeek: Respuesta recibida ({len(answer)} caracteres)')
                         
                         return jsonify({
