@@ -1383,6 +1383,20 @@ a.logo-card:focus {
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
 
+/* Cards dentro de carruseles infinitos deben usar flexbox para alinear botones */
+.infinite-carousel .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Contenedor de botones dentro de cards debe empujar al final */
+.infinite-carousel .card > div:has(.cta-button-green),
+.infinite-carousel .card > div:has(.cta-button) {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 24px 50px rgba(35, 115, 186, 0.18);
@@ -1883,6 +1897,7 @@ a.logo-card:focus {
   position: relative;
   width: 100%;
   overflow: hidden;
+  padding-bottom: 1rem; /* Espacio para los botones de navegación */
 }
 
 .carousel-wrapper {
@@ -1921,6 +1936,9 @@ a.logo-card:focus {
   justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
+  padding-bottom: 0.5rem; /* Espacio adicional para evitar cortes */
+  position: relative;
+  z-index: 10;
 }
 
 .carousel-nav-btn {
@@ -2403,8 +2421,9 @@ a.logo-card:focus {
     justify-content: center;
     gap: 1rem;
     margin-top: 1.5rem;
-    padding: 0 1rem;
+    padding: 0 1rem 1rem 1rem !important; /* Espacio inferior adicional para evitar cortes */
     z-index: 10;
+    position: relative;
   }
   
   /* Unificar todos los botones de carrusel en móvil */

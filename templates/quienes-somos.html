@@ -418,7 +418,7 @@
                         {{ get_translated_field(certificado, 'descripcion') or certificado.descripcion or '' }}
                       </p>
                       {% if certificado.imagen or certificado.enlace_externo %}
-                        <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+                        <div style="margin-top: auto; padding-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
                           {% if certificado.imagen %}
                             {% set es_pdf = certificado.imagen.lower().endswith('.pdf') %}
                             {% if es_pdf %}
