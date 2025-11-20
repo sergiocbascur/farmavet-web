@@ -246,7 +246,7 @@
             <article class="card">
               <h3 class="pillar-title">{{ _('Equipamiento') }}</h3>
               <p>
-                {{ _('Cromatografía líquida acoplada a espectrometría de masas (LC-MS/MS), cromatografía de gases con detector de espectrometría de masas (GC-MS), HPLC, espectrofotometría de absorción atómica e inmunoensayos ELISA.') }}
+                {{ _('Cromatografía líquida acoplada a espectrometría de masas (LC-MS/MS), cromatografía de gases con detector de espectrometría de masas (GC-MS), HPLC y espectrofotometría de absorción atómica.') }}
               </p>
             </article>
             <article class="card">
@@ -449,29 +449,11 @@
                         {% set met = grupo.metodologia_representativa %}
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
                           <td><strong>{{ get_translated_field(met, 'nombre') or met.nombre }}</strong></td>
-                          <td>
-                            {% if grupo.agrupado and grupo.analitos %}
-                              {{ grupo.analitos|join(', ') }}
-                            {% else %}
-                              {{ get_translated_field(met, 'analito') or met.analito or '—' }}
-                            {% endif %}
-                          </td>
+                          <td>{{ get_translated_field(met, 'analito') or met.analito or '—' }}</td>
                           <td>{{ get_translated_field(met, 'matriz') or met.matriz }}</td>
                           <td>{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}</td>
-                          <td>
-                            {% if grupo.agrupado and met.lod_agrupado %}
-                              {{ met.lod_agrupado }}
-                            {% else %}
-                              {{ met.limite_deteccion or '—' }}
-                            {% endif %}
-                          </td>
-                          <td>
-                            {% if grupo.agrupado and met.loq_agrupado %}
-                              {{ met.loq_agrupado }}
-                            {% else %}
-                              {{ met.limite_cuantificacion or '—' }}
-                            {% endif %}
-                          </td>
+                          <td>{{ met.limite_deteccion or '—' }}</td>
+                          <td>{{ met.limite_cuantificacion or '—' }}</td>
                           <td>
                             {% if met.acreditada %}
                               <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>

@@ -1282,7 +1282,8 @@ def servicios_page():
             
             metodologias_agrupadas[categoria][group_key].append(metodologia)
         
-        # Convertir a lista para el template, manteniendo orden y agrupando por nombre + matriz + técnica
+        # Convertir a lista para el template, mostrando cada metodología individualmente
+        # Cuando tienen el mismo nombre/matriz/técnica, se muestran en filas separadas
         metodologias_por_categoria = {}
         for categoria, grupos in metodologias_agrupadas.items():
             metodologias_por_categoria[categoria] = []
@@ -1294,90 +1295,32 @@ def servicios_page():
             ))
             
             for group_key, items in grupos_ordenados:
-                # Extraer todos los analitos únicos del grupo
-                analitos_unicos = []
-                lods = []
-                loqs = []
+                # Obtener información común del grupo (nombre, matriz, técnica, acreditada)
+                nombre_comun = group_key[0]
+                matriz_comun = group_key[1]
+                tecnica_comun = group_key[2]
+                acreditada_comun = group_key[3]
                 
+                # Crear una fila por cada metodología individual
                 for item in items:
-                    analito = get_translated_field(item, 'analito') or item['analito'] or ''
-                    if analito and analito not in analitos_unicos:
-                        analitos_unicos.append(analito)
+                    # Convertir Row a dict para poder modificarlo
+                    met_dict = dict(item)
                     
-                    # Extraer valores numéricos de LOD y LOQ
-                    # sqlite3.Row no tiene .get(), usar acceso directo con verificación
-                    lod = item['limite_deteccion'] if 'limite_deteccion' in item.keys() else ''
-                    loq = item['limite_cuantificacion'] if 'limite_cuantificacion' in item.keys() else ''
+                    # Agregar información común si falta
+                    if not met_dict.get('nombre'):
+                        met_dict['nombre'] = nombre_comun
+                    if not met_dict.get('matriz'):
+                        met_dict['matriz'] = matriz_comun
+                    if not met_dict.get('tecnica'):
+                        met_dict['tecnica'] = tecnica_comun
+                    if 'acreditada' not in met_dict or met_dict.get('acreditada') is None:
+                        met_dict['acreditada'] = acreditada_comun
                     
-                    if lod:
-                        try:
-                            lod_match = re.search(r'[\d.]+', str(lod))
-                            if lod_match:
-                                lods.append(float(lod_match.group()))
-                        except:
-                            pass
-                    
-                    if loq:
-                        try:
-                            loq_match = re.search(r'[\d.]+', str(loq))
-                            if loq_match:
-                                loqs.append(float(loq_match.group()))
-                        except:
-                            pass
-                
-                # Formatear LOD/LOQ como rango (min-max) o valor único
-                lod_formato = ''
-                loq_formato = ''
-                
-                if lods:
-                    if len(lods) > 1 and min(lods) != max(lods):
-                        lod_formato = f"{min(lods):g}-{max(lods):g}"
-                        # Extraer unidad del primer LOD si está disponible
-                        primer_lod = items[0]['limite_deteccion'] if 'limite_deteccion' in items[0].keys() else ''
-                        if primer_lod:
-                            lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
-                            if lod_match:
-                                lod_formato += lod_match.group(1).strip()
-                    else:
-                        lod_formato = str(min(lods))
-                        # Extraer unidad del primer LOD
-                        primer_lod = items[0]['limite_deteccion'] if 'limite_deteccion' in items[0].keys() else ''
-                        if primer_lod:
-                            lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
-                            if lod_match:
-                                lod_formato += lod_match.group(1).strip()
-                
-                if loqs:
-                    if len(loqs) > 1 and min(loqs) != max(loqs):
-                        loq_formato = f"{min(loqs):g}-{max(loqs):g}"
-                        # Extraer unidad del primer LOQ si está disponible
-                        primer_loq = items[0]['limite_cuantificacion'] if 'limite_cuantificacion' in items[0].keys() else ''
-                        if primer_loq:
-                            loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
-                            if loq_match:
-                                loq_formato += loq_match.group(1).strip()
-                    else:
-                        loq_formato = str(min(loqs))
-                        # Extraer unidad del primer LOQ
-                        primer_loq = items[0]['limite_cuantificacion'] if 'limite_cuantificacion' in items[0].keys() else ''
-                        if primer_loq:
-                            loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
-                            if loq_match:
-                                loq_formato += loq_match.group(1).strip()
-                
-                # Crear una metodología representativa con los valores agregados
-                # Convertir Row a dict para poder modificarlo
-                met_representativa = dict(items[0])
-                met_representativa['analitos_agrupados'] = analitos_unicos
-                met_representativa['lod_agrupado'] = lod_formato
-                met_representativa['loq_agrupado'] = loq_formato
-                
-                metodologias_por_categoria[categoria].append({
-                    'agrupado': True,
-                    'metodologias': items,
-                    'analitos': analitos_unicos,
-                    'metodologia_representativa': met_representativa
-                })
+                    # Agregar como metodología individual (no agrupada)
+                    metodologias_por_categoria[categoria].append({
+                        'agrupado': False,
+                        'metodologia_representativa': met_dict
+                    })
         return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
     except Exception as e:
         app.logger.error(f'Error en servicios_page al procesar metodologías: {str(e)}', exc_info=True)
