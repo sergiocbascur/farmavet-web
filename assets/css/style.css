@@ -33,6 +33,10 @@
   display: flex;
   justify-content: center;
   gap: 1rem;
+  margin-top: 2rem;
+  padding-bottom: 0.5rem; /* Espacio adicional para evitar cortes */
+  position: relative;
+  z-index: 10;
 }
 
 .carousel-button {
