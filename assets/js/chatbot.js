@@ -656,15 +656,40 @@ class MetodologiasChatbot {
                         }
                         
                         // Coincidencia en analito o nombre como substring (menor prioridad)
+                        // Buscar también en los términos expandidos para mejor matching
+                        for (const expandedTerm of expandedTermsArray) {
+                            const cleanExpanded = expandedTerm.replace(/[?¿!¡.,;:]/g, '').trim();
+                            if (cleanExpanded.length >= 3) {
+                                // Coincidencia en analito con términos expandidos
+                                if (analitoNorm.includes(cleanExpanded) || analitoEnNorm.includes(cleanExpanded)) {
+                                    score += maxScore * 0.75;
+                                    keywordsMatched++;
+                                    keywordsInAnalito++;
+                                    keywordMatched = true;
+                                    break;
+                                }
+                                // Coincidencia en nombre con términos expandidos (muy importante para "ORGANOCLORADOS HARINA")
+                                if (nombreNorm.includes(cleanExpanded) || nombreEnNorm.includes(cleanExpanded)) {
+                                    score += maxScore * 0.7;
+                                    keywordsMatched++;
+                                    keywordsInNombre++;
+                                    keywordMatched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (keywordMatched) continue;
+                        
+                        // Fallback: búsqueda simple en analito/nombre
                         if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.8;
+                            score += maxScore * 0.6;
                             keywordsMatched++;
                             keywordsInAnalito++;
                             keywordMatched = true;
                             continue;
                         }
                         if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.7;
+                            score += maxScore * 0.5;
                             keywordsMatched++;
                             keywordsInNombre++;
                             keywordMatched = true;

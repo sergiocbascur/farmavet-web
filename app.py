@@ -2447,7 +2447,8 @@ def api_chatbot_search():
                         pass
             
             # Formatear grupos de manera natural
-            for grupo in list(grupos.values())[:10]:  # Máximo 10 grupos
+            # Aumentar límite a 20 para incluir más variantes (ej: organoclorados en músculo, aceite, harina)
+            for grupo in list(grupos.values())[:20]:  # Máximo 20 grupos para incluir todas las variantes
                 analitos_str = ', '.join(grupo['analitos'][:5])
                 if len(grupo['analitos']) > 5:
                     analitos_str += f" y {len(grupo['analitos']) - 5} más"
