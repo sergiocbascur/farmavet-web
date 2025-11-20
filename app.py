@@ -2668,7 +2668,7 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
             app.logger.info(f'Chatbot Ollama: Buscando - {query[:100]}... con modelo {ollama_model}')
             
             try:
-                response = requests.post(ollama_api_url, headers=headers, json=payload, timeout=30)
+                response = requests.post(ollama_api_url, headers=headers, json=payload, timeout=60)
                 
                 if response.status_code == 200:
                     result = response.json()
