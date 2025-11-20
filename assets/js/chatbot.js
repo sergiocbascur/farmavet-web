@@ -951,7 +951,7 @@ class MetodologiasChatbot {
                 score = 0;
             }
             
-            // FILTRO ESTRICTO: Si hay múltiples keywords, requerir que AL MENOS una keyword principal coincida
+            // FILTRO ESTRICTO: Si hay múltiples keywords, requerir que TODAS las keywords principales coincidan
             // y si hay keywords secundarias (como "harina"), deben coincidir TAMBIÉN
             if (keywords.length > 1 && keywordsMatched > 0) {
                 // Extraer keywords principales (organoclorados, tetraciclinas, etc.) y secundarias (harina, salmon, etc.)
@@ -962,6 +962,17 @@ class MetodologiasChatbot {
                 // Si hay keywords secundarias (matriz), verificar que coincidan en el nombre o matriz
                 if (keywordsSecundarias.length > 0 && keywordsPrincipales.length > 0) {
                     let keywordsSecundariasMatched = 0;
+                    let keywordsPrincipalesMatched = 0;
+                    
+                    // Verificar coincidencia de keywords principales
+                    for (const keywordPrincipal of keywordsPrincipales) {
+                        const cleanPrincipal = keywordPrincipal.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
+                        if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
+                            keywordsPrincipalesMatched++;
+                        }
+                    }
+                    
+                    // Verificar coincidencia de keywords secundarias
                     for (const keywordSec of keywordsSecundarias) {
                         const cleanSec = keywordSec.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
                         if (nombreNorm.includes(cleanSec) || matrizNorm.includes(cleanSec)) {
@@ -969,13 +980,35 @@ class MetodologiasChatbot {
                         }
                     }
                     
-                    // Si hay keywords secundarias pero ninguna coincidió, penalizar fuerte
-                    // Esto evita mostrar "organoclorados musculo" cuando se busca "organoclorados en harina"
-                    if (keywordsSecundariasMatched === 0) {
+                    // FILTRO CRÍTICO: Si hay keywords principales Y secundarias, TODAS deben coincidir
+                    // Esto evita mostrar "plomo harina" cuando se busca "organoclorados harina"
+                    if (keywordsPrincipalesMatched < keywordsPrincipales.length) {
+                        // Si NO coinciden TODAS las keywords principales, DESCARTAR completamente
+                        score = 0;
+                        hasMatchInAnalitoOrNombre = false;
+                    } else if (keywordsSecundariasMatched === 0) {
+                        // Si hay keywords secundarias pero ninguna coincidió, penalizar fuerte
+                        // Esto evita mostrar "organoclorados musculo" cuando se busca "organoclorados en harina"
                         score = score * 0.1; // Penalizar fuertemente pero no descartar completamente
                     } else {
                         // Bonus si coinciden TODAS las keywords (principal + secundarias)
                         score = score * 1.5;
+                    }
+                } else if (keywordsPrincipales.length > 1) {
+                    // Si hay múltiples keywords principales sin secundarias, requerir que TODAS coincidan
+                    let todasCoinciden = true;
+                    for (const keywordPrincipal of keywordsPrincipales) {
+                        const cleanPrincipal = keywordPrincipal.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
+                        if (!nombreNorm.includes(cleanPrincipal) && !analitoNorm.includes(cleanPrincipal)) {
+                            todasCoinciden = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!todasCoinciden) {
+                        // Si NO coinciden TODAS las keywords principales, DESCARTAR completamente
+                        score = 0;
+                        hasMatchInAnalitoOrNombre = false;
                     }
                 }
             }
