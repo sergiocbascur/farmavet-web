@@ -1392,12 +1392,11 @@ class MetodologiasChatbot {
                 // Obtener unidades de LOD/LOQ
                 let lodUnit = '';
                 let loqUnit = '';
-                const grupoResults = results.filter(r => {
-                    const nombreBaseR = this.extraerNombreBase(r.nombre || '');
-                    const nombreBaseG = this.extraerNombreBase(grupo.nombre || '');
-                    return this.normalizeText(nombreBaseR) === this.normalizeText(nombreBaseG) &&
-                           this.normalizeText(r.tecnica || '') === this.normalizeText(grupo.tecnica || '');
-                });
+                const grupoResults = results.filter(r => 
+                    this.normalizeText(r.nombre || '') === this.normalizeText(grupo.nombre || '') &&
+                    this.normalizeText(r.matriz || '') === this.normalizeText(grupo.matriz || '') &&
+                    this.normalizeText(r.tecnica || '') === this.normalizeText(grupo.tecnica || '')
+                );
                 if (grupoResults.length > 0) {
                     const firstLod = grupoResults.find(r => r.limite_deteccion);
                     if (firstLod && firstLod.limite_deteccion) {
