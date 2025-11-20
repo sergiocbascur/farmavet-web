@@ -1257,41 +1257,30 @@ class MetodologiasChatbot {
             return;
         }
 
-        // Agrupar metodologías por nombre base (sin matriz en la clave de agrupación)
-        // Esto permite que metodologías con el mismo nombre pero diferentes matrices se agrupen
-        // Ej: "ESTEROIDES Y ESTILBENOS" con diferentes analitos se muestra como una sola metodología
+        // Agrupar metodologías similares (mismo método, misma matriz, misma técnica, etc.)
+        // REVERTIR: Agrupar por nombre completo + matriz + técnica + acreditada (como antes)
+        // No usar nombre base para evitar duplicados y confusiones
         const grupos = {};
         
         results.forEach(met => {
-            // Extraer nombre base (sin matriz específica en el nombre)
-            // Ej: "ORGANOCLORADOS MUSCULO" -> nombre base: "ORGANOCLORADOS"
-            // Ej: "ESTEROIDES Y ESTILBENOS" -> nombre base: "ESTEROIDES Y ESTILBENOS"
-            const nombreCompleto = met.nombre || '';
-            const nombreBase = this.extraerNombreBase(nombreCompleto);
-            const nombre = this.normalizeText(nombreBase);
+            // Crear clave de agrupación: nombre del método + matriz + técnica + acreditada
+            const nombre = this.normalizeText(met.nombre || '');
             const matriz = this.normalizeText(met.matriz || '');
             const tecnica = this.normalizeText(met.tecnica || '');
             const acreditada = met.acreditada || false;
             
-            // Agrupar por nombre base + técnica + acreditada (SIN matriz en la clave)
-            // Esto permite que "ESTEROIDES Y ESTILBENOS" con diferentes analitos se agrupe
-            const grupoKey = `${nombre}|${tecnica}|${acreditada}`;
+            const grupoKey = `${nombre}|${matriz}|${tecnica}|${acreditada}`;
             
             if (!grupos[grupoKey]) {
                 grupos[grupoKey] = {
-                    nombre: nombreBase, // Usar nombre base sin matriz específica
-                    matrices: [], // Lista de matrices donde se aplica
+                    nombre: met.nombre || '',
+                    matriz: met.matriz || '',
                     tecnica: met.tecnica || '',
                     acreditada: acreditada,
                     analitos: [],
                     lods: [],
                     loqs: []
                 };
-            }
-            
-            // Agregar matriz si no está ya en la lista
-            if (matriz && !grupos[grupoKey].matrices.includes(met.matriz)) {
-                grupos[grupoKey].matrices.push(met.matriz);
             }
             
             // Agregar analito y límites
@@ -1331,15 +1320,8 @@ class MetodologiasChatbot {
             
             message = `<p><strong>Sí, tenemos una metodología${grupo.acreditada ? ' acreditada' : ''}</strong> para analizar <strong>${this.formatAnalitos(grupo.analitos)}</strong>`;
             
-            // Mostrar matrices si hay múltiples o una específica
-            if (grupo.matrices && grupo.matrices.length > 0) {
-                if (grupo.matrices.length === 1) {
-                    message += ` en <strong>${grupo.matrices[0].toLowerCase()}</strong>`;
-                } else {
-                    // Múltiples matrices: listarlas
-                    const matricesText = grupo.matrices.map(m => m.toLowerCase()).join(', ');
-                    message += ` en <strong>${matricesText}</strong>`;
-                }
+            if (grupo.matriz) {
+                message += ` en <strong>${grupo.matriz.toLowerCase()}</strong>`;
             }
             
             if (grupo.tecnica) {
