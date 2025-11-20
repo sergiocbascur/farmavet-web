@@ -5150,17 +5150,15 @@ input[type="button"],
     display: none !important;
   }
   
-  /* Crear contenedor de cards móviles */
-  .metodologias-results::after {
-    content: '';
-    display: table;
-    clear: both;
-  }
-  
   /* Versión móvil: convertir filas de tabla en cards */
   .metodologias-table-mobile {
     display: block !important;
     margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .metodologias-table-mobile:empty {
+    display: none !important;
   }
   
   .metodologias-table-mobile .metodologia-card {
