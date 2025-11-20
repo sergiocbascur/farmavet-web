@@ -414,7 +414,7 @@
                           {% endif %}
                         </p>
                       {% endif %}
-                      <p>
+                      <p style="flex-grow: 0; flex-shrink: 1;">
                         {{ get_translated_field(certificado, 'descripcion') or certificado.descripcion or '' }}
                       </p>
                       {% if certificado.imagen or certificado.enlace_externo %}

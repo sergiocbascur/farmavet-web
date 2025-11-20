@@ -1385,15 +1385,22 @@ a.logo-card:focus {
 
 /* Cards dentro de carruseles infinitos deben usar flexbox para alinear botones */
 .infinite-carousel .card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 100% !important;
 }
 
 /* Contenedor de botones dentro de cards debe empujar al final */
 .infinite-carousel .card > div:last-child {
-  margin-top: auto;
+  margin-top: auto !important;
   padding-top: 1rem;
+}
+
+/* Asegurar que el párrafo de descripción no crezca demasiado */
+.infinite-carousel .card > p {
+  flex-grow: 0;
+  flex-shrink: 1;
 }
 
 .card:hover {
@@ -1907,6 +1914,7 @@ a.logo-card:focus {
 .carousel-track-infinite {
   display: flex;
   gap: 1.5rem;
+  align-items: stretch; /* Asegurar que todas las cards tengan la misma altura */
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
 }
