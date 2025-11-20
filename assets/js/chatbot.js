@@ -256,13 +256,17 @@ class MetodologiasChatbot {
         setTimeout(async () => {
             this.hideTyping(typingId);
             
-            // Detectar si la consulta es sobre metodologías o información general
+            // Detectar si la consulta es sobre información general (contacto, ubicación, etc.)
             const queryLower = query.toLowerCase();
-            const isGeneralQuery = /\b(horario|horarios|dirección|direccion|ubicación|ubicacion|ubicados|ubicadas|donde|dónde|se encuentran|contacto|email|correo|teléfono|telefono|formulario|envío|envio|consultas|preguntas frecuentes|faq|atencion|atención|agendar|reunión|reunion|solicitar|solicitud|informe|informes|ingles|english|idioma|lang)\b/i.test(query);
+            const isContactQuery = /\b(contacto|email|correo|teléfono|telefono)\b/i.test(query);
+            const isLocationQuery = /\b(ubicación|ubicacion|ubicados|ubicadas|donde|dónde|se encuentran|localización|localizacion|dirección|direccion)\b/i.test(query);
+            const isScheduleQuery = /\b(horario|horarios|atencion|atención|agendar|reunión|reunion)\b/i.test(query);
+            const isGeneralQuery = isContactQuery || isLocationQuery || isScheduleQuery;
             
-            // Si es una consulta general (no sobre metodologías), ir directamente a Perplexity
+            // Si es una consulta general (contacto, ubicación, horario), responder directamente sin Perplexity
             if (isGeneralQuery) {
-                await this.searchWithPerplexity(query, false, true); // true = es consulta general
+                // Responder directamente con información local (GRATIS)
+                this.showGeneralInfo(query, isContactQuery, isLocationQuery, isScheduleQuery);
                 return;
             }
             
@@ -938,6 +942,45 @@ class MetodologiasChatbot {
         .map(item => item.metodologia); // Devolver solo las metodologías
 
         return scoredResults;
+    }
+
+    showGeneralInfo(query, isContactQuery, isLocationQuery, isScheduleQuery) {
+        // Responder directamente con información local (GRATIS, sin Perplexity)
+        let message = '';
+        
+        if (isContactQuery) {
+            message = `
+                <p>Sí, puedes contactarnos al email <strong>farmavet@uchile.cl</strong>.</p>
+                <p>Si tu consulta es sobre programas académicos, también tenemos el email <strong>postitulo@veterinaria.uchile.cl</strong>.</p>
+            `;
+        } else if (isLocationQuery) {
+            message = `
+                <p>El Laboratorio FARMAVET se encuentra en:</p>
+                <p><strong>Av. Santa Rosa 11735, La Pintana, Santiago, Chile</strong></p>
+                <p>Universidad de Chile</p>
+            `;
+        } else if (isScheduleQuery) {
+            message = `
+                <p>Nuestro horario de atención es:</p>
+                <p><strong>Lunes a viernes, de 09:00 a 17:30 hrs</strong></p>
+                <p>Atención presencial con agendamiento previo.</p>
+            `;
+        } else {
+            // Información general combinada
+            message = `
+                <p><strong>Información de contacto de FARMAVET:</strong></p>
+                <ul>
+                    <li><strong>Dirección:</strong> Av. Santa Rosa 11735, La Pintana, Santiago, Chile</li>
+                    <li><strong>Email:</strong> farmavet@uchile.cl</li>
+                    <li><strong>Email programas académicos:</strong> postitulo@veterinaria.uchile.cl</li>
+                    <li><strong>Horario:</strong> Lunes a viernes, 09:00 a 17:30 hrs</li>
+                    <li><strong>Atención:</strong> Presencial con agendamiento previo</li>
+                </ul>
+                <p>Para enviar consultas, puedes usar el formulario de contacto en nuestra página web.</p>
+            `;
+        }
+        
+        this.addMessage(message);
     }
 
     async showResults(query, results) {
