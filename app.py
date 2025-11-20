@@ -2395,7 +2395,7 @@ def api_chatbot_search():
         
         # Información de contacto (solo para consultas generales o cuando no hay resultados locales)
         if not local_results or is_general_query:
-            local_context += "\n\nCONTACTO:\nEmail: farmavet@uchile.cl\nHorario: L-V 09:00-17:30 hrs"
+            local_context += "\n\nCONTACTO FARMAVET:\nDirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile\nEmail: farmavet@uchile.cl\nHorario: L-V 09:00-17:30 hrs"
         
         # Si hay resultados locales, agregarlos como contexto relevante
         if local_results and len(local_results) > 0:
