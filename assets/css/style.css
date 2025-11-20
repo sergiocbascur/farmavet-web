@@ -1390,11 +1390,25 @@ a.logo-card:focus {
   height: 100% !important;
   min-height: 100% !important;
   align-self: stretch !important;
+  box-sizing: border-box !important;
 }
 
 /* Todos los elementos dentro de la card deben tener flex-shrink excepto el contenedor de botones */
 .infinite-carousel .card > * {
   flex-shrink: 1;
+}
+
+/* Títulos y elementos de encabezado no deben crecer */
+.infinite-carousel .card > h3,
+.infinite-carousel .card > h4 {
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+}
+
+/* Párrafos de fecha no deben crecer */
+.infinite-carousel .card > p:first-of-type {
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
 }
 
 /* Contenedor de botones dentro de cards debe empujar al final - selector más específico */
@@ -1403,6 +1417,7 @@ a.logo-card:focus {
   padding-top: 1rem !important;
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
+  min-height: fit-content !important;
 }
 
 /* Asegurar que el contenedor con botones verdes se alinee */
@@ -1411,7 +1426,7 @@ a.logo-card:focus {
 }
 
 /* Asegurar que el párrafo de descripción no crezca demasiado */
-.infinite-carousel .card > p {
+.infinite-carousel .card > p:not(:first-of-type) {
   flex-grow: 0 !important;
   flex-shrink: 1 !important;
   margin-bottom: 0 !important;
