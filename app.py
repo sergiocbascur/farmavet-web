@@ -2744,7 +2744,7 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                 "messages": [
                     {
                         "role": "system",
-                        "content": system_message[:4000]
+                        "content": system_message[:3000]  # Reducido de 4000 a 3000 para acelerar
                     },
                     {
                         "role": "user",
@@ -2807,15 +2807,15 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                 "messages": [
                     {
                         "role": "system",
-                        "content": system_message[:4000]
+                        "content": system_message[:3000]  # Reducido de 4000 a 3000 para acelerar
                     },
                     {
                         "role": "user",
                         "content": query
                     }
                 ],
-                "temperature": 0.3,
-                "max_tokens": 200
+                "temperature": 0.2,  # Reducido para respuestas más rápidas
+                "max_tokens": 150  # Reducido de 200 a 150 para respuestas más rápidas
             }
             
             app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
