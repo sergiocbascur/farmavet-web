@@ -867,13 +867,32 @@ class MetodologiasChatbot {
                         const keywordLen = cleanKeyword.length;
                         
                         // PRIORIDAD 1: Coincidencia exacta o como palabra completa (máxima confianza)
-                        const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                        const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        // Usar límites de palabra (\b) para evitar coincidencias parciales
+                        // Ej: "beta" no debe coincidir con "beta-hch" si se busca "betalactamicos"
+                        const escapedKeyword = cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const analitoRegex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+                        const nombreRegex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
                         
                         if (analitoRegex.test(analitoNorm) || analitoRegex.test(analitoEnNorm) ||
                             nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
                             hasMatchInAnalitoOrNombre = true;
                             break;
+                        }
+                        
+                        // Si la keyword es corta (< 4 caracteres), ser más estricto
+                        // Para evitar coincidencias falsas como "beta" en "beta-hch"
+                        if (keywordLen < 4) {
+                            // Solo aceptar si es palabra completa y no está dentro de otra palabra
+                            // Ej: "beta" debe coincidir con "beta-lactamicos" pero NO con "beta-hch" si se busca "betalactamicos"
+                            // Para keywords cortas, requerir que sea al inicio de una palabra compuesta
+                            const strictRegex = new RegExp(`(^|\\s|-)${escapedKeyword}(-|\\s|$)`, 'i');
+                            if ((strictRegex.test(analitoNorm) || strictRegex.test(analitoEnNorm) ||
+                                 strictRegex.test(nombreNorm) || strictRegex.test(nombreEnNorm)) &&
+                                // Asegurar que NO sea solo "beta" en "beta-hch" si se busca algo más largo
+                                (cleanKeyword.length >= 4 || !analitoNorm.match(/beta[^a-z]/i) || nombreNorm.includes(cleanKeyword))) {
+                                hasMatchInAnalitoOrNombre = true;
+                                break;
+                            }
                         }
                         
                         // PRIORIDAD 2: Coincidencia como substring pero SOLO si es realmente relevante
@@ -980,8 +999,27 @@ class MetodologiasChatbot {
                     for (const keywordPrincipal of keywordsPrincipales) {
                         const cleanPrincipal = keywordPrincipal.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
                         // Verificar que coincida en nombre O analito (no solo en matriz o técnica)
-                        if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
-                            keywordsPrincipalesMatched++;
+                        // Usar regex con límites de palabra para evitar coincidencias parciales
+                        const principalLen = cleanPrincipal.length;
+                        if (principalLen >= 4) {
+                            // Para keywords largas, usar búsqueda normal
+                            if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
+                                keywordsPrincipalesMatched++;
+                            }
+                        } else {
+                            // Para keywords cortas (< 4 caracteres), ser más estricto
+                            // Evitar coincidencias falsas como "beta" en "beta-hch" cuando se busca "betalactamicos"
+                            const escapedPrincipal = cleanPrincipal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const strictRegex = new RegExp(`(^|\\s|-)${escapedPrincipal}(-|\\s|$|[a-z])`, 'i');
+                            // Solo aceptar si es palabra completa al inicio de una palabra compuesta
+                            // Ej: "beta" debe coincidir con "beta-lactamicos" pero NO solo con "beta-hch"
+                            if (strictRegex.test(nombreNorm) || strictRegex.test(analitoNorm)) {
+                                // Verificar adicionalmente que la coincidencia tenga sentido
+                                // Si la keyword es muy corta, verificar que esté en el nombre completo del método
+                                if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
+                                    keywordsPrincipalesMatched++;
+                                }
+                            }
                         }
                     }
                     
