@@ -2377,12 +2377,17 @@ def api_chatbot_search():
         if not query:
             return jsonify({'error': 'Query vacía'}), 400
         
+        # Verificar si hay Ollama configurado (prioridad) o Perplexity (fallback)
+        ollama_url = os.environ.get('OLLAMA_API_URL', '').strip()
         perplexity_api_key = os.environ.get('PERPLEXITY_API_KEY')
         
-        if not perplexity_api_key:
-            app.logger.warning('PERPLEXITY_API_KEY no configurada')
+        use_ollama = bool(ollama_url)
+        use_perplexity = bool(perplexity_api_key)
+        
+        if not use_ollama and not use_perplexity:
+            app.logger.warning('Ni OLLAMA_API_URL ni PERPLEXITY_API_KEY configuradas')
             return jsonify({
-                'error': 'API de Perplexity no configurada',
+                'error': 'Ninguna API de IA configurada',
                 'message': 'La funcionalidad de búsqueda inteligente no está disponible'
             }), 503
         
@@ -2623,18 +2628,97 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         
         system_message = context
         
-        # Llamar a la API de Perplexity
-        perplexity_url = "https://api.perplexity.ai/chat/completions"
+        # Usar Ollama si está configurado, si no usar Perplexity
+        if use_ollama:
+            # Llamar a la API de Ollama
+            ollama_model = os.environ.get('OLLAMA_MODEL', 'llama3.2:3b')
+            ollama_api_url = f"{ollama_url}/api/chat"
+            
+            headers = {
+                "Content-Type": "application/json"
+            }
+            
+            # Formato de Ollama (diferente a Perplexity)
+            payload = {
+                "model": ollama_model,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_message[:4000]  # Ollama maneja mejor contexto largo
+                    },
+                    {
+                        "role": "user",
+                        "content": query
+                    }
+                ],
+                "stream": False,
+                "options": {
+                    "temperature": 0.3,
+                    "num_predict": 200  # max_tokens en Ollama
+                }
+            }
+            
+            app.logger.info(f'Chatbot Ollama: Buscando - {query[:100]}... con modelo {ollama_model}')
+            
+            try:
+                response = requests.post(ollama_api_url, headers=headers, json=payload, timeout=30)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if 'message' in result and 'content' in result['message']:
+                        answer = result['message']['content']
+                        app.logger.info(f'Chatbot Ollama: Respuesta recibida ({len(answer)} caracteres)')
+                        
+                        return jsonify({
+                            'answer': answer,
+                            'sources': [],
+                            'query': query
+                        })
+                    else:
+                        app.logger.warning('Chatbot Ollama: Respuesta sin message.content')
+                        # Fallback a Perplexity si está configurado
+                        if use_perplexity:
+                            app.logger.info('Chatbot Ollama: Fallback a Perplexity')
+                        else:
+                            return jsonify({'error': 'Respuesta inválida de Ollama'}), 500
+                else:
+                    error_text = response.text[:500]
+                    app.logger.error(f'Chatbot Ollama: Error {response.status_code}: {error_text}')
+                    # Fallback a Perplexity si está configurado
+                    if use_perplexity:
+                        app.logger.info('Chatbot Ollama: Fallback a Perplexity por error')
+                    else:
+                        return jsonify({
+                            'error': f'Error en Ollama API: {response.status_code}',
+                            'details': error_text if app.debug else 'Error al procesar la consulta'
+                        }), response.status_code
+                    
+            except requests.exceptions.RequestException as e:
+                app.logger.error(f'Chatbot Ollama: Error de conexión: {str(e)}')
+                # Fallback a Perplexity si está configurado
+                if use_perplexity:
+                    app.logger.info('Chatbot Ollama: Fallback a Perplexity por error de conexión')
+                else:
+                    return jsonify({
+                        'error': 'Error de conexión con Ollama',
+                        'details': str(e) if app.debug else 'No se pudo conectar al servicio'
+                    }), 503
         
-        headers = {
-            "Authorization": f"Bearer {perplexity_api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        # OPTIMIZACIÓN: Limitar contexto a 3000 caracteres para ahorrar tokens (reducido de 8000)
-        if len(system_message) > 3000:
-            app.logger.warning(f'Chatbot Perplexity: Contexto demasiado largo ({len(system_message)} caracteres), truncando...')
-            system_message = system_message[:3000] + "..."
+        # Usar Perplexity como fallback o principal si Ollama no está configurado
+        if use_perplexity:
+            # Llamar a la API de Perplexity
+            perplexity_url = "https://api.perplexity.ai/chat/completions"
+            
+            headers = {
+                "Authorization": f"Bearer {perplexity_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            # OPTIMIZACIÓN: Limitar contexto a 3000 caracteres para ahorrar tokens
+            if len(system_message) > 3000:
+                app.logger.warning(f'Chatbot Perplexity: Contexto demasiado largo ({len(system_message)} caracteres), truncando...')
+                system_message = system_message[:3000] + "..."
         
         # Modelos disponibles de Perplexity (ordenados por preferencia):
         # - sonar-pro (más potente, mejor razonamiento)
