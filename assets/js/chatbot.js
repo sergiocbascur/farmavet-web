@@ -1358,10 +1358,17 @@ class MetodologiasChatbot {
             const grupo = gruposArray[0];
             const numAnalitos = grupo.analitos.length;
             
-            message = `<p><strong>Sí, tenemos una metodología acreditada</strong> para analizar <strong>${this.formatAnalitos(grupo.analitos)}</strong>`;
+            message = `<p><strong>Sí, tenemos una metodología${grupo.acreditada ? ' acreditada' : ''}</strong> para analizar <strong>${this.formatAnalitos(grupo.analitos)}</strong>`;
             
-            if (grupo.matriz) {
-                message += ` en <strong>${grupo.matriz.toLowerCase()}</strong>`;
+            // Mostrar matrices si hay múltiples o una específica
+            if (grupo.matrices && grupo.matrices.length > 0) {
+                if (grupo.matrices.length === 1) {
+                    message += ` en <strong>${grupo.matrices[0].toLowerCase()}</strong>`;
+                } else {
+                    // Múltiples matrices: listarlas
+                    const matricesText = grupo.matrices.map(m => m.toLowerCase()).join(', ');
+                    message += ` en <strong>${matricesText}</strong>`;
+                }
             }
             
             if (grupo.tecnica) {
