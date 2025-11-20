@@ -4133,8 +4133,16 @@ input[type="button"],
     transform: rotate(-45deg);
   }
   
-  /* Overlay oscuro cuando el menú está abierto */
-  body.no-scroll::before {
+  /* Prevenir scroll del body cuando el menú está abierto */
+  body.no-scroll {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* Overlay oscuro cuando el menú está abierto - removido para menú a pantalla completa */
+  /* body.no-scroll::before {
     content: "";
     position: fixed;
     top: 0;
@@ -4151,7 +4159,7 @@ input[type="button"],
   body.no-scroll::before {
     opacity: 1;
     pointer-events: all;
-  }
+  } */
   
   .nav-links {
     position: fixed !important;
@@ -4163,6 +4171,8 @@ input[type="button"],
     max-width: 100vw !important;
     height: 100vh !important;
     max-height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
     background: #ffffff !important;
     flex-direction: column;
     align-items: stretch;
@@ -4179,6 +4189,8 @@ input[type="button"],
     opacity: 0;
     box-shadow: none;
     margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     box-sizing: border-box;
   }
   
