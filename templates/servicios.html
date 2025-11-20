@@ -445,10 +445,22 @@
                 <tbody>
                   {% for cat_key, cat_name in categorias_nombres.items() %}
                     {% if cat_key in metodologias_por_categoria %}
+                      {% set prev_metodologia = '' %}
                       {% for grupo in metodologias_por_categoria[cat_key] %}
                         {% set met = grupo.metodologia_representativa %}
+                        {% set metodologia_nombre = get_translated_field(met, 'nombre') or met.nombre %}
+                        {% set mostrar_metodologia = (metodologia_nombre != prev_metodologia) %}
+                        {% if mostrar_metodologia %}
+                          {% set prev_metodologia = metodologia_nombre %}
+                        {% endif %}
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
-                          <td><strong>{{ get_translated_field(met, 'nombre') or met.nombre }}</strong></td>
+                          <td>
+                            {% if mostrar_metodologia %}
+                              <strong>{{ metodologia_nombre }}</strong>
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          </td>
                           <td>
                             {% if grupo.agrupado and grupo.analitos %}
                               {{ grupo.analitos|join(', ') }}
@@ -456,15 +468,31 @@
                               {{ get_translated_field(met, 'analito') or met.analito or '—' }}
                             {% endif %}
                           </td>
-                          <td>{{ get_translated_field(met, 'matriz') or met.matriz }}</td>
-                          <td>{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}</td>
+                          <td>
+                            {% if mostrar_metodologia %}
+                              {{ get_translated_field(met, 'matriz') or met.matriz }}
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if mostrar_metodologia %}
+                              {{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          </td>
                           <td>{{ met.limite_deteccion or '—' }}</td>
                           <td>{{ met.limite_cuantificacion or '—' }}</td>
                           <td>
-                            {% if met.acreditada %}
-                              <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
+                            {% if mostrar_metodologia %}
+                              {% if met.acreditada %}
+                                <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
+                              {% else %}
+                                <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
+                              {% endif %}
                             {% else %}
-                              <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
+                              &nbsp;
                             {% endif %}
                           </td>
                         </tr>
