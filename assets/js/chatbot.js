@@ -631,7 +631,7 @@ class MetodologiasChatbot {
             // Normalizar también la query completa
             const cleanQuery = normalizedQuery.replace(/[?¿!¡.,;:]/g, '').trim();
             
-            // PRIORIDAD 1: Coincidencia exacta en analito (máxima prioridad)
+            // PRIORIDAD 1: Coincidencia en NOMBRE DEL MÉTODO (máxima prioridad)
             // Contador de keywords que coinciden para priorizar coincidencias múltiples
             let keywordsMatched = 0;
             let keywordsInAnalito = 0;
@@ -644,9 +644,54 @@ class MetodologiasChatbot {
                     if (cleanKeyword.length >= 3) {
                         let keywordMatched = false;
                         
+                        // PRIMERO: Buscar en NOMBRE DEL MÉTODO (máxima prioridad)
+                        // Coincidencia exacta en nombre del método
+                        if (nombreNorm === cleanKeyword || nombreEnNorm === cleanKeyword) {
+                            score += maxScore * 3; // Prioridad máxima: coincidencia exacta en nombre
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
+                            continue;
+                        }
+                        
+                        // Coincidencia como palabra completa en nombre
+                        const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        if (nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
+                            score += maxScore * 2.5; // Alta prioridad: palabra completa en nombre
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
+                            continue;
+                        }
+                        
+                        // Coincidencia en nombre con términos expandidos (importante para "ORGANOCLORADOS HARINA")
+                        for (const expandedTerm of expandedTermsArray) {
+                            const cleanExpanded = expandedTerm.replace(/[?¿!¡.,;:]/g, '').trim();
+                            if (cleanExpanded.length >= 3) {
+                                if (nombreNorm.includes(cleanExpanded) || nombreEnNorm.includes(cleanExpanded)) {
+                                    score += maxScore * 2.2; // Alta prioridad: término expandido en nombre
+                                    keywordsMatched++;
+                                    keywordsInNombre++;
+                                    keywordMatched = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (keywordMatched) continue;
+                        
+                        // Coincidencia flexible en nombre (substring)
+                        if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                            score += maxScore * 2.0; // Alta prioridad: substring en nombre
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
+                            continue;
+                        }
+                        
+                        // SEGUNDO: Solo si NO se encontró en nombre, buscar en analito
                         // Coincidencia exacta en analito
                         if (analitoNorm === cleanKeyword || analitoEnNorm === cleanKeyword) {
-                            score += maxScore * 2; // Bonus extra por coincidencia exacta
+                            score += maxScore * 1.5; // Menor prioridad: coincidencia exacta en analito
                             keywordsMatched++;
                             keywordsInAnalito++;
                             keywordMatched = true;
@@ -656,7 +701,7 @@ class MetodologiasChatbot {
                         // Coincidencia como palabra completa en analito
                         const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         if (analitoRegex.test(analitoNorm) || analitoRegex.test(analitoEnNorm)) {
-                            score += maxScore * 1.5;
+                            score += maxScore * 1.3;
                             keywordsMatched++;
                             keywordsInAnalito++;
                             keywordMatched = true;
@@ -667,7 +712,7 @@ class MetodologiasChatbot {
                         const analitoWords = (analitoNorm + ' ' + analitoEnNorm).split(/\s+/).filter(w => w.length >= 3);
                         for (const word of analitoWords) {
                             if (this.isSimilar(cleanKeyword, word, 2)) {
-                                score += maxScore * 1.2;
+                                score += maxScore * 1.1;
                                 keywordsMatched++;
                                 keywordsInAnalito++;
                                 keywordMatched = true;
@@ -676,65 +721,6 @@ class MetodologiasChatbot {
                         }
                         if (keywordMatched) continue;
                         
-                        // Coincidencia exacta en nombre del método
-                        if (nombreNorm === cleanKeyword || nombreEnNorm === cleanKeyword) {
-                            score += maxScore * 1.3;
-                            keywordsMatched++;
-                            keywordsInNombre++;
-                            keywordMatched = true;
-                            continue;
-                        }
-                        
-                        // Coincidencia como palabra completa en nombre
-                        const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                        if (nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
-                            score += maxScore * 1.1;
-                            keywordsMatched++;
-                            keywordsInNombre++;
-                            keywordMatched = true;
-                            continue;
-                        }
-                        
-                        // Coincidencia en analito o nombre como substring (menor prioridad)
-                        // Buscar también en los términos expandidos para mejor matching
-                        for (const expandedTerm of expandedTermsArray) {
-                            const cleanExpanded = expandedTerm.replace(/[?¿!¡.,;:]/g, '').trim();
-                            if (cleanExpanded.length >= 3) {
-                                // Coincidencia en analito con términos expandidos
-                                if (analitoNorm.includes(cleanExpanded) || analitoEnNorm.includes(cleanExpanded)) {
-                                    score += maxScore * 0.75;
-                                    keywordsMatched++;
-                                    keywordsInAnalito++;
-                                    keywordMatched = true;
-                                    break;
-                                }
-                                // Coincidencia en nombre con términos expandidos (muy importante para "ORGANOCLORADOS HARINA")
-                                if (nombreNorm.includes(cleanExpanded) || nombreEnNorm.includes(cleanExpanded)) {
-                                    score += maxScore * 0.7;
-                                    keywordsMatched++;
-                                    keywordsInNombre++;
-                                    keywordMatched = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (keywordMatched) continue;
-                        
-                        // Fallback: búsqueda simple en analito/nombre
-                        if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.6;
-                            keywordsMatched++;
-                            keywordsInAnalito++;
-                            keywordMatched = true;
-                            continue;
-                        }
-                        if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.5;
-                            keywordsMatched++;
-                            keywordsInNombre++;
-                            keywordMatched = true;
-                            continue;
-                        }
                         
                         // Coincidencia en matriz (solo si también hay coincidencia en analito/nombre)
                         const matrizRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
