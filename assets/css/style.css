@@ -2412,7 +2412,38 @@ a.logo-card:focus {
 
   .infinite-carousel .list-card,
   .infinite-carousel .card {
-    flex: 0 0 calc(100% - 2rem);
+    flex: 0 0 calc(100% - 2rem) !important;
+    max-width: calc(100% - 2rem) !important;
+    min-width: calc(100% - 2rem) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Mejorar padding de cards en móvil */
+  .infinite-carousel .card {
+    padding: 1.5rem !important;
+  }
+  
+  .infinite-carousel .list-card {
+    padding: 1.25rem !important;
+  }
+  
+  /* Asegurar que el texto sea legible en móvil */
+  .infinite-carousel .card h3,
+  .infinite-carousel .card .pillar-title,
+  .infinite-carousel .list-card h4 {
+    font-size: 1.1rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .infinite-carousel .card p,
+  .infinite-carousel .list-card p {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 0 !important;
   }
   
   /* Carrusel infinito - asegurar visibilidad en móvil */
@@ -2420,6 +2451,7 @@ a.logo-card:focus {
     width: 100% !important;
     overflow: hidden !important;
     position: relative;
+    padding: 0 1rem !important;
   }
   
   .carousel-wrapper {
@@ -2431,10 +2463,11 @@ a.logo-card:focus {
   .carousel-track-infinite {
     display: flex !important;
     flex-wrap: nowrap !important;
-    gap: 1rem;
+    gap: 1rem !important;
     width: auto !important;
     min-width: 100% !important;
     position: relative;
+    padding: 0.5rem 0 !important;
   }
   
   .infinite-carousel .logo-card {
