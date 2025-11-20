@@ -2389,7 +2389,25 @@ def api_chatbot_search():
                 previous_tema = previous_tema.replace(f' {palabra} ', ' ').replace(f'{palabra} ', '').replace(f' {palabra}', '')
             previous_tema = previous_tema.strip().rstrip('?').strip()
             
-            conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta DE SEGUIMIENTO se refiere AL MISMO TEMA ({previous_tema}), especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', 'que limites tiene?', DEBES interpretar que se refiere AL TEMA ANTERIOR ({previous_tema}), NO a otro tema diferente.\n- RESPUESTA OBLIGATORIA: Si la pregunta es sobre matrices, límites, o variantes, busca información específica sobre {previous_tema} en el contexto proporcionado, NO sobre otros analitos o métodos."
+            # Detectar si la pregunta actual es con negación sobre matrices
+            is_negative_about_matrix = any(word in query.lower() for word in ['no hacen', 'sin', 'no tienen', 'no analizan']) and \
+                                      any(word in query.lower() for word in ['harina', 'musculo', 'aceite', 'carne', 'leche', 'salmon'])
+            
+            if is_negative_about_matrix:
+                # Extraer la matriz mencionada
+                matrices = ['harina', 'musculo', 'aceite', 'carne', 'leche', 'salmon', 'pecuarios', 'hidrobiologicos']
+                matriz_mencionada = None
+                for matriz in matrices:
+                    if matriz in query.lower():
+                        matriz_mencionada = matriz
+                        break
+                
+                if matriz_mencionada:
+                    conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta es una PREGUNTA DE NEGACIÓN sobre si hay {previous_tema} en {matriz_mencionada}.\n- DEBES buscar en el contexto si EXISTE metodología para {previous_tema} en {matriz_mencionada}.\n- Si ENCUENTRAS que SÍ existe (ej: 'organoclorados harina' en las METODOLOGÍAS RELEVANTES), responde AFIRMATIVAMENTE: 'Sí, también tenemos metodología para {previous_tema} en {matriz_mencionada} mediante [técnica].'\n- Si NO encuentras que existe en el contexto, responde NEGATIVAMENTE: 'No, no tenemos metodología específica para {previous_tema} en {matriz_mencionada}.'\n- NO confundas con otros analitos. La pregunta se refiere SOLO a {previous_tema} en {matriz_mencionada}."
+                else:
+                    conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta DE SEGUIMIENTO se refiere AL MISMO TEMA ({previous_tema}), especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta es una negación sobre matrices, busca si EXISTE metodología para {previous_tema} en esa matriz específica.\n- RESPUESTA OBLIGATORIA: Si encuentra que SÍ existe en el contexto, responde AFIRMATIVAMENTE. Si NO existe, responde NEGATIVAMENTE."
+            else:
+                conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta DE SEGUIMIENTO se refiere AL MISMO TEMA ({previous_tema}), especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', 'que limites tiene?', DEBES interpretar que se refiere AL TEMA ANTERIOR ({previous_tema}), NO a otro tema diferente.\n- RESPUESTA OBLIGATORIA: Si la pregunta es sobre matrices, límites, o variantes, busca información específica sobre {previous_tema} en el contexto proporcionado, NO sobre otros analitos o métodos."
         
         # SISTEMA DE 3 CAPAS:
         # 1. Ollama (local, gratis) - PRIORIDAD ALTA
