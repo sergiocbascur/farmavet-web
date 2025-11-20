@@ -2454,8 +2454,9 @@ def api_chatbot_search():
                         pass
             
             # Formatear grupos de manera natural
-            # Aumentar límite a 20 para incluir más variantes (ej: organoclorados en músculo, aceite, harina)
-            for grupo in list(grupos.values())[:20]:  # Máximo 20 grupos para incluir todas las variantes
+            # Aumentar límite a 30 para incluir todas las variantes (ej: organoclorados en músculo, aceite, harina)
+            # Esto asegura que todas las variantes de un mismo método se incluyan en el contexto
+            for grupo in list(grupos.values())[:30]:  # Máximo 30 grupos para incluir todas las variantes
                 analitos_str = ', '.join(grupo['analitos'][:5])
                 if len(grupo['analitos']) > 5:
                     # No dar número específico para evitar imprecisiones, usar "varios más"
@@ -2666,17 +2667,37 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Si la pregunta puede ser sobre metodologías O servicios, prioriza el contexto de la conversación anterior
 
 INSTRUCCIONES ESPECIALES DE RAZONAMIENTO:
-- Cuando el usuario pregunta sobre algo mencionado anteriormente, busca en el contexto la información relevante
-- Si preguntan sobre "matrices" después de mencionar un analito, lista las matrices específicas (músculo, aceite, harina, etc.) donde se analiza ese analito
-- Si hay múltiples metodologías con el mismo nombre pero diferentes matrices, agrupa y menciona todas las matrices
-- Si el contexto tiene información detallada sobre una metodología, úsala completamente para dar respuestas precisas
+
+1. MANTENER CONTEXTO DE CONVERSACIÓN:
+   - Si el usuario pregunta algo después de mencionar un tema, usa ese contexto previo
+   - Ejemplo: Si preguntaron "organoclorados?" y luego "no hacen en harina?", interpreta "harina" como organoclorados en harina, NO otra metodología
+   - Si preguntaron sobre un analito específico, las preguntas siguientes probablemente se refieren a ese analito
+   - Cuando veas preguntas cortas como "en que matrices?" o "no hacen en X?", busca el tema mencionado anteriormente en el contexto
+
+2. USAR TODAS LAS VARIANTES DISPONIBLES:
+   - Si hay múltiples metodologías con el mismo nombre pero diferentes matrices, menciona TODAS las matrices disponibles
+   - Ejemplo: Si hay "organoclorados musculo", "organoclorados aceite" y "organoclorados harina", menciona las tres cuando preguntan "organoclorados?"
+   - NO omitas variantes que están en el contexto
+
+3. INTERPRETAR PREGUNTAS DE SEGUIMIENTO:
+   - "no hacen en X?" → Busca si existe la metodología mencionada anteriormente en la matriz X
+   - "en que matrices?" → Lista todas las matrices donde se analiza el analito mencionado anteriormente
+   - "que limites tiene X?" → Busca LOD/LOQ para el analito X mencionado anteriormente
+   - Si no hay contexto previo claro, busca en todo el contexto la información más relevante
+
+4. CORRECCIÓN DE ERRORES DE CONTEXTO:
+   - Si una pregunta se refiere claramente a algo mencionado antes, NO cambies el tema
+   - Ejemplo: Si preguntaron "organoclorados?" y luego "no hacen en harina?", NO respondas sobre "tetraciclinas" u otro analito
+   - Revisa el contexto completo para entender qué tema está discutiendo el usuario
 
 CRÍTICO - DISTINGUIR TIPOS DE PREGUNTAS:
 1. PREGUNTAS SOBRE METODOLOGÍAS: "hacen X?", "analizan Y?", "metodología para Z?"
    → Busca en METODOLOGÍAS RELEVANTES o METODOLOGÍAS DISPONIBLES
+   → Si hay múltiples variantes (diferentes matrices), menciona TODAS
 
 2. PREGUNTAS SOBRE SERVICIOS: "pueden hacer X?", "generan Y?", "entregan Z?", "informes en inglés?", "traducción?"
    → Busca en FAQ, servicios principales, o responde honestamente si no hay información
+   → NO confundas con metodologías analíticas
 
 3. PREGUNTAS SOBRE CONTACTO: "correo?", "teléfono?", "dirección?", "horario?"
    → Usa la información de CONTACTO FARMAVET
@@ -2686,10 +2707,16 @@ CRÍTICO - DISTINGUIR TIPOS DE PREGUNTAS:
    - Si es sobre "informes", "reportes", "traducción", "idioma", "formato", es sobre SERVICIOS, NO metodologías
    - Si es sobre "analizan X?", "hacen análisis de Y?", es sobre METODOLOGÍAS
 
+5. PREGUNTAS DE SEGUIMIENTO (crítico):
+   - Si hay METODOLOGÍAS RELEVANTES ENCONTRADAS en el contexto, usa esa información como contexto previo
+   - Las preguntas cortas como "en que matrices?", "no hacen en X?", "que limites tiene?" se refieren al tema mencionado anteriormente
+   - Ejemplo: Si el contexto muestra "organoclorados musculo", "organoclorados aceite" y luego preguntan "no hacen en harina?", busca "organoclorados harina" en el contexto completo
+
 IMPORTANTE: 
-- Usa TODA la información disponible en el contexto proporcionado
-- Razona sobre el contexto completo antes de responder
+- Usa TODA la información disponible en el contexto proporcionado, especialmente METODOLOGÍAS RELEVANTES ENCONTRADAS
+- Razona sobre el contexto completo antes de responder, incluyendo lo que se mencionó anteriormente
 - Si hay información contradictoria o ambigua en el contexto, prioriza la más específica y reciente
+- Si una pregunta de seguimiento no tiene sentido sin contexto previo, revisa las METODOLOGÍAS RELEVANTES ENCONTRADAS para entender el tema
 - Si la pregunta es sobre algo que NO está en el contexto (especialmente servicios), responde honestamente en lugar de inventar o mencionar metodologías no relacionadas
 - Menos es más. Responde lo esencial de forma natural pero breve.
 
