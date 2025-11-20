@@ -1203,6 +1203,167 @@ def equipo_page():
     conn.close()
     return render_template('equipo.html', organigrama=organigrama_organizado, direccion=direccion, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
 
+@app.route('/servicios')
+@app.route('/servicios.html')
+def servicios_page():
+    """Ruta específica para página de servicios"""
+    lang = get_language()
+    locale = get_locale()
+    conn = get_db()
+    metodologias = conn.execute('''
+        SELECT * FROM metodologias WHERE activo = 1 
+        ORDER BY categoria, orden, nombre
+    ''').fetchall()
+    tarjetas_destacadas = conn.execute('''
+        SELECT * FROM tarjetas_destacadas WHERE pagina = 'servicios' AND activo = 1 
+        ORDER BY orden, id
+    ''').fetchall()
+    # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
+    imagenes_hero = conn.execute('''
+        SELECT * FROM galeria_imagenes 
+        WHERE activo = 1 AND (pagina = 'servicios' OR pagina IS NULL OR pagina = '')
+        ORDER BY orden, id DESC
+        LIMIT 10
+    ''').fetchall()
+    conn.close()
+    # Organizar metodologías por categoría y agrupar por similitudes
+    metodologias_por_categoria = {}
+    categorias_nombres = {
+        'residuos': 'Residuos de Medicamentos Veterinarios',
+        'contaminantes': 'Contaminantes Químicos',
+        'microbiologia': 'Microbiología',
+        'otros': 'Otros Análisis'
+    }
+    
+    # Función para crear clave de agrupación (sin analito, sin LOD/LOQ)
+    # Agrupar por nombre + matriz + técnica + acreditada
+    # Los analitos y LOD/LOQ pueden variar dentro del mismo grupo
+    def get_group_key(metodologia):
+        nombre = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
+        matriz = get_translated_field(metodologia, 'matriz') or metodologia['matriz'] or ''
+        tecnica = get_translated_field(metodologia, 'tecnica') or metodologia['tecnica'] or ''
+        acreditada = metodologia['acreditada'] or False
+        return (nombre, matriz, tecnica, acreditada)
+    
+    # Agrupar metodologías por nombre + matriz + técnica + acreditada
+    # Mantener orden original usando lista para orden
+    metodologias_agrupadas = {}
+    orden_grupos = []  # Lista para mantener el orden de aparición
+    
+    for metodologia in metodologias:
+        categoria = metodologia['categoria'] or 'otros'
+        if categoria not in metodologias_agrupadas:
+            metodologias_agrupadas[categoria] = {}
+            orden_grupos.append(categoria)
+        
+        # Crear clave de agrupación (sin LOD/LOQ, sin analito)
+        group_key = get_group_key(metodologia)
+        
+        if group_key not in metodologias_agrupadas[categoria]:
+            metodologias_agrupadas[categoria][group_key] = []
+            # Guardar orden de aparición del primer grupo
+            if categoria not in [g[0] for g in orden_grupos]:
+                orden_grupos.append((categoria, group_key))
+        
+        metodologias_agrupadas[categoria][group_key].append(metodologia)
+    
+    # Convertir a lista para el template, manteniendo orden y agrupando por nombre + matriz + técnica
+    metodologias_por_categoria = {}
+    for categoria, grupos in metodologias_agrupadas.items():
+        metodologias_por_categoria[categoria] = []
+        # Mantener orden de grupos dentro de cada categoría
+        grupos_ordenados = sorted(grupos.items(), key=lambda x: (
+            x[0][0],  # nombre
+            x[0][1],  # matriz
+            x[0][2]   # tecnica
+        ))
+        
+        for group_key, items in grupos_ordenados:
+            # Extraer todos los analitos únicos del grupo
+            analitos_unicos = []
+            lods = []
+            loqs = []
+            
+            for item in items:
+                analito = get_translated_field(item, 'analito') or item['analito'] or ''
+                if analito and analito not in analitos_unicos:
+                    analitos_unicos.append(analito)
+                
+                # Extraer valores numéricos de LOD y LOQ
+                lod = item.get('limite_deteccion') or ''
+                loq = item.get('limite_cuantificacion') or ''
+                
+                if lod:
+                    try:
+                        lod_match = re.search(r'[\d.]+', str(lod))
+                        if lod_match:
+                            lods.append(float(lod_match.group()))
+                    except:
+                        pass
+                
+                if loq:
+                    try:
+                        loq_match = re.search(r'[\d.]+', str(loq))
+                        if loq_match:
+                            loqs.append(float(loq_match.group()))
+                    except:
+                        pass
+            
+            # Formatear LOD/LOQ como rango (min-max) o valor único
+            lod_formato = ''
+            loq_formato = ''
+            
+            if lods:
+                if len(lods) > 1 and min(lods) != max(lods):
+                    lod_formato = f"{min(lods):g}-{max(lods):g}"
+                    # Extraer unidad del primer LOD si está disponible
+                    primer_lod = items[0].get('limite_deteccion') or ''
+                    if primer_lod:
+                        lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
+                        if lod_match:
+                            lod_formato += lod_match.group(1).strip()
+                else:
+                    lod_formato = str(min(lods))
+                    # Extraer unidad del primer LOD
+                    primer_lod = items[0].get('limite_deteccion') or ''
+                    if primer_lod:
+                        lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
+                        if lod_match:
+                            lod_formato += lod_match.group(1).strip()
+            
+            if loqs:
+                if len(loqs) > 1 and min(loqs) != max(loqs):
+                    loq_formato = f"{min(loqs):g}-{max(loqs):g}"
+                    # Extraer unidad del primer LOQ si está disponible
+                    primer_loq = items[0].get('limite_cuantificacion') or ''
+                    if primer_loq:
+                        loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
+                        if loq_match:
+                            loq_formato += loq_match.group(1).strip()
+                else:
+                    loq_formato = str(min(loqs))
+                    # Extraer unidad del primer LOQ
+                    primer_loq = items[0].get('limite_cuantificacion') or ''
+                    if primer_loq:
+                        loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
+                        if loq_match:
+                            loq_formato += loq_match.group(1).strip()
+            
+            # Crear una metodología representativa con los valores agregados
+            # Convertir Row a dict para poder modificarlo
+            met_representativa = dict(items[0])
+            met_representativa['analitos_agrupados'] = analitos_unicos
+            met_representativa['lod_agrupado'] = lod_formato
+            met_representativa['loq_agrupado'] = loq_formato
+            
+            metodologias_por_categoria[categoria].append({
+                'agrupado': True,
+                'metodologias': items,
+                'analitos': analitos_unicos,
+                'metodologia_representativa': met_representativa
+            })
+    return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+
 @app.route('/<page>.html')
 def page(page):
     """Rutas dinámicas para páginas HTML - SIEMPRE prioriza templates"""
@@ -1526,163 +1687,6 @@ def page(page):
             ''').fetchall()
             conn.close()
             return render_template('quienes-somos.html', certificados=certificados, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
-        
-        elif page == 'servicios':
-            conn = get_db()
-            metodologias = conn.execute('''
-                SELECT * FROM metodologias WHERE activo = 1 
-                ORDER BY categoria, orden, nombre
-            ''').fetchall()
-            tarjetas_destacadas = conn.execute('''
-                SELECT * FROM tarjetas_destacadas WHERE pagina = 'servicios' AND activo = 1 
-                ORDER BY orden, id
-            ''').fetchall()
-            # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
-            imagenes_hero = conn.execute('''
-                SELECT * FROM galeria_imagenes 
-                WHERE activo = 1 AND (pagina = 'servicios' OR pagina IS NULL OR pagina = '')
-                ORDER BY orden, id DESC
-                LIMIT 10
-            ''').fetchall()
-            conn.close()
-            # Organizar metodologías por categoría y agrupar por similitudes
-            metodologias_por_categoria = {}
-            categorias_nombres = {
-                'residuos': 'Residuos de Medicamentos Veterinarios',
-                'contaminantes': 'Contaminantes Químicos',
-                'microbiologia': 'Microbiología',
-                'otros': 'Otros Análisis'
-            }
-            
-            # Función para crear clave de agrupación (sin analito, sin LOD/LOQ)
-            # Agrupar por nombre + matriz + técnica + acreditada
-            # Los analitos y LOD/LOQ pueden variar dentro del mismo grupo
-            def get_group_key(metodologia):
-                nombre = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
-                matriz = get_translated_field(metodologia, 'matriz') or metodologia['matriz'] or ''
-                tecnica = get_translated_field(metodologia, 'tecnica') or metodologia['tecnica'] or ''
-                acreditada = metodologia['acreditada'] or False
-                return (nombre, matriz, tecnica, acreditada)
-            
-            # Agrupar metodologías por nombre + matriz + técnica + acreditada
-            # Mantener orden original usando lista para orden
-            metodologias_agrupadas = {}
-            orden_grupos = []  # Lista para mantener el orden de aparición
-            
-            for metodologia in metodologias:
-                categoria = metodologia['categoria'] or 'otros'
-                if categoria not in metodologias_agrupadas:
-                    metodologias_agrupadas[categoria] = {}
-                    orden_grupos.append(categoria)
-                
-                # Crear clave de agrupación (sin LOD/LOQ, sin analito)
-                group_key = get_group_key(metodologia)
-                
-                if group_key not in metodologias_agrupadas[categoria]:
-                    metodologias_agrupadas[categoria][group_key] = []
-                    # Guardar orden de aparición del primer grupo
-                    if categoria not in [g[0] for g in orden_grupos]:
-                        orden_grupos.append((categoria, group_key))
-                
-                metodologias_agrupadas[categoria][group_key].append(metodologia)
-            
-            # Convertir a lista para el template, manteniendo orden y agrupando por nombre + matriz + técnica
-            metodologias_por_categoria = {}
-            for categoria, grupos in metodologias_agrupadas.items():
-                metodologias_por_categoria[categoria] = []
-                # Mantener orden de grupos dentro de cada categoría
-                grupos_ordenados = sorted(grupos.items(), key=lambda x: (
-                    x[0][0],  # nombre
-                    x[0][1],  # matriz
-                    x[0][2]   # tecnica
-                ))
-                
-                for group_key, items in grupos_ordenados:
-                    # Extraer todos los analitos únicos del grupo
-                    analitos_unicos = []
-                    lods = []
-                    loqs = []
-                    
-                    for item in items:
-                        analito = get_translated_field(item, 'analito') or item['analito'] or ''
-                        if analito and analito not in analitos_unicos:
-                            analitos_unicos.append(analito)
-                        
-                        # Extraer valores numéricos de LOD y LOQ
-                        lod = item.get('limite_deteccion') or ''
-                        loq = item.get('limite_cuantificacion') or ''
-                        
-                        if lod:
-                            try:
-                                import re
-                                lod_match = re.search(r'[\d.]+', str(lod))
-                                if lod_match:
-                                    lods.append(float(lod_match.group()))
-                            except:
-                                pass
-                        
-                        if loq:
-                            try:
-                                import re
-                                loq_match = re.search(r'[\d.]+', str(loq))
-                                if loq_match:
-                                    loqs.append(float(loq_match.group()))
-                            except:
-                                pass
-                    
-                    # Formatear LOD/LOQ como rango (min-max) o valor único
-                    lod_formato = ''
-                    loq_formato = ''
-                    
-                    if lods:
-                        if len(lods) > 1 and min(lods) != max(lods):
-                            lod_formato = f"{min(lods):g}-{max(lods):g}"
-                            # Extraer unidad del primer LOD si está disponible
-                            primer_lod = items[0].get('limite_deteccion') or ''
-                            if primer_lod:
-                                lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
-                                if lod_match:
-                                    lod_formato += lod_match.group(1).strip()
-                        else:
-                            lod_formato = str(min(lods))
-                            # Extraer unidad del primer LOD
-                            primer_lod = items[0].get('limite_deteccion') or ''
-                            if primer_lod:
-                                lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
-                                if lod_match:
-                                    lod_formato += lod_match.group(1).strip()
-                    
-                    if loqs:
-                        if len(loqs) > 1 and min(loqs) != max(loqs):
-                            loq_formato = f"{min(loqs):g}-{max(loqs):g}"
-                            # Extraer unidad del primer LOQ si está disponible
-                            primer_loq = items[0].get('limite_cuantificacion') or ''
-                            if primer_loq:
-                                loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
-                                if loq_match:
-                                    loq_formato += loq_match.group(1).strip()
-                        else:
-                            loq_formato = str(min(loqs))
-                            # Extraer unidad del primer LOQ
-                            primer_loq = items[0].get('limite_cuantificacion') or ''
-                            if primer_loq:
-                                loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
-                                if loq_match:
-                                    loq_formato += loq_match.group(1).strip()
-                    
-                    # Crear una metodología representativa con los valores agregados
-                    met_representativa = items[0].copy()
-                    met_representativa['analitos_agrupados'] = analitos_unicos
-                    met_representativa['lod_agrupado'] = lod_formato
-                    met_representativa['loq_agrupado'] = loq_formato
-                    
-                    metodologias_por_categoria[categoria].append({
-                        'agrupado': True,
-                        'metodologias': items,
-                        'analitos': analitos_unicos,
-                        'metodologia_representativa': met_representativa
-                    })
-            return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         # Si existe template pero no necesita datos especiales, renderizarlo con lang
         # Incluir tarjetas destacadas e imágenes hero para todas las páginas
@@ -2703,21 +2707,26 @@ PERSONALIDAD Y ESTILO:
 - Si hay múltiples metodologías relacionadas, agrupa la información de forma coherente y natural
 - Usa un lenguaje claro y accesible, evitando jerga técnica innecesaria
 
-REGLAS OBLIGATORIAS - CONCISIÓN Y PRECISIÓN:
+REGLAS OBLIGATORIAS - CONCISIÓN Y PRECISIÓN (CRÍTICO):
 1. SOLO usa la información que te proporciono EXPLÍCITAMENTE a continuación sobre FARMAVET
 2. NO busques información en internet - usa SOLO el contexto proporcionado
-3. NO uses conocimiento general o inferencias sobre metodologías que NO están mencionadas explícitamente en el contexto
+3. NO uses conocimiento general, inferencias o información de tu entrenamiento sobre metodologías que NO están mencionadas explícitamente en el contexto
 4. NO inventes metodologías, analitos, matrices o técnicas que NO están en el contexto proporcionado
-5. Si el contexto menciona "METODOLOGÍAS DISPONIBLES EN FARMAVET (lista completa)", esa es una lista de TODAS las metodologías disponibles. Si una metodología NO está en esa lista, NO existe en FARMAVET
-6. Si una metodología NO está mencionada explícitamente en "METODOLOGÍAS RELEVANTES ENCONTRADAS" ni en "METODOLOGÍAS DISPONIBLES", responde: "No encontré información sobre [tema] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
-7. Responde de manera CONCISA: 1-2 oraciones para preguntas simples, máximo 2-3 oraciones para preguntas más complejas
-8. Para preguntas simples como "algún correo de contacto?", responde DIRECTAMENTE con el correo (ej: "Sí, puedes contactarnos al email farmavet@uchile.cl")
-9. NO agregues información extra como dirección, horarios, etc. a menos que se pregunte específicamente
-10. Para metodologías: menciona SOLO lo que está EXPLÍCITAMENTE en el contexto - qué analizan, en qué matriz, con qué técnica, y si es acreditada. Solo menciona LOD/LOQ si se pregunta específicamente sobre límites Y está en el contexto
-11. NO incluyas referencias, citas, notas o números entre corchetes como [1], [2], etc.
-12. NO uses formato de citas como <...> o [...]
-13. NO des consejos adicionales como "puedes contactarnos" o "usa el formulario" a menos que se pregunte específicamente cómo contactar
-14. Si la pregunta requiere información que NO está EXPLÍCITAMENTE en el contexto, responde amablemente: "No encontré información sobre [tema específico] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
+5. DISTINGUE entre "mencionar un servicio" y "tener una metodología específica documentada":
+   - Si solo se menciona "Dioxinas, furanos, PCBs" como servicio general, NO significa que haya una metodología específica documentada
+   - Solo puedes confirmar una metodología si está EXPLÍCITAMENTE en "METODOLOGÍAS RELEVANTES ENCONTRADAS" o "METODOLOGÍAS DISPONIBLES"
+   - NO puedes inferir analitos específicos (ej: PCDD, PCDF, dl-PCB), matrices (ej: músculo, aceite, harina) o técnicas (ej: HRGC/HRMS) solo porque se menciona el nombre del servicio
+6. Si el contexto menciona "METODOLOGÍAS DISPONIBLES EN FARMAVET (lista completa)", esa es una lista de TODAS las metodologías disponibles. Si una metodología NO está en esa lista, NO existe en FARMAVET
+7. Si una metodología NO está mencionada explícitamente en "METODOLOGÍAS RELEVANTES ENCONTRADAS" ni en "METODOLOGÍAS DISPONIBLES", responde: "No encontré información sobre [tema] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
+8. Responde de manera CONCISA: 1-2 oraciones para preguntas simples, máximo 2-3 oraciones para preguntas más complejas
+9. Para preguntas simples como "algún correo de contacto?", responde DIRECTAMENTE con el correo (ej: "Sí, puedes contactarnos al email farmavet@uchile.cl")
+10. NO agregues información extra como dirección, horarios, etc. a menos que se pregunte específicamente
+11. Para metodologías: menciona SOLO lo que está EXPLÍCITAMENTE en el contexto - qué analizan, en qué matriz, con qué técnica, y si es acreditada. Solo menciona LOD/LOQ si se pregunta específicamente sobre límites Y está en el contexto
+12. NO incluyas referencias, citas, notas o números entre corchetes como [1], [2], etc.
+13. NO uses formato de citas como <...> o [...]
+14. NO des consejos adicionales como "puedes contactarnos" o "usa el formulario" a menos que se pregunte específicamente cómo contactar
+15. Si la pregunta requiere información que NO está EXPLÍCITAMENTE en el contexto, responde amablemente: "No encontré información sobre [tema específico] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
+16. PROHIBIDO usar conocimiento general sobre qué analitos, matrices o técnicas se usan típicamente para un tipo de análisis. Solo usa información EXPLÍCITA del contexto.
 
 CONTEXTO DISPONIBLE DE FARMAVET:
 {local_context}
@@ -2817,17 +2826,20 @@ CRÍTICO - DISTINGUIR TIPOS DE PREGUNTAS:
    - Las preguntas cortas como "en que matrices?", "no hacen en X?", "que limites tiene?" se refieren al tema mencionado anteriormente
    - Ejemplo: Si el contexto muestra "organoclorados musculo", "organoclorados aceite" y luego preguntan "no hacen en harina?", busca "organoclorados harina" en el contexto completo
 
-IMPORTANTE - REGLAS CRÍTICAS DE PRECISIÓN:
+IMPORTANTE - REGLAS CRÍTICAS DE PRECISIÓN (OBLIGATORIO):
 - Usa SOLO la información EXPLÍCITAMENTE mencionada en el contexto proporcionado, especialmente METODOLOGÍAS RELEVANTES ENCONTRADAS y METODOLOGÍAS DISPONIBLES
 - Si una metodología NO está mencionada explícitamente en el contexto (ni en METODOLOGÍAS RELEVANTES ni en METODOLOGÍAS DISPONIBLES), NO existe en FARMAVET
 - NO uses conocimiento general, no inferencias, no inventes metodologías, analitos, matrices o técnicas
 - NO respondas con información que "debería" existir o que "generalmente" se hace - SOLO responde con lo que está EXPLÍCITAMENTE en el contexto
 - Si el contexto muestra "METODOLOGÍAS DISPONIBLES EN FARMAVET (lista completa)", esa es la lista TOTAL de metodologías. Si no está ahí, no existe
+- Si solo se menciona un servicio general (ej: "Dioxinas, furanos, PCBs" en una tarjeta de servicios), NO significa que haya una metodología específica documentada. NO puedes inferir analitos, matrices o técnicas de esa mención general
+- Para confirmar una metodología, debe estar EXPLÍCITAMENTE en "METODOLOGÍAS RELEVANTES ENCONTRADAS" o "METODOLOGÍAS DISPONIBLES" con sus detalles (analitos, matrices, técnicas)
 - Razona sobre el contexto completo antes de responder, incluyendo lo que se mencionó anteriormente
 - Si hay información contradictoria o ambigua en el contexto, prioriza la más específica y reciente
 - Si una pregunta de seguimiento no tiene sentido sin contexto previo, revisa las METODOLOGÍAS RELEVANTES ENCONTRADAS para entender el tema
 - Si la pregunta es sobre algo que NO está en el contexto (especialmente metodologías o servicios), responde honestamente: "No encontré información sobre [tema específico] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
 - NO inventes, NO infieras, NO uses conocimiento general - SOLO usa lo que está EXPLÍCITAMENTE en el contexto
+- PROHIBIDO usar conocimiento general sobre qué analitos, matrices o técnicas se usan típicamente para un tipo de análisis
 - Menos es más. Responde lo esencial de forma natural pero breve.
 
 Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de manera natural, inteligente, conversacional PERO CONCISA:
