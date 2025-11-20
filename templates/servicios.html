@@ -450,16 +450,28 @@
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
                           <td><strong>{{ get_translated_field(met, 'nombre') or met.nombre }}</strong></td>
                           <td>
-                            {% if grupo.agrupado %}
+                            {% if grupo.agrupado and grupo.analitos %}
                               {{ grupo.analitos|join(', ') }}
                             {% else %}
-                              {{ get_translated_field(met, 'analito') or met.analito }}
+                              {{ get_translated_field(met, 'analito') or met.analito or '—' }}
                             {% endif %}
                           </td>
                           <td>{{ get_translated_field(met, 'matriz') or met.matriz }}</td>
                           <td>{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}</td>
-                          <td>{{ met.limite_deteccion or '—' }}</td>
-                          <td>{{ met.limite_cuantificacion or '—' }}</td>
+                          <td>
+                            {% if grupo.agrupado and met.lod_agrupado %}
+                              {{ met.lod_agrupado }}
+                            {% else %}
+                              {{ met.limite_deteccion or '—' }}
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if grupo.agrupado and met.loq_agrupado %}
+                              {{ met.loq_agrupado }}
+                            {% else %}
+                              {{ met.limite_cuantificacion or '—' }}
+                            {% endif %}
+                          </td>
                           <td>
                             {% if met.acreditada %}
                               <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>

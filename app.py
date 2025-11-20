@@ -1554,65 +1554,134 @@ def page(page):
                 'otros': 'Otros Análisis'
             }
             
-            # Función para crear clave de agrupación (sin analito)
+            # Función para crear clave de agrupación (sin analito, sin LOD/LOQ)
+            # Agrupar por nombre + matriz + técnica + acreditada
+            # Los analitos y LOD/LOQ pueden variar dentro del mismo grupo
             def get_group_key(metodologia):
                 nombre = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
                 matriz = get_translated_field(metodologia, 'matriz') or metodologia['matriz'] or ''
                 tecnica = get_translated_field(metodologia, 'tecnica') or metodologia['tecnica'] or ''
-                lod = metodologia['limite_deteccion'] or ''
-                loq = metodologia['limite_cuantificacion'] or ''
                 acreditada = metodologia['acreditada'] or False
-                return (nombre, matriz, tecnica, lod, loq, acreditada)
+                return (nombre, matriz, tecnica, acreditada)
             
-            # Agrupar metodologías por nombre de método
+            # Agrupar metodologías por nombre + matriz + técnica + acreditada
+            # Mantener orden original usando lista para orden
             metodologias_agrupadas = {}
+            orden_grupos = []  # Lista para mantener el orden de aparición
+            
             for metodologia in metodologias:
                 categoria = metodologia['categoria'] or 'otros'
                 if categoria not in metodologias_agrupadas:
                     metodologias_agrupadas[categoria] = {}
+                    orden_grupos.append(categoria)
                 
-                # Usar nombre del método como clave principal
-                nombre_metodo = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
-                
-                if nombre_metodo not in metodologias_agrupadas[categoria]:
-                    metodologias_agrupadas[categoria][nombre_metodo] = {}
-                
-                # Crear clave de agrupación (mismo método, misma matriz, técnica, LOD, LOQ)
+                # Crear clave de agrupación (sin LOD/LOQ, sin analito)
                 group_key = get_group_key(metodologia)
                 
-                if group_key not in metodologias_agrupadas[categoria][nombre_metodo]:
-                    metodologias_agrupadas[categoria][nombre_metodo][group_key] = []
+                if group_key not in metodologias_agrupadas[categoria]:
+                    metodologias_agrupadas[categoria][group_key] = []
+                    # Guardar orden de aparición del primer grupo
+                    if categoria not in [g[0] for g in orden_grupos]:
+                        orden_grupos.append((categoria, group_key))
                 
-                metodologias_agrupadas[categoria][nombre_metodo][group_key].append(metodologia)
+                metodologias_agrupadas[categoria][group_key].append(metodologia)
             
-            # Convertir a lista para el template
+            # Convertir a lista para el template, manteniendo orden y agrupando por nombre + matriz + técnica
             metodologias_por_categoria = {}
-            for categoria, metodos in metodologias_agrupadas.items():
+            for categoria, grupos in metodologias_agrupadas.items():
                 metodologias_por_categoria[categoria] = []
-                for nombre_metodo, grupos in metodos.items():
-                    for group_key, items in grupos.items():
-                        # Si hay más de un analito con los mismos valores (excepto analito), agrupar
-                        if len(items) > 1:
-                            # Extraer analitos únicos
-                            analitos_unicos = []
-                            for item in items:
-                                analito = get_translated_field(item, 'analito') or item['analito'] or ''
-                                if analito and analito not in analitos_unicos:
-                                    analitos_unicos.append(analito)
-                            metodologias_por_categoria[categoria].append({
-                                'agrupado': True,
-                                'metodologias': items,
-                                'analitos': analitos_unicos,
-                                'metodologia_representativa': items[0]  # Primera metodología como representante
-                            })
+                # Mantener orden de grupos dentro de cada categoría
+                grupos_ordenados = sorted(grupos.items(), key=lambda x: (
+                    x[0][0],  # nombre
+                    x[0][1],  # matriz
+                    x[0][2]   # tecnica
+                ))
+                
+                for group_key, items in grupos_ordenados:
+                    # Extraer todos los analitos únicos del grupo
+                    analitos_unicos = []
+                    lods = []
+                    loqs = []
+                    
+                    for item in items:
+                        analito = get_translated_field(item, 'analito') or item['analito'] or ''
+                        if analito and analito not in analitos_unicos:
+                            analitos_unicos.append(analito)
+                        
+                        # Extraer valores numéricos de LOD y LOQ
+                        lod = item.get('limite_deteccion') or ''
+                        loq = item.get('limite_cuantificacion') or ''
+                        
+                        if lod:
+                            try:
+                                import re
+                                lod_match = re.search(r'[\d.]+', str(lod))
+                                if lod_match:
+                                    lods.append(float(lod_match.group()))
+                            except:
+                                pass
+                        
+                        if loq:
+                            try:
+                                import re
+                                loq_match = re.search(r'[\d.]+', str(loq))
+                                if loq_match:
+                                    loqs.append(float(loq_match.group()))
+                            except:
+                                pass
+                    
+                    # Formatear LOD/LOQ como rango (min-max) o valor único
+                    lod_formato = ''
+                    loq_formato = ''
+                    
+                    if lods:
+                        if len(lods) > 1 and min(lods) != max(lods):
+                            lod_formato = f"{min(lods):g}-{max(lods):g}"
+                            # Extraer unidad del primer LOD si está disponible
+                            primer_lod = items[0].get('limite_deteccion') or ''
+                            if primer_lod:
+                                lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
+                                if lod_match:
+                                    lod_formato += lod_match.group(1).strip()
                         else:
-                            # Un solo analito
-                            metodologias_por_categoria[categoria].append({
-                                'agrupado': False,
-                                'metodologias': items,
-                                'analitos': [get_translated_field(items[0], 'analito') or items[0]['analito'] or ''],
-                                'metodologia_representativa': items[0]
-                            })
+                            lod_formato = str(min(lods))
+                            # Extraer unidad del primer LOD
+                            primer_lod = items[0].get('limite_deteccion') or ''
+                            if primer_lod:
+                                lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
+                                if lod_match:
+                                    lod_formato += lod_match.group(1).strip()
+                    
+                    if loqs:
+                        if len(loqs) > 1 and min(loqs) != max(loqs):
+                            loq_formato = f"{min(loqs):g}-{max(loqs):g}"
+                            # Extraer unidad del primer LOQ si está disponible
+                            primer_loq = items[0].get('limite_cuantificacion') or ''
+                            if primer_loq:
+                                loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
+                                if loq_match:
+                                    loq_formato += loq_match.group(1).strip()
+                        else:
+                            loq_formato = str(min(loqs))
+                            # Extraer unidad del primer LOQ
+                            primer_loq = items[0].get('limite_cuantificacion') or ''
+                            if primer_loq:
+                                loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
+                                if loq_match:
+                                    loq_formato += loq_match.group(1).strip()
+                    
+                    # Crear una metodología representativa con los valores agregados
+                    met_representativa = items[0].copy()
+                    met_representativa['analitos_agrupados'] = analitos_unicos
+                    met_representativa['lod_agrupado'] = lod_formato
+                    met_representativa['loq_agrupado'] = loq_formato
+                    
+                    metodologias_por_categoria[categoria].append({
+                        'agrupado': True,
+                        'metodologias': items,
+                        'analitos': analitos_unicos,
+                        'metodologia_representativa': met_representativa
+                    })
             return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
         
         # Si existe template pero no necesita datos especiales, renderizarlo con lang
