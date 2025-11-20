@@ -2601,17 +2601,19 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         }
         
         # Verificar que el system_message no sea demasiado largo
-        if len(system_message) > 4000:
-            system_message = system_message[:4000] + "..."
+        # Perplexity permite hasta ~32000 tokens en el contexto, pero limitamos a 8000 caracteres para ser seguros
+        if len(system_message) > 8000:
+            app.logger.warning(f'Chatbot Perplexity: System message demasiado largo ({len(system_message)} caracteres), truncando...')
+            system_message = system_message[:8000] + "..."
         
-        # Modelos disponibles de Perplexity:
-        # - sonar-pro (más potente, con búsqueda web automática)
-        # - sonar (más rápido, con búsqueda web automática)  
-        # - llama-3.1-sonar-small-128k-online (legacy, con búsqueda web)
-        # Usar modelo offline que NO busca en internet
-        # Si no hay modelo offline, usar llama-3.1-70b-instruct o similar
-        payload = {
-            "model": "llama-3.1-70b-instruct",  # Modelo sin búsqueda web automática
+        # Modelos disponibles de Perplexity (ordenados por preferencia):
+        # - sonar-pro (más potente, mejor razonamiento)
+        # - sonar (más rápido)  
+        # - llama-3.1-sonar-large-128k-online (legacy, más contexto)
+        # - llama-3.1-sonar-small-128k-online (legacy, más rápido)
+        # Nota: Estos modelos pueden hacer búsqueda web, pero con el prompt restringimos su uso
+        # El payload base con el primer modelo que intentaremos
+        base_payload = {
             "messages": [
                 {
                     "role": "system",
@@ -2622,7 +2624,7 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                     "content": query
                 }
             ],
-            "temperature": 0.2,
+            "temperature": 0.3,  # Un poco más alto para respuestas más naturales
             "max_tokens": 500
         }
         
