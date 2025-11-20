@@ -44,6 +44,7 @@
                     <li><a href="{{ url_for('admin_tarjetas_destacadas') }}" {% if 'tarjeta_destacada' in request.endpoint or 'tarjetas_destacadas' in request.endpoint %}class="active"{% endif %}><i class="bi bi-card-text me-2"></i>Tarjetas Destacadas</a></li>
                     <li><a href="{{ url_for('admin_correos_contacto') }}" {% if 'correo_contacto' in request.endpoint %}class="active"{% endif %}><i class="bi bi-envelope me-2"></i>Correos de Contacto</a></li>
                     <li><a href="{{ url_for('admin_redes_sociales') }}" {% if 'redes_sociales' in request.endpoint %}class="active"{% endif %}><i class="bi bi-share me-2"></i>Redes Sociales</a></li>
+                    <li><a href="{{ url_for('admin_usuarios') }}" {% if 'usuario' in request.endpoint %}class="active"{% endif %}><i class="bi bi-person-badge me-2"></i>Usuarios Administradores</a></li>
                     <li><hr style="border-color: rgba(255,255,255,0.1); margin: 1rem 0;"></li>
                     <li><a href="{{ url_for('admin_cambiar_contrasena') }}" {% if 'cambiar_contrasena' in request.endpoint %}class="active"{% endif %}><i class="bi bi-key me-2"></i>Cambiar Contraseña</a></li>
                     <li><a href="/" target="_blank"><i class="bi bi-globe me-2"></i>Ver sitio web</a></li>

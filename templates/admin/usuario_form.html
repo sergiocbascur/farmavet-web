@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Nuevo Usuario Administrador{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Usuario Administrador
+    </h2>
+    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Crear Usuario</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person me-2"></i>Nombre de Usuario <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                        <small class="form-text text-muted">El nombre de usuario debe ser único</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-key me-2"></i>Contraseña <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <small class="form-text text-muted">
+                            La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas y números
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">
+                            <i class="bi bi-key-fill me-2"></i>Confirmar Contraseña <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        <small class="form-text text-muted">Vuelve a ingresar la contraseña para confirmar</small>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('admin_usuarios') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Crear Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-shield-check me-2"></i>Requisitos de Seguridad</h6>
+                <ul class="mb-0">
+                    <li>Mínimo 8 caracteres</li>
+                    <li>Al menos una letra mayúscula</li>
+                    <li>Al menos una letra minúscula</li>
+                    <li>Al menos un número</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Validación en tiempo real de coincidencia de contraseñas
+    document.getElementById('confirm_password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        
+        if (password && confirmPassword) {
+            if (password !== confirmPassword) {
+                this.setCustomValidity('Las contraseñas no coinciden');
+                this.classList.add('is-invalid');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Validación de fortaleza de contraseña
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const requirements = {
+            length: password.length >= 8,
+            upper: /[A-Z]/.test(password),
+            lower: /[a-z]/.test(password),
+            number: /[0-9]/.test(password)
+        };
+        
+        if (requirements.length && requirements.upper && requirements.lower && requirements.number) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+            if (password.length > 0) {
+                this.classList.add('is-invalid');
+            }
+        }
+    });
+</script>
+{% endblock %}
+

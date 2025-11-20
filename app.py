@@ -1840,6 +1840,110 @@ def admin_cambiar_contrasena():
     
     return render_template('admin/cambiar_contrasena.html')
 
+# Gestión de usuarios administradores
+@app.route('/admin/usuarios')
+@login_required
+def admin_usuarios():
+    conn = get_db()
+    usuarios = conn.execute('SELECT id, username, created_at FROM admins ORDER BY created_at DESC').fetchall()
+    conn.close()
+    return render_template('admin/usuarios.html', usuarios=usuarios)
+
+@app.route('/admin/usuarios/nuevo', methods=['GET', 'POST'])
+@login_required
+@csrf_required
+def admin_usuarios_nuevo():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # Validaciones
+        if not username:
+            flash('El nombre de usuario es requerido', 'error')
+            return render_template('admin/usuario_form.html')
+        
+        if not password or not confirm_password:
+            flash('La contraseña y su confirmación son requeridas', 'error')
+            return render_template('admin/usuario_form.html')
+        
+        if password != confirm_password:
+            flash('Las contraseñas no coinciden', 'error')
+            return render_template('admin/usuario_form.html')
+        
+        # Validar fortaleza de contraseña
+        is_valid, error_msg = validate_password_strength(password)
+        if not is_valid:
+            flash(error_msg, 'error')
+            return render_template('admin/usuario_form.html')
+        
+        # Verificar si el usuario ya existe
+        conn = get_db()
+        existing = conn.execute('SELECT id FROM admins WHERE username = ?', (username,)).fetchone()
+        
+        if existing:
+            flash(f'El usuario "{username}" ya existe', 'error')
+            conn.close()
+            return render_template('admin/usuario_form.html')
+        
+        # Crear el usuario
+        password_hash = generate_password_hash(password)
+        try:
+            conn.execute('''
+                INSERT INTO admins (username, password_hash)
+                VALUES (?, ?)
+            ''', (username, password_hash))
+            conn.commit()
+            conn.close()
+            flash(f'Usuario "{username}" creado exitosamente', 'success')
+            return redirect(url_for('admin_usuarios'))
+        except Exception as e:
+            conn.close()
+            app.logger.error(f'Error al crear usuario: {str(e)}', exc_info=True)
+            flash('Error al crear el usuario', 'error')
+            return render_template('admin/usuario_form.html')
+    
+    return render_template('admin/usuario_form.html')
+
+@app.route('/admin/usuarios/<int:usuario_id>/eliminar', methods=['POST'])
+@login_required
+@csrf_required
+def admin_usuarios_eliminar(usuario_id):
+    # No permitir eliminar el propio usuario
+    if usuario_id == session.get('admin_id'):
+        flash('No puedes eliminar tu propio usuario', 'error')
+        return redirect(url_for('admin_usuarios'))
+    
+    conn = get_db()
+    
+    # Verificar que el usuario existe
+    usuario = conn.execute('SELECT username FROM admins WHERE id = ?', (usuario_id,)).fetchone()
+    
+    if not usuario:
+        flash('Usuario no encontrado', 'error')
+        conn.close()
+        return redirect(url_for('admin_usuarios'))
+    
+    # Verificar que no sea el último usuario
+    count = conn.execute('SELECT COUNT(*) FROM admins').fetchone()[0]
+    if count <= 1:
+        flash('No se puede eliminar el último usuario administrador', 'error')
+        conn.close()
+        return redirect(url_for('admin_usuarios'))
+    
+    # Eliminar el usuario
+    try:
+        conn.execute('DELETE FROM admins WHERE id = ?', (usuario_id,))
+        conn.commit()
+        conn.close()
+        flash(f'Usuario "{usuario["username"]}" eliminado exitosamente', 'success')
+    except Exception as e:
+        conn.close()
+        app.logger.error(f'Error al eliminar usuario: {str(e)}', exc_info=True)
+        flash('Error al eliminar el usuario', 'error')
+    
+    return redirect(url_for('admin_usuarios'))
+
 # Gestión de programas
 @app.route('/admin/programas')
 @login_required
