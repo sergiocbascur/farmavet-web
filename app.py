@@ -2629,7 +2629,7 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
-        app.logger.debug(f'Chatbot Perplexity: Payload model: {payload["model"]}, messages count: {len(payload["messages"])}')
+        app.logger.debug(f'Chatbot Perplexity: System message length: {len(system_message)} caracteres')
         
         # Intentar primero con sonar-pro (modelo más reciente y potente)
         # Nota: sonar-pro y sonar son modelos online (buscadores web), pero podemos usarlos con contexto local
@@ -2645,6 +2645,8 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         
         for model_name in models_to_try:
             try:
+                # Construir payload para este modelo
+                payload = base_payload.copy()
                 payload["model"] = model_name
                 app.logger.info(f'Chatbot Perplexity: Intentando con modelo {model_name}...')
                 response = requests.post(perplexity_url, headers=headers, json=payload, timeout=20)
