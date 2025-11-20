@@ -445,13 +445,16 @@
                 <tbody>
                   {% for cat_key, cat_name in categorias_nombres.items() %}
                     {% if cat_key in metodologias_por_categoria %}
-                      {% set prev_metodologia = '' %}
                       {% for grupo in metodologias_por_categoria[cat_key] %}
                         {% set met = grupo.metodologia_representativa %}
                         {% set metodologia_nombre = get_translated_field(met, 'nombre') or met.nombre %}
-                        {% set mostrar_metodologia = (metodologia_nombre != prev_metodologia) %}
-                        {% if mostrar_metodologia %}
-                          {% set prev_metodologia = metodologia_nombre %}
+                        {% if loop.first %}
+                          {% set mostrar_metodologia = True %}
+                        {% else %}
+                          {% set grupo_anterior = metodologias_por_categoria[cat_key][loop.index0 - 1] %}
+                          {% set met_anterior = grupo_anterior.metodologia_representativa %}
+                          {% set nombre_anterior = get_translated_field(met_anterior, 'nombre') or met_anterior.nombre %}
+                          {% set mostrar_metodologia = (metodologia_nombre != nombre_anterior) %}
                         {% endif %}
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
                           <td>
