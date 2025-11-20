@@ -256,17 +256,28 @@ class MetodologiasChatbot {
         setTimeout(async () => {
             this.hideTyping(typingId);
             
-            // Detectar si la consulta es sobre información general (contacto, ubicación, etc.)
+            // Detectar si la consulta es sobre información general (contacto, ubicación, etc.) o servicios
             const queryLower = query.toLowerCase();
             const isContactQuery = /\b(contacto|email|correo|teléfono|telefono)\b/i.test(query);
             const isLocationQuery = /\b(ubicación|ubicacion|ubicados|ubicadas|donde|dónde|se encuentran|localización|localizacion|dirección|direccion)\b/i.test(query);
             const isScheduleQuery = /\b(horario|horarios|atencion|atención|agendar|reunión|reunion)\b/i.test(query);
-            const isGeneralQuery = isContactQuery || isLocationQuery || isScheduleQuery;
             
-            // Si es una consulta general (contacto, ubicación, horario), responder directamente sin Perplexity
+            // Detectar preguntas sobre servicios (NO metodologías): informes, reportes, traducción, formato, etc.
+            const isServiceQuery = /\b(informes|reportes|traducción|traduccion|traducir|inglés|ingles|english|formato|formatos|entregar|entregan|generar|generan|pueden)\b/i.test(query) &&
+                                   !/\b(metodología|metodologia|metodo|metodos|analizan|analisis|ensayo|ensayos|técnica|tecnica)\b/i.test(query);
+            
+            const isGeneralQuery = isContactQuery || isLocationQuery || isScheduleQuery || isServiceQuery;
+            
+            // Si es una consulta general o sobre servicios, responder directamente sin búsqueda de metodologías
             if (isGeneralQuery) {
-                // Responder directamente con información local (GRATIS)
-                this.showGeneralInfo(query, isContactQuery, isLocationQuery, isScheduleQuery);
+                if (isServiceQuery) {
+                    // Para preguntas sobre servicios, usar IA para responder apropiadamente
+                    // Ya que puede requerir información contextual que no está en la BD
+                    await this.searchWithPerplexity(query, false, true, [], null);
+                } else {
+                    // Para contacto, ubicación, horario, responder directamente (GRATIS)
+                    this.showGeneralInfo(query, isContactQuery, isLocationQuery, isScheduleQuery);
+                }
                 return;
             }
             
@@ -965,15 +976,16 @@ class MetodologiasChatbot {
                     let keywordsSecundariasMatched = 0;
                     let keywordsPrincipalesMatched = 0;
                     
-                    // Verificar coincidencia de keywords principales
+                    // Verificar coincidencia de keywords principales (deben estar en nombre O analito)
                     for (const keywordPrincipal of keywordsPrincipales) {
                         const cleanPrincipal = keywordPrincipal.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
+                        // Verificar que coincida en nombre O analito (no solo en matriz o técnica)
                         if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
                             keywordsPrincipalesMatched++;
                         }
                     }
                     
-                    // Verificar coincidencia de keywords secundarias
+                    // Verificar coincidencia de keywords secundarias (pueden estar en nombre O matriz)
                     for (const keywordSec of keywordsSecundarias) {
                         const cleanSec = keywordSec.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
                         if (nombreNorm.includes(cleanSec) || matrizNorm.includes(cleanSec)) {
@@ -1008,6 +1020,34 @@ class MetodologiasChatbot {
                     
                     if (!todasCoinciden) {
                         // Si NO coinciden TODAS las keywords principales, DESCARTAR completamente
+                        score = 0;
+                        hasMatchInAnalitoOrNombre = false;
+                    }
+                }
+            }
+            
+            // FILTRO ADICIONAL: Si hay keyword principal (ej: "organoclorados") y keyword secundaria (ej: "harina"),
+            // el resultado DEBE tener la keyword principal en el nombre O analito
+            // Esto previene que aparezcan resultados como "plomo harina" cuando se busca "organoclorados harina"
+            if (keywords.length > 1) {
+                const palabrasMatriz = ['harina', 'salmon', 'aceite', 'musculo', 'carne', 'leche', 'huevo', 'pecuarios', 'hidrobiologicos'];
+                const keywordsPrincipales = keywords.filter(k => !palabrasMatriz.includes(k.toLowerCase()));
+                const keywordsSecundarias = keywords.filter(k => palabrasMatriz.includes(k.toLowerCase()));
+                
+                if (keywordsPrincipales.length > 0 && keywordsSecundarias.length > 0) {
+                    // Verificar que al menos una keyword principal esté en nombre o analito
+                    let tieneKeywordPrincipal = false;
+                    for (const keywordPrincipal of keywordsPrincipales) {
+                        const cleanPrincipal = keywordPrincipal.replace(/[?¿!¡.,;:]/g, '').trim().toLowerCase();
+                        if (nombreNorm.includes(cleanPrincipal) || analitoNorm.includes(cleanPrincipal)) {
+                            tieneKeywordPrincipal = true;
+                            break;
+                        }
+                    }
+                    
+                    // Si NO tiene ninguna keyword principal en nombre/analito, DESCARTAR
+                    // Esto evita "plomo harina" cuando se busca "organoclorados harina"
+                    if (!tieneKeywordPrincipal) {
                         score = 0;
                         hasMatchInAnalitoOrNombre = false;
                     }
