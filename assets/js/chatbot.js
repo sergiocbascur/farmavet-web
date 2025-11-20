@@ -585,34 +585,87 @@ class MetodologiasChatbot {
             }
             
             // PRIORIDAD 2: Términos expandidos (sinónimos) en analito o nombre
-            for (const term of expandedTermsArray) {
-                const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
-                if (cleanTerm.length >= 3) {
-                    // Solo considerar si está en analito o nombre, NO en matriz o técnica
-                    if (analitoNorm.includes(cleanTerm) || analitoEnNorm.includes(cleanTerm) ||
-                        nombreNorm.includes(cleanTerm) || nombreEnNorm.includes(cleanTerm)) {
-                        score += maxScore * 0.3;
-                        break; // Solo contar una vez por término expandido
-                    }
-                }
-            }
-            
-            // PRIORIDAD 3: Coincidencia en otros campos (matriz, técnica) - MUY BAJA prioridad
-            // Solo si ya hay alguna coincidencia en analito/nombre
-            if (score > 0 && keywords.length > 0) {
+            // IMPORTANTE: Solo si NO hay coincidencia directa en keywords, considerar sinónimos
+            // Pero solo si el sinónimo está específicamente relacionado con el término buscado
+            if (score === 0 && keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
-                    if (cleanKeyword.length >= 4) {
-                        if (matrizNorm.includes(cleanKeyword) || tecnicaNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.1;
+                    if (cleanKeyword.length >= 3) {
+                        // Buscar en términos expandidos si el keyword está relacionado con sinónimos
+                        for (const term of expandedTermsArray) {
+                            const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
+                            if (cleanTerm.length >= 3 && cleanTerm !== cleanKeyword) {
+                                // Solo considerar si está en analito o nombre, NO en matriz o técnica
+                                if (analitoNorm.includes(cleanTerm) || analitoEnNorm.includes(cleanTerm) ||
+                                    nombreNorm.includes(cleanTerm) || nombreEnNorm.includes(cleanTerm)) {
+                                    // Verificar que el término expandido sea realmente un sinónimo del keyword buscado
+                                    // Revisar si el término expandido está en la lista de sinónimos del keyword
+                                    let isRelated = false;
+                                    for (const [synKey, synValues] of Object.entries(synonyms)) {
+                                        const normalizedSynKey = this.normalizeText(synKey);
+                                        if ((normalizedSynKey === cleanKeyword || cleanKeyword.includes(normalizedSynKey) || normalizedSynKey.includes(cleanKeyword)) &&
+                                            synValues.some(v => this.normalizeText(v) === cleanTerm)) {
+                                            isRelated = true;
+                                            break;
+                                        }
+                                        if (synValues.some(v => this.normalizeText(v) === cleanKeyword) &&
+                                            (normalizedSynKey === cleanTerm || cleanTerm.includes(normalizedSynKey) || normalizedSynKey.includes(cleanTerm))) {
+                                            isRelated = true;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (isRelated) {
+                                        score += maxScore * 0.6; // Menor prioridad que coincidencia directa
+                                        break; // Solo contar una vez por keyword
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
             
+            // PRIORIDAD 3: Coincidencia en otros campos (matriz, técnica) - MUY BAJA prioridad
+            // SOLO como bonus adicional si ya hay coincidencia fuerte en analito/nombre
+            // NUNCA debe ser suficiente por sí sola para aparecer en resultados
+            if (score >= maxScore * 0.5 && keywords.length > 0) {
+                for (const keyword of keywords) {
+                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                    if (cleanKeyword.length >= 4) {
+                        if (matrizNorm.includes(cleanKeyword) || tecnicaNorm.includes(cleanKeyword)) {
+                            score += maxScore * 0.05; // Muy pequeño bonus adicional
+                        }
+                    }
+                }
+            }
+            
+            // FILTRO CRÍTICO: Si no hay coincidencia mínima en analito/nombre, descartar completamente
+            // Esto evita que aparezcan metodologías solo por compartir matriz o técnica
+            if (score === 0 || (score < maxScore * 0.3 && keywords.length > 0)) {
+                // Verificar si al menos hay una coincidencia débil en analito o nombre
+                let hasWeakMatch = false;
+                for (const keyword of keywords) {
+                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                    if (cleanKeyword.length >= 3) {
+                        // Coincidencia muy débil (substring) en analito o nombre
+                        if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
+                            nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                            hasWeakMatch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si no hay coincidencia mínima, descartar (score = 0)
+                if (!hasWeakMatch) {
+                    score = 0;
+                }
+            }
+            
             return { metodologia: met, score: score };
         })
-        .filter(item => item.score > 0) // Solo mantener resultados con score > 0
+        .filter(item => item.score >= maxScore * 0.3) // Solo mantener resultados con score mínimo significativo
         .sort((a, b) => b.score - a.score) // Ordenar por score descendente
         .slice(0, 20) // Limitar a los 20 mejores resultados
         .map(item => item.metodologia); // Devolver solo las metodologías
