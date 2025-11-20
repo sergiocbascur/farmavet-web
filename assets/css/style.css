@@ -4854,25 +4854,126 @@ input[type="button"],
 @media (max-width: 768px) {
   .metodologias-search-wrapper {
     margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
   }
   
-  .metodologias-search {
-    font-size: 16px; /* Evita zoom en iOS */
-    min-height: 48px;
-    padding: 0.75rem 1rem;
+  .metodologias-search-box {
+    margin-bottom: 1.25rem;
+  }
+  
+  .metodologias-search-box i.bi-search {
+    left: 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .metodologias-search-input {
+    font-size: 16px !important; /* Evita zoom automático en iOS */
+    min-height: 52px; /* Más grande para mejor accesibilidad táctil */
+    padding: 0.875rem 3rem 0.875rem 2.75rem; /* Más padding para mejor área táctil */
     border-radius: 12px;
+    border-width: 2px;
+  }
+  
+  .metodologias-search-input:focus {
+    box-shadow: 0 0 0 3px rgba(35, 115, 186, 0.15);
+  }
+  
+  .metodologias-clear-btn {
+    right: 0.75rem;
+    font-size: 1.5rem; /* Más grande para mejor accesibilidad */
+    padding: 0.5rem; /* Área táctil más grande */
+    min-width: 44px; /* Mínimo recomendado para accesibilidad */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .metodologias-filters {
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.625rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    margin: 0 -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   
-  .metodologias-filters button {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9rem;
-    min-height: 40px;
-    border-radius: 8px;
+  .metodologias-filters::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .metodologias-filter-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 44px; /* Mínimo recomendado para accesibilidad */
+    min-width: 44px;
+    border-radius: 22px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    touch-action: manipulation; /* Mejora respuesta táctil */
+  }
+  
+  .metodologias-results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .metodologias-results-header span {
+    font-size: 0.95rem;
+    width: 100%;
+  }
+  
+  .metodologias-download-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+    min-height: 48px; /* Más grande para mejor accesibilidad */
+    border-radius: 12px;
+    touch-action: manipulation;
+  }
+  
+  .metodologias-empty-state,
+  .metodologias-no-results {
+    padding: 3rem 1.5rem;
+  }
+  
+  .metodologias-empty-state i,
+  .metodologias-no-results i {
+    font-size: 2.5rem;
+    margin-bottom: 0.875rem;
+  }
+  
+  .metodologias-empty-state p,
+  .metodologias-no-results p {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .metodologias-table-wrapper {
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .metodologias-table {
+    min-width: 800px; /* Ancho mínimo para mantener legibilidad */
+  }
+  
+  .metodologias-table th,
+  .metodologias-table td {
+    padding: 0.875rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .metodologias-table th {
+    font-size: 0.8rem;
+    padding: 0.75rem;
   }
 }
 
