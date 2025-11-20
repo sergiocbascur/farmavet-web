@@ -266,8 +266,8 @@ class MetodologiasChatbot {
                 return;
             }
             
-            // Para consultas sobre metodologías, buscar localmente primero
-            const results = await this.searchMetodologias(query);
+            // Para consultas sobre metodologías, buscar localmente primero usando el query procesado
+            const results = await this.searchMetodologias(searchQuery);
             
             // Si encuentra resultados locales, mostrarlos
             if (results.length > 0) {
@@ -592,20 +592,34 @@ class MetodologiasChatbot {
             const cleanQuery = normalizedQuery.replace(/[?¿!¡.,;:]/g, '').trim();
             
             // PRIORIDAD 1: Coincidencia exacta en analito (máxima prioridad)
+            // Contador de keywords que coinciden para priorizar coincidencias múltiples
+            let keywordsMatched = 0;
+            let keywordsInAnalito = 0;
+            let keywordsInNombre = 0;
+            let keywordsInMatriz = 0;
+            
             if (keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 3) {
+                        let keywordMatched = false;
+                        
                         // Coincidencia exacta en analito
                         if (analitoNorm === cleanKeyword || analitoEnNorm === cleanKeyword) {
-                            score += maxScore;
+                            score += maxScore * 2; // Bonus extra por coincidencia exacta
+                            keywordsMatched++;
+                            keywordsInAnalito++;
+                            keywordMatched = true;
                             continue;
                         }
                         
                         // Coincidencia como palabra completa en analito
                         const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         if (analitoRegex.test(analitoNorm) || analitoRegex.test(analitoEnNorm)) {
-                            score += maxScore * 0.9;
+                            score += maxScore * 1.5;
+                            keywordsMatched++;
+                            keywordsInAnalito++;
+                            keywordMatched = true;
                             continue;
                         }
                         
@@ -613,34 +627,73 @@ class MetodologiasChatbot {
                         const analitoWords = (analitoNorm + ' ' + analitoEnNorm).split(/\s+/).filter(w => w.length >= 3);
                         for (const word of analitoWords) {
                             if (this.isSimilar(cleanKeyword, word, 2)) {
-                                score += maxScore * 0.8;
-                                continue;
+                                score += maxScore * 1.2;
+                                keywordsMatched++;
+                                keywordsInAnalito++;
+                                keywordMatched = true;
+                                break;
                             }
                         }
+                        if (keywordMatched) continue;
                         
                         // Coincidencia exacta en nombre del método
                         if (nombreNorm === cleanKeyword || nombreEnNorm === cleanKeyword) {
-                            score += maxScore * 0.7;
+                            score += maxScore * 1.3;
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
                             continue;
                         }
                         
                         // Coincidencia como palabra completa en nombre
                         const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         if (nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
-                            score += maxScore * 0.6;
+                            score += maxScore * 1.1;
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
                             continue;
                         }
                         
                         // Coincidencia en analito o nombre como substring (menor prioridad)
                         if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.5;
+                            score += maxScore * 0.8;
+                            keywordsMatched++;
+                            keywordsInAnalito++;
+                            keywordMatched = true;
                             continue;
                         }
                         if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
-                            score += maxScore * 0.4;
+                            score += maxScore * 0.7;
+                            keywordsMatched++;
+                            keywordsInNombre++;
+                            keywordMatched = true;
+                            continue;
+                        }
+                        
+                        // Coincidencia en matriz (solo si también hay coincidencia en analito/nombre)
+                        const matrizRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        if (matrizRegex.test(matrizNorm)) {
+                            keywordsMatched++;
+                            keywordsInMatriz++;
+                            // Solo dar puntos si ya hay alguna coincidencia en analito/nombre
+                            if (keywordsInAnalito > 0 || keywordsInNombre > 0) {
+                                score += maxScore * 0.3; // Bonus por coincidencia múltiple
+                            }
+                            keywordMatched = true;
                             continue;
                         }
                     }
+                }
+                
+                // BONUS: Si TODOS los keywords coinciden (coincidencia múltiple), dar bonus extra
+                if (keywords.length > 1 && keywordsMatched === keywords.length) {
+                    score += maxScore * 0.5; // Bonus por coincidencia completa
+                }
+                
+                // BONUS: Si hay coincidencias en múltiples campos (analito Y nombre Y matriz)
+                if (keywordsInAnalito > 0 && keywordsInNombre > 0) {
+                    score += maxScore * 0.4; // Bonus por coincidencia en múltiples campos
                 }
             }
             
@@ -774,10 +827,17 @@ class MetodologiasChatbot {
                 score = 0;
             }
             
-            return { metodologia: met, score: score };
+            return { metodologia: met, score: score, keywordsMatched: keywordsMatched || 0 };
         })
         .filter(item => item.score > 0) // Solo mantener resultados con score > 0 (ya filtrado por coincidencia en analito/nombre)
-        .sort((a, b) => b.score - a.score) // Ordenar por score descendente
+        .sort((a, b) => {
+            // Ordenar primero por número de keywords que coinciden (descendente)
+            if (b.keywordsMatched !== a.keywordsMatched) {
+                return b.keywordsMatched - a.keywordsMatched;
+            }
+            // Si tienen el mismo número de keywords, ordenar por score descendente
+            return b.score - a.score;
+        })
         .slice(0, 20) // Limitar a los 20 mejores resultados
         .map(item => item.metodologia); // Devolver solo las metodologías
 
