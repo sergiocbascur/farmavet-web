@@ -864,10 +864,41 @@ class MetodologiasChatbot {
                 score = 0;
             }
             
-            return { metodologia: met, score: score, keywordsMatched: keywordsMatched || 0 };
+            // BONUS ESPECIAL: Si el nombre del método contiene una de las keywords principales,
+            // y hay múltiples variantes del mismo método (ej: ORGANOCLORADOS MUSCULO, ORGANOCLORADOS ACEITE, ORGANOCLORADOS HARINA),
+            // dar un bonus adicional para asegurar que todas las variantes se incluyan
+            if (keywordsMatched > 0 && nombreNorm) {
+                // Extraer la "raíz" del método (ej: "organoclorados" de "organoclorados musculo")
+                const nombreWords = nombreNorm.split(/\s+/).filter(w => w.length >= 4);
+                for (const keyword of keywords) {
+                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                    if (cleanKeyword.length >= 4 && nombreWords.some(word => word.includes(cleanKeyword) || cleanKeyword.includes(word))) {
+                        // Si la keyword principal está en el nombre, asegurar que se incluya
+                        // Esto ayuda con casos como "ORGANOCLORADOS HARINA" cuando se busca "organoclorados"
+                        if (score === 0) {
+                            score = maxScore * 0.3; // Score mínimo para no descartar
+                            keywordsMatched = 1;
+                            hasMatchInAnalitoOrNombre = true;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            return { metodologia: met, score: score, keywordsMatched: keywordsMatched || 0, nombre: nombreNorm };
         })
-        .filter(item => item.score > 0) // Solo mantener resultados con score > 0 (ya filtrado por coincidencia en analito/nombre)
+        .filter(item => item.score > 0) // Solo mantener resultados con score > 0
         .sort((a, b) => {
+            // Si son del mismo método base (ej: ambos "organoclorados"), agrupar juntos
+            const nombreA = a.nombre ? a.nombre.split(/\s+/)[0] : '';
+            const nombreB = b.nombre ? b.nombre.split(/\s+/)[0] : '';
+            
+            // Si tienen el mismo nombre base, mantener juntos
+            if (nombreA && nombreB && nombreA === nombreB) {
+                // Dentro del mismo grupo, ordenar por score
+                return b.score - a.score;
+            }
+            
             // Ordenar primero por número de keywords que coinciden (descendente)
             if (b.keywordsMatched !== a.keywordsMatched) {
                 return b.keywordsMatched - a.keywordsMatched;
@@ -875,7 +906,7 @@ class MetodologiasChatbot {
             // Si tienen el mismo número de keywords, ordenar por score descendente
             return b.score - a.score;
         })
-        .slice(0, 20) // Limitar a los 20 mejores resultados
+        .slice(0, 30) // Aumentar límite a 30 para incluir más variantes del mismo método
         .map(item => item.metodologia); // Devolver solo las metodologías
 
         return scoredResults;
