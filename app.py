@@ -2927,8 +2927,8 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
             app.logger.info('Chatbot: DeepSeek no disponible, intentando Ollama...')
         
         # CAPA 3 (OPCIONAL): Si Ollama y DeepSeek fallaron, usar Perplexity como último recurso (si está configurado)
-        if ollama_failed and deepseek_failed and use_perplexity:
-            app.logger.info('Chatbot: Ollama y DeepSeek no disponibles, usando Perplexity como último recurso...')
+        if deepseek_failed and ollama_failed and use_perplexity:
+            app.logger.info('Chatbot: DeepSeek y Ollama no disponibles, usando Perplexity como último recurso...')
             # Llamar a la API de Perplexity
             perplexity_url = "https://api.perplexity.ai/chat/completions"
             
@@ -3044,8 +3044,8 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
             perplexity_failed = True
         
         # CAPA 3 (FALLBACK FINAL): Si todas las APIs fallaron, usar búsqueda local básica sin IA
-        if ollama_failed and deepseek_failed and (not use_perplexity or perplexity_failed):
-            app.logger.warning('Chatbot: Todas las APIs de IA fallaron, usando búsqueda local básica')
+        if deepseek_failed and ollama_failed and (not use_perplexity or perplexity_failed):
+            app.logger.warning('Chatbot: Todas las APIs de IA fallaron (DeepSeek y Ollama), usando búsqueda local básica')
             
             # Respuesta básica usando solo los resultados locales
             if local_results and len(local_results) > 0:
