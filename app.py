@@ -1909,6 +1909,12 @@ def admin_usuarios_nuevo():
 @login_required
 @csrf_required
 def admin_usuarios_eliminar(usuario_id):
+    # Solo el usuario "admin" puede eliminar otros usuarios
+    current_username = session.get('admin_username', '')
+    if current_username != 'admin':
+        flash('Solo el usuario administrador principal puede eliminar usuarios', 'error')
+        return redirect(url_for('admin_usuarios'))
+    
     # No permitir eliminar el propio usuario
     if usuario_id == session.get('admin_id'):
         flash('No puedes eliminar tu propio usuario', 'error')
@@ -1921,6 +1927,12 @@ def admin_usuarios_eliminar(usuario_id):
     
     if not usuario:
         flash('Usuario no encontrado', 'error')
+        conn.close()
+        return redirect(url_for('admin_usuarios'))
+    
+    # No permitir eliminar al usuario "admin"
+    if usuario['username'] == 'admin':
+        flash('No se puede eliminar al usuario administrador principal', 'error')
         conn.close()
         return redirect(url_for('admin_usuarios'))
     
