@@ -2484,23 +2484,52 @@ def api_chatbot_search():
             try:
                 conn = get_db()
                 
-                # Obtener metodologías disponibles
+                # Obtener TODAS las metodologías agrupadas por nombre (para incluir context completo)
+                # Esto permite que Perplexity busque inteligentemente incluso cuando la búsqueda local no encuentra resultados
                 metodologias = conn.execute('''
-                    SELECT DISTINCT analito, matriz, tecnica, categoria 
+                    SELECT DISTINCT nombre, matriz, tecnica, categoria, acreditada
                     FROM metodologias 
                     WHERE activo = 1 
-                    LIMIT 20
+                    ORDER BY nombre, matriz
+                    LIMIT 100
                 ''').fetchall()
                 
                 if metodologias:
-                    met_list = []
-                    for m in metodologias[:10]:
-                        analito = m['analito'] if 'analito' in m.keys() else ''
+                    # Agrupar por nombre del método para mostrar de forma más natural
+                    metodos_dict = {}
+                    for m in metodologias:
+                        nombre = m['nombre'] if 'nombre' in m.keys() else ''
                         matriz = m['matriz'] if 'matriz' in m.keys() else ''
-                        tecnica = m['tecnica'] if 'tecnica' in m.keys() and m['tecnica'] else 'técnica variada'
-                        met_list.append(f"{analito} en {matriz} ({tecnica})")
+                        tecnica = m['tecnica'] if 'tecnica' in m.keys() and m['tecnica'] else ''
+                        categoria = m['categoria'] if 'categoria' in m.keys() else ''
+                        acreditada = m.get('acreditada', False) if 'acreditada' in m.keys() else False
+                        
+                        if nombre:
+                            # Crear clave única por método y matriz
+                            key = f"{nombre}|{matriz}"
+                            if key not in metodos_dict:
+                                metodos_dict[key] = {
+                                    'nombre': nombre,
+                                    'matriz': matriz,
+                                    'tecnica': tecnica,
+                                    'categoria': categoria,
+                                    'acreditada': acreditada
+                                }
+                    
+                    # Formatear lista de métodos disponibles
+                    met_list = []
+                    for metodo in list(metodos_dict.values())[:50]:  # Máximo 50 métodos
+                        metodo_str = metodo['nombre']
+                        if metodo['matriz']:
+                            metodo_str += f" en {metodo['matriz']}"
+                        if metodo['tecnica']:
+                            metodo_str += f" ({metodo['tecnica']})"
+                        if metodo['acreditada']:
+                            metodo_str += " [Acreditada ISO 17025]"
+                        met_list.append(metodo_str)
+                    
                     if met_list:
-                        local_context = f"\n\nMetodologías disponibles en FARMAVET:\n- " + "\n- ".join(met_list) + local_context
+                        local_context += f"\n\nMETODOLOGÍAS DISPONIBLES EN FARMAVET (lista completa):\n- " + "\n- ".join(met_list)
                 
                 # Obtener servicios principales
                 try:

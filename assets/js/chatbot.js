@@ -496,6 +496,8 @@ class MetodologiasChatbot {
             'micotoxina': ['aflatoxina', 'ocratoxina', 'fumonisina', 'zearalenona', 'deoxinivalenol', 'toxina t-2', 'patulina'],
             'aflatoxina': ['aflatoxinas', 'aflatoxina b1', 'aflatoxina b2', 'aflatoxina g1', 'aflatoxina g2', 'aflatoxinas'],
             'pesticida': ['plaguicida', 'organoclorado', 'organofosforado', 'diquat', 'paraquat', 'glifosato', 'herbicida', 'insecticida', 'fungicida'],
+            'organoclorado': ['organoclorados', 'pesticida organoclorado', 'plaguicida organoclorado', 'hch', 'lindano', 'ddt', 'dieldrin', 'aldrin', 'endrin', 'heptacloro', 'clordano'],
+            'organoclorados': ['organoclorado', 'pesticida organoclorado', 'plaguicida organoclorado', 'hch', 'lindano', 'ddt', 'dieldrin', 'aldrin', 'endrin', 'heptacloro', 'clordano', 'alfa-hch', 'beta-hch', 'gamma-hch', 'gama-hch'],
             'salmon': ['salmones', 'salmonidos', 'salmonideos', 'trucha', 'truchas', 'pez', 'peces', 'hidrobiologico', 'hidrobiológico', 'productos hidrobiologicos'],
             'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina', 'cerdo', 'cerdos', 'ave', 'aves', 'pollo', 'pollos', 'productos pecuarios', 'pecuarios', 'producto animal'],
             'leche': ['lacteo', 'lacteos', 'dairy', 'producto lacteo'],
