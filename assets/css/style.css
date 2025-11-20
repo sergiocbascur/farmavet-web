@@ -4255,24 +4255,42 @@ input[type="button"],
   
   /* Mejorar dropdowns en móvil */
   .nav-links .dropdown-menu {
-    margin: 0.5rem 0 0 0;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
     padding: 0;
     background: rgba(35, 115, 186, 0.03);
     border-radius: 8px;
-    border: none;
-    box-shadow: none;
+    transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    margin-top: 0;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+  
+  .nav-links .nav-item.has-dropdown[aria-expanded="true"] .dropdown-menu {
+    max-height: 500px;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
   }
   
   .nav-links .dropdown-menu a {
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9375rem;
     color: rgba(35, 115, 186, 0.8);
     border-bottom: 1px solid rgba(35, 115, 186, 0.05);
-    min-height: 48px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
   
   .nav-links .dropdown-menu a:last-child {
     border-bottom: none;
+  }
+  
+  .nav-links .dropdown-menu a:hover,
+  .nav-links .dropdown-menu a:active {
+    background: rgba(35, 115, 186, 0.08);
+    color: var(--color-primary);
   }
   
   /* Indicador visual para items con dropdown */
@@ -4289,6 +4307,10 @@ input[type="button"],
   .nav-links .nav-item.has-dropdown[aria-expanded="true"] > a::after {
     transform: rotate(90deg);
     color: var(--color-primary);
+  }
+  
+  .nav-links .nav-item.has-dropdown[aria-expanded="true"] > a {
+    background: rgba(35, 115, 186, 0.1);
   }
   
   /* Botón de cerrar menú móvil */
