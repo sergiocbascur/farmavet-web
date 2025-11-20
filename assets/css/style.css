@@ -2332,12 +2332,14 @@ a.logo-card:focus {
   /* Carrusel infinito - asegurar visibilidad en móvil */
   .infinite-carousel {
     width: 100% !important;
-    overflow: visible !important;
+    overflow: hidden !important;
+    position: relative;
   }
   
   .carousel-wrapper {
     width: 100% !important;
-    overflow: visible !important;
+    overflow: hidden !important;
+    position: relative;
   }
   
   .carousel-track-infinite {
@@ -2346,6 +2348,7 @@ a.logo-card:focus {
     gap: 1rem;
     width: auto !important;
     min-width: 100% !important;
+    position: relative;
   }
   
   .infinite-carousel .logo-card {
@@ -2358,6 +2361,7 @@ a.logo-card:focus {
     opacity: 1 !important;
     visibility: visible !important;
     display: flex !important;
+    position: relative !important;
   }
   
   /* Mejorar logos en móvil */
