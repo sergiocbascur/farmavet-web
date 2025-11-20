@@ -328,13 +328,69 @@ class MetodologiasChatbot {
 
     normalizeText(text) {
         // Normalizar texto: quitar acentos, convertir a minúsculas, quitar caracteres especiales
-        return text
+        if (!text) return '';
+        return text.toString()
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '') // Quitar acentos
             .replace(/[^\w\s]/g, ' ') // Reemplazar caracteres especiales con espacios
             .replace(/\s+/g, ' ') // Normalizar espacios
             .trim();
+    }
+    
+    // Función de distancia de Levenshtein simplificada (para typos)
+    levenshteinDistance(str1, str2) {
+        const len1 = str1.length;
+        const len2 = str2.length;
+        
+        if (len1 === 0) return len2;
+        if (len2 === 0) return len1;
+        
+        const matrix = [];
+        for (let i = 0; i <= len1; i++) {
+            matrix[i] = [i];
+        }
+        for (let j = 0; j <= len2; j++) {
+            matrix[0][j] = j;
+        }
+        
+        for (let i = 1; i <= len1; i++) {
+            for (let j = 1; j <= len2; j++) {
+                const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j] + 1,     // Eliminación
+                    matrix[i][j - 1] + 1,     // Inserción
+                    matrix[i - 1][j - 1] + cost // Sustitución
+                );
+            }
+        }
+        
+        return matrix[len1][len2];
+    }
+    
+    // Verificar si dos strings son similares (considerando typos)
+    isSimilar(str1, str2, threshold = 2) {
+        const normalized1 = this.normalizeText(str1);
+        const normalized2 = this.normalizeText(str2);
+        
+        // Si son iguales después de normalizar, son similares
+        if (normalized1 === normalized2) return true;
+        
+        // Si uno contiene al otro, son similares
+        if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) {
+            return true;
+        }
+        
+        // Si la distancia de Levenshtein es pequeña (typo de 1-2 caracteres)
+        const distance = this.levenshteinDistance(normalized1, normalized2);
+        const maxLen = Math.max(normalized1.length, normalized2.length);
+        
+        // Permitir hasta 2 errores o 15% de diferencia para strings largos
+        if (distance <= threshold || (maxLen > 6 && distance / maxLen <= 0.15)) {
+            return true;
+        }
+        
+        return false;
     }
 
     extractKeywords(query) {
@@ -367,25 +423,58 @@ class MetodologiasChatbot {
         
         // Diccionario de sinónimos y términos relacionados (sin acentos)
         const synonyms = {
-            'antibiotico': ['antimicrobiano', 'antimicrobianos', 'fluoroquinolona', 'tetraciclina', 'sulfonamida', 'macrolido', 'aminoglucosido'],
-            'micotoxina': ['aflatoxina', 'ocratoxina', 'fumonisina', 'zearalenona'],
-            'pesticida': ['plaguicida', 'organoclorado', 'organofosforado', 'diquat', 'paraquat', 'glifosato'],
-            'salmon': ['salmones', 'salmonidos', 'salmonideos', 'trucha', 'truchas', 'pez', 'peces', 'hidrobiologico', 'hidrobiológico'],
+            'tetraciclina': ['tetraciclinas', 'tetracilinas', 'tetraciclina', 'tetraciclinas', 'tetraciclina', 'tetraciclina', 'oxitetraciclina', 'clortetraciclina', 'doxiciclina', 'minociclina'],
+            'tetraciclinas': ['tetraciclina', 'tetracilinas', 'oxitetraciclina', 'epi-tetraciclina', 'clortetraciclina', 'epi-oxitetraciclina', 'epi-clortetraciclina'],
+            'tetracilinas': ['tetraciclinas', 'tetraciclina', 'oxitetraciclina', 'clortetraciclina'],
+            'macrolido': ['macrolidos', 'macrolido', 'eritromicina', 'tilmicosina', 'tilosina', 'espiramicina', 'tulatromicina', 'azitromicina'],
+            'macrolidos': ['macrolido', 'eritromicina', 'tilmicosina', 'tilosina', 'espiramicina', 'tulatromicina', 'azitromicina'],
+            'aminoglucosido': ['aminoglucosidos', 'aminoglucosido', 'estreptomicina', 'neomicina', 'gentamicina', 'kanamicina', 'espectinomicina', 'apramicina'],
+            'aminoglucosidos': ['aminoglucosido', 'estreptomicina', 'neomicina', 'gentamicina', 'kanamicina', 'espectinomicina', 'apramicina'],
+            'beta-lactamico': ['betalactamico', 'betalactamicos', 'beta-lactamicos', 'penicilina', 'ampicilina', 'amoxicilina', 'cefalosporina', 'ceftiofur'],
+            'betalactamico': ['beta-lactamico', 'betalactamicos', 'beta-lactamicos', 'penicilina', 'ampicilina', 'amoxicilina', 'cefalosporina', 'ceftiofur'],
+            'betalactamicos': ['betalactamico', 'beta-lactamico', 'beta-lactamicos', 'penicilina', 'ampicilina', 'amoxicilina', 'cefalosporina', 'ceftiofur'],
+            'antibiotico': ['antimicrobiano', 'antimicrobianos', 'fluoroquinolona', 'tetraciclina', 'sulfonamida', 'macrolido', 'aminoglucosido', 'betalactamico'],
+            'antibioticos': ['antimicrobiano', 'antimicrobianos', 'fluoroquinolona', 'tetraciclinas', 'sulfonamidas', 'macrolidos', 'aminoglucosidos', 'betalactamicos'],
+            'micotoxina': ['aflatoxina', 'ocratoxina', 'fumonisina', 'zearalenona', 'deoxinivalenol', 'toxina t-2', 'patulina'],
+            'aflatoxina': ['aflatoxinas', 'aflatoxina b1', 'aflatoxina b2', 'aflatoxina g1', 'aflatoxina g2', 'aflatoxinas'],
+            'pesticida': ['plaguicida', 'organoclorado', 'organofosforado', 'diquat', 'paraquat', 'glifosato', 'herbicida', 'insecticida', 'fungicida'],
+            'salmon': ['salmones', 'salmonidos', 'salmonideos', 'trucha', 'truchas', 'pez', 'peces', 'hidrobiologico', 'hidrobiológico', 'productos hidrobiologicos'],
             'carne': ['carnes', 'bovino', 'bovina', 'porcino', 'porcina', 'cerdo', 'cerdos', 'ave', 'aves', 'pollo', 'pollos', 'productos pecuarios', 'pecuarios', 'producto animal'],
             'leche': ['lacteo', 'lacteos', 'dairy', 'producto lacteo'],
             'lcmsms': ['lc-ms/ms', 'lc-ms', 'lcms', 'cromatografia liquida', 'espectrometria de masas', 'liquid chromatography'],
             'gcms': ['gc-ms', 'cromatografia de gases', 'gas chromatography'],
-            'hplc': ['cromatografia liquida', 'high performance liquid chromatography'],
+            'hplc': ['cromatografia liquida', 'high performance liquid chromatography', 'hplc-dad', 'hplc-fl'],
             'metodo': ['metodologia', 'metodologias', 'tecnica', 'tecnicas', 'analisis', 'ensayo', 'ensayos', 'metodos'],
             'productos pecuarios': ['producto pecuario', 'pecuarios', 'carne', 'carnes', 'leche', 'huevos', 'huevo', 'productos de origen animal'],
+            'productos hidrobiologicos': ['producto hidrobiologico', 'hidrobiologicos', 'salmon', 'salmones', 'trucha', 'truchas', 'pez', 'peces'],
             'diquat': ['diquat', 'paraquat', 'herbicida', 'bipiridilo'],
             'amprolio': ['amprolio', 'amprolium', 'anticoccidiano', 'antiparasitario']
+        };
+        
+        // Diccionario de correcciones de typos comunes
+        const typoCorrections = {
+            'tetracilinas': 'tetraciclinas',
+            'tetracilina': 'tetraciclina',
+            'tetraciclinas': 'tetraciclinas',
+            'macrolidos': 'macrolidos',
+            'macrolido': 'macrolidos',
+            'aminoglucosidos': 'aminoglucosidos',
+            'aminoglucosido': 'aminoglucosidos',
+            'betalactamicos': 'betalactamicos',
+            'betalactamico': 'betalactamicos'
         };
 
         // Expandir búsqueda con sinónimos
         const expandedTerms = new Set();
         expandedTerms.add(normalizedQuery);
-        keywords.forEach(kw => expandedTerms.add(kw));
+        keywords.forEach(kw => {
+            expandedTerms.add(kw);
+            // Corregir typos comunes
+            const corrected = typoCorrections[kw] || kw;
+            if (corrected !== kw) {
+                expandedTerms.add(corrected);
+            }
+        });
         
         // Para cada keyword, buscar en sinónimos y expandir
         for (const keyword of keywords) {
@@ -418,83 +507,117 @@ class MetodologiasChatbot {
         // Convertir Set a Array
         const expandedTermsArray = Array.from(expandedTerms);
 
-        // Búsqueda semántica mejorada
-        const results = this.metodologias.filter(met => {
+        // Búsqueda con sistema de scoring/prioridad
+        const scoredResults = this.metodologias.map(met => {
+            let score = 0;
+            const maxScore = 1000;
+            
+            // Normalizar campos individuales para búsqueda específica
+            const nombreNorm = this.normalizeText(met.nombre || '');
+            const nombreEnNorm = this.normalizeText(met.nombre_en || '');
+            const analitoNorm = this.normalizeText(met.analito || '');
+            const analitoEnNorm = this.normalizeText(met.analito_en || '');
+            const matrizNorm = this.normalizeText(met.matriz || '');
+            const tecnicaNorm = this.normalizeText(met.tecnica || '');
+            
             // Crear un texto de búsqueda combinando todos los campos
             const searchFields = [
-                this.normalizeText(met.nombre || ''),
-                this.normalizeText(met.nombre_en || ''),
-                this.normalizeText(met.analito || ''),
-                this.normalizeText(met.analito_en || ''),
-                this.normalizeText(met.matriz || ''),
-                this.normalizeText(met.matriz_en || ''),
-                this.normalizeText(met.tecnica || ''),
-                this.normalizeText(met.tecnica_en || ''),
+                nombreNorm, nombreEnNorm, analitoNorm, analitoEnNorm,
+                matrizNorm, this.normalizeText(met.matriz_en || ''),
+                tecnicaNorm, this.normalizeText(met.tecnica_en || ''),
                 this.normalizeText(met.categoria || '')
             ].join(' ');
             
             // Normalizar también la query completa
             const cleanQuery = normalizedQuery.replace(/[?¿!¡.,;:]/g, '').trim();
             
-            // 1. Búsqueda exacta: si la query completa está en los campos
-            if (cleanQuery.length >= 3 && searchFields.includes(cleanQuery)) {
-                return true;
-            }
-            
-            // 2. Búsqueda con términos expandidos (sinónimos)
-            for (const term of expandedTermsArray) {
-                const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
-                if (cleanTerm.length >= 3 && searchFields.includes(cleanTerm)) {
-                    return true;
-                }
-            }
-            
-            // 3. Búsqueda por palabras clave individuales (más flexible)
+            // PRIORIDAD 1: Coincidencia exacta en analito (máxima prioridad)
             if (keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 3) {
-                        // Buscar como palabra completa o como substring
-                        // Buscar como palabra completa (entre espacios o al inicio/fin)
-                        const wordRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                        if (wordRegex.test(searchFields)) {
-                            return true;
+                        // Coincidencia exacta en analito
+                        if (analitoNorm === cleanKeyword || analitoEnNorm === cleanKeyword) {
+                            score += maxScore;
+                            continue;
                         }
-                        // También buscar como substring para términos químicos
-                        if (searchFields.includes(cleanKeyword)) {
-                            return true;
+                        
+                        // Coincidencia como palabra completa en analito
+                        const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        if (analitoRegex.test(analitoNorm) || analitoRegex.test(analitoEnNorm)) {
+                            score += maxScore * 0.9;
+                            continue;
+                        }
+                        
+                        // Coincidencia flexible con typos en analito
+                        const analitoWords = (analitoNorm + ' ' + analitoEnNorm).split(/\s+/).filter(w => w.length >= 3);
+                        for (const word of analitoWords) {
+                            if (this.isSimilar(cleanKeyword, word, 2)) {
+                                score += maxScore * 0.8;
+                                continue;
+                            }
+                        }
+                        
+                        // Coincidencia exacta en nombre del método
+                        if (nombreNorm === cleanKeyword || nombreEnNorm === cleanKeyword) {
+                            score += maxScore * 0.7;
+                            continue;
+                        }
+                        
+                        // Coincidencia como palabra completa en nombre
+                        const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        if (nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
+                            score += maxScore * 0.6;
+                            continue;
+                        }
+                        
+                        // Coincidencia en analito o nombre como substring (menor prioridad)
+                        if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword)) {
+                            score += maxScore * 0.5;
+                            continue;
+                        }
+                        if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                            score += maxScore * 0.4;
+                            continue;
                         }
                     }
                 }
             }
             
-            // 4. Búsqueda de similitud parcial para términos químicos (última opción)
-            // Para términos de 4+ caracteres, buscar si está contenido en cualquier parte
-            if (keywords.length > 0) {
+            // PRIORIDAD 2: Términos expandidos (sinónimos) en analito o nombre
+            for (const term of expandedTermsArray) {
+                const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
+                if (cleanTerm.length >= 3) {
+                    // Solo considerar si está en analito o nombre, NO en matriz o técnica
+                    if (analitoNorm.includes(cleanTerm) || analitoEnNorm.includes(cleanTerm) ||
+                        nombreNorm.includes(cleanTerm) || nombreEnNorm.includes(cleanTerm)) {
+                        score += maxScore * 0.3;
+                        break; // Solo contar una vez por término expandido
+                    }
+                }
+            }
+            
+            // PRIORIDAD 3: Coincidencia en otros campos (matriz, técnica) - MUY BAJA prioridad
+            // Solo si ya hay alguna coincidencia en analito/nombre
+            if (score > 0 && keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 4) {
-                        // Buscar si el keyword está en algún campo individual (no solo en el texto combinado)
-                        const individualFields = [
-                            this.normalizeText(met.analito || ''),
-                            this.normalizeText(met.analito_en || ''),
-                            this.normalizeText(met.nombre || ''),
-                            this.normalizeText(met.nombre_en || '')
-                        ];
-                        
-                        for (const field of individualFields) {
-                            if (field && field.includes(cleanKeyword)) {
-                                return true;
-                            }
+                        if (matrizNorm.includes(cleanKeyword) || tecnicaNorm.includes(cleanKeyword)) {
+                            score += maxScore * 0.1;
                         }
                     }
                 }
             }
             
-            return false;
-        });
+            return { metodologia: met, score: score };
+        })
+        .filter(item => item.score > 0) // Solo mantener resultados con score > 0
+        .sort((a, b) => b.score - a.score) // Ordenar por score descendente
+        .slice(0, 20) // Limitar a los 20 mejores resultados
+        .map(item => item.metodologia); // Devolver solo las metodologías
 
-        return results;
+        return scoredResults;
     }
 
     async showResults(query, results) {
