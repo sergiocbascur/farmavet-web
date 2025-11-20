@@ -36,27 +36,41 @@
 }
 
 .carousel-button {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: 50%;
-  border: none;
-  background-color: rgba(35, 115, 186, 0.12);
+  border: 2px solid rgba(35, 115, 186, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
   color: var(--color-primary);
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: background-color var(--transition-base), color var(--transition-base);
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 300;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-base);
+  overflow: visible;
 }
 
 .carousel-button:hover,
 .carousel-button:focus {
   background-color: var(--color-primary);
   color: var(--color-white);
+  transform: scale(1.1);
+  border-color: var(--color-primary);
+}
+
+.carousel-button:active {
+  transform: scale(0.9);
 }
 
 .carousel-button:disabled {
   opacity: 0.4;
   cursor: default;
+  transform: none;
 }
 
 :root {
@@ -1910,11 +1924,13 @@ a.logo-card:focus {
 }
 
 .carousel-nav-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: 50%;
-  border: none;
-  background-color: rgba(35, 115, 186, 0.12);
+  border: 2px solid rgba(35, 115, 186, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
   color: var(--color-primary);
   display: grid;
   place-items: center;
@@ -1922,17 +1938,26 @@ a.logo-card:focus {
   font-size: 1.5rem;
   line-height: 1;
   font-weight: 300;
-  transition: background-color var(--transition-base), color var(--transition-base), transform var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-base);
+  overflow: visible;
 }
 
 .carousel-nav-btn:hover {
   background-color: var(--color-primary);
   color: var(--color-white);
   transform: scale(1.1);
+  border-color: var(--color-primary);
 }
 
 .carousel-nav-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
+}
+
+.carousel-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Organigrama Styles */
@@ -2382,21 +2407,28 @@ a.logo-card:focus {
     z-index: 10;
   }
   
-  .carousel-nav-btn {
+  /* Unificar todos los botones de carrusel en móvil */
+  .carousel-nav-btn,
+  .carousel-button,
+  .vertical-carousel-btn {
     width: 56px !important;
     height: 56px !important;
     min-width: 56px !important;
     min-height: 56px !important;
     font-size: 1.5rem !important;
-    background-color: rgba(35, 115, 186, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
     border: 2px solid var(--color-primary) !important;
-    box-shadow: 0 2px 8px rgba(35, 115, 186, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(35, 115, 186, 0.25) !important;
     opacity: 1 !important;
     visibility: visible !important;
     display: grid !important;
+    place-items: center !important;
+    overflow: visible !important;
   }
   
-  .carousel-nav-btn:active {
+  .carousel-nav-btn:active,
+  .carousel-button:active,
+  .vertical-carousel-btn:active {
     transform: scale(0.9) !important;
     background-color: var(--color-primary) !important;
     color: var(--color-white) !important;
@@ -3874,11 +3906,13 @@ div[data-hero-slide].card .cta-link-red:focus,
 }
 
 .vertical-carousel-btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: 50%;
-  border: none;
-  background-color: rgba(35, 115, 186, 0.12);
+  border: 2px solid rgba(35, 115, 186, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
   color: var(--color-primary);
   display: grid;
   place-items: center;
@@ -3886,17 +3920,20 @@ div[data-hero-slide].card .cta-link-red:focus,
   font-size: 1.5rem;
   line-height: 1;
   font-weight: 300;
-  transition: background-color var(--transition-base), color var(--transition-base), transform var(--transition-base);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-base);
+  overflow: visible;
 }
 
 .vertical-carousel-btn:hover {
   background-color: var(--color-primary);
   color: var(--color-white);
   transform: scale(1.1);
+  border-color: var(--color-primary);
 }
 
 .vertical-carousel-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.9);
 }
 
 .vertical-carousel-btn:disabled {
@@ -4579,30 +4616,8 @@ input[type="button"],
   touch-action: pan-x pan-y;
 }
 
-/* Áreas de toque más grandes para controles de carrusel */
-.carousel-nav-btn,
-.carousel-button,
-.vertical-carousel-btn {
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 2px solid rgba(35, 115, 186, 0.1);
-  transition: all 0.2s ease;
-}
-
-.carousel-nav-btn:active,
-.carousel-button:active,
-.vertical-carousel-btn:active {
-  transform: scale(0.9);
-  background: rgba(35, 115, 186, 0.1);
-}
+/* Nota: Los estilos unificados de botones de carrusel están definidos arriba */
+/* Esta sección se mantiene para compatibilidad pero los estilos principales están en las definiciones individuales */
 
 /* Hero dots - ajustes adicionales para móvil */
 @media (max-width: 768px) {
