@@ -378,10 +378,9 @@ class MetodologiasChatbot {
             const anteriores = analitosCapitalizados.slice(0, -1).join(', ');
             return `${anteriores} y ${ultimos}`;
         }
-        // Si hay más de 5, mostrar los primeros 5 y decir "y X más"
+        // Si hay más de 5, mostrar los primeros 5 y decir "y varios más" (evitar números específicos por imprecisión)
         const primeros = analitosCapitalizados.slice(0, 5).join(', ');
-        const restantes = analitosCapitalizados.length - 5;
-        return `${primeros} y ${restantes} más`;
+        return `${primeros} y varios más`;
     }
     
     // Extraer número de un string como "30 ng/g" -> 30
