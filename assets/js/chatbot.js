@@ -640,32 +640,83 @@ class MetodologiasChatbot {
                 }
             }
             
-            // FILTRO CRÍTICO: Si no hay coincidencia mínima en analito/nombre, descartar completamente
-            // Esto evita que aparezcan metodologías solo por compartir matriz o técnica
-            if (score === 0 || (score < maxScore * 0.3 && keywords.length > 0)) {
-                // Verificar si al menos hay una coincidencia débil en analito o nombre
-                let hasWeakMatch = false;
+            // FILTRO CRÍTICO: Solo mantener metodologías con coincidencia en analito o nombre
+            // Descarta completamente metodologías que solo coinciden en matriz o técnica
+            let hasMatchInAnalitoOrNombre = false;
+            
+            if (keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 3) {
-                        // Coincidencia muy débil (substring) en analito o nombre
+                        // Verificar coincidencia directa en analito o nombre
                         if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
                             nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
-                            hasWeakMatch = true;
+                            hasMatchInAnalitoOrNombre = true;
                             break;
                         }
+                        
+                        // Verificar coincidencia flexible (typos) en analito o nombre
+                        const analitoWords = (analitoNorm + ' ' + analitoEnNorm).split(/\s+/).filter(w => w.length >= 3);
+                        const nombreWords = (nombreNorm + ' ' + nombreEnNorm).split(/\s+/).filter(w => w.length >= 3);
+                        
+                        for (const word of [...analitoWords, ...nombreWords]) {
+                            if (this.isSimilar(cleanKeyword, word, 2)) {
+                                hasMatchInAnalitoOrNombre = true;
+                                break;
+                            }
+                        }
+                        
+                        if (hasMatchInAnalitoOrNombre) break;
                     }
                 }
                 
-                // Si no hay coincidencia mínima, descartar (score = 0)
-                if (!hasWeakMatch) {
-                    score = 0;
+                // Si hay términos expandidos, verificar también
+                if (!hasMatchInAnalitoOrNombre) {
+                    for (const term of expandedTermsArray) {
+                        const cleanTerm = term.replace(/[?¿!¡.,;:]/g, '').trim();
+                        if (cleanTerm.length >= 3) {
+                            // Solo considerar si está en analito o nombre
+                            if (analitoNorm.includes(cleanTerm) || analitoEnNorm.includes(cleanTerm) ||
+                                nombreNorm.includes(cleanTerm) || nombreEnNorm.includes(cleanTerm)) {
+                                // Verificar que el término expandido sea realmente relacionado con el keyword buscado
+                                let isRelated = false;
+                                for (const keyword of keywords) {
+                                    const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
+                                    // Verificar si el término expandido está en los sinónimos del keyword
+                                    for (const [synKey, synValues] of Object.entries(synonyms)) {
+                                        const normalizedSynKey = this.normalizeText(synKey);
+                                        if ((normalizedSynKey === cleanKeyword || cleanKeyword.includes(normalizedSynKey) || normalizedSynKey.includes(cleanKeyword)) &&
+                                            synValues.some(v => this.normalizeText(v) === cleanTerm)) {
+                                            isRelated = true;
+                                            break;
+                                        }
+                                        if (synValues.some(v => this.normalizeText(v) === cleanKeyword) &&
+                                            (normalizedSynKey === cleanTerm || cleanTerm.includes(normalizedSynKey) || normalizedSynKey.includes(cleanTerm))) {
+                                            isRelated = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isRelated) break;
+                                }
+                                
+                                if (isRelated) {
+                                    hasMatchInAnalitoOrNombre = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
+            }
+            
+            // Si no hay coincidencia en analito o nombre, descartar completamente (score = 0)
+            if (!hasMatchInAnalitoOrNombre) {
+                score = 0;
             }
             
             return { metodologia: met, score: score };
         })
-        .filter(item => item.score >= maxScore * 0.3) // Solo mantener resultados con score mínimo significativo
+        .filter(item => item.score > 0) // Solo mantener resultados con score > 0 (ya filtrado por coincidencia en analito/nombre)
         .sort((a, b) => b.score - a.score) // Ordenar por score descendente
         .slice(0, 20) // Limitar a los 20 mejores resultados
         .map(item => item.metodologia); // Devolver solo las metodologías
