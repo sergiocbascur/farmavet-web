@@ -2367,11 +2367,12 @@ def api_chatbot_context():
 # API de Perplexity para búsquedas inteligentes
 @app.route('/api/chatbot/search', methods=['POST'])
 def api_chatbot_search():
-    """API endpoint para búsquedas inteligentes usando Perplexity"""
+    """API endpoint para búsquedas inteligentes usando Perplexity como motor principal de razonamiento"""
     try:
         data = request.get_json()
         query = data.get('query', '').strip()
         include_local = data.get('include_local', True)  # Incluir contexto local
+        local_results = data.get('local_results', [])  # Resultados de búsqueda local para contexto
         
         if not query:
             return jsonify({'error': 'Query vacía'}), 400
@@ -2398,7 +2399,88 @@ def api_chatbot_search():
         local_context += "\n- Atención presencial con agendamiento previo"
         local_context += "\n- Para enviar consultas, usar el formulario de contacto en la página de contacto"
         
-        if include_local:
+        # Si hay resultados locales, agregarlos como contexto relevante
+        if local_results and len(local_results) > 0:
+            local_context += "\n\nMETODOLOGÍAS RELEVANTES ENCONTRADAS EN LA BASE DE DATOS:"
+            # Agrupar por método para mostrar de forma más natural
+            grupos = {}
+            for met in local_results[:50]:  # Limitar a 50 para no sobrecargar
+                nombre = met.get('nombre', '') or ''
+                matriz = met.get('matriz', '') or ''
+                tecnica = met.get('tecnica', '') or ''
+                grupo_key = f"{nombre}|{matriz}|{tecnica}"
+                
+                if grupo_key not in grupos:
+                    grupos[grupo_key] = {
+                        'nombre': nombre,
+                        'matriz': matriz,
+                        'tecnica': tecnica,
+                        'acreditada': met.get('acreditada', False),
+                        'analitos': [],
+                        'lods': [],
+                        'loqs': []
+                    }
+                
+                analito = met.get('analito', '')
+                if analito and analito not in grupos[grupo_key]['analitos']:
+                    grupos[grupo_key]['analitos'].append(analito)
+                
+                lod = met.get('lod', '') or met.get('limite_deteccion', '')
+                loq = met.get('loq', '') or met.get('limite_cuantificacion', '')
+                
+                if lod:
+                    try:
+                        import re
+                        lod_num = re.search(r'[\d.]+', str(lod))
+                        if lod_num:
+                            grupos[grupo_key]['lods'].append(float(lod_num.group()))
+                    except:
+                        pass
+                
+                if loq:
+                    try:
+                        import re
+                        loq_num = re.search(r'[\d.]+', str(loq))
+                        if loq_num:
+                            grupos[grupo_key]['loqs'].append(float(loq_num.group()))
+                    except:
+                        pass
+            
+            # Formatear grupos de manera natural
+            for grupo in list(grupos.values())[:10]:  # Máximo 10 grupos
+                analitos_str = ', '.join(grupo['analitos'][:5])
+                if len(grupo['analitos']) > 5:
+                    analitos_str += f" y {len(grupo['analitos']) - 5} más"
+                
+                lod_range = ""
+                if grupo['lods']:
+                    min_lod = min(grupo['lods'])
+                    max_lod = max(grupo['lods'])
+                    if min_lod == max_lod:
+                        lod_range = f"LOD: {min_lod}"
+                    else:
+                        lod_range = f"LOD: {min_lod}-{max_lod}"
+                
+                loq_range = ""
+                if grupo['loqs']:
+                    min_loq = min(grupo['loqs'])
+                    max_loq = max(grupo['loqs'])
+                    if min_loq == max_loq:
+                        loq_range = f"LOQ: {min_loq}"
+                    else:
+                        loq_range = f"LOQ: {min_loq}-{max_loq}"
+                
+                metodo_info = f"- {grupo['nombre']}: {analitos_str} en {grupo['matriz']}"
+                if grupo['tecnica']:
+                    metodo_info += f" mediante {grupo['tecnica']}"
+                if lod_range or loq_range:
+                    metodo_info += f" ({lod_range}" + (f", {loq_range}" if loq_range else "") + ")"
+                if grupo['acreditada']:
+                    metodo_info += " [Acreditada ISO 17025]"
+                
+                local_context += "\n" + metodo_info
+        
+        if include_local and not local_results:
             try:
                 conn = get_db()
                 
@@ -2468,27 +2550,41 @@ def api_chatbot_search():
             except Exception as e:
                 app.logger.warning(f'Error al obtener contexto local: {str(e)}')
         
-        # Construir el prompt contextual para Perplexity
-        # CRÍTICO: Solo usar información proporcionada, NO buscar en internet ni dar información general
-        context = f"""Eres FARMA, el asistente virtual del Laboratorio FARMAVET de la Universidad de Chile.
+        # Construir el prompt contextual para Perplexity - Motor principal de razonamiento
+        # Perplexity debe razonar de manera natural e inteligente sobre la consulta
+        context = f"""Eres FARMA, el asistente virtual inteligente del Laboratorio FARMAVET de la Universidad de Chile.
+
+Tu rol es responder preguntas de manera natural, conversacional e inteligente, como lo haría un asistente humano bien informado.
+
+PERSONALIDAD Y ESTILO:
+- Responde de forma amable, profesional y natural
+- Razona sobre la pregunta antes de responder
+- Si hay múltiples metodologías relacionadas, agrupa la información de forma coherente
+- Usa un lenguaje claro y accesible, evitando jerga técnica innecesaria
+- Responde como si conocieras bien el laboratorio y sus capacidades
 
 REGLAS OBLIGATORIAS:
-1. SOLO responde usando la información que te proporciono a continuación sobre FARMAVET
-2. NO busques información en internet
-3. NO des explicaciones generales o educativas
-4. Puedes responder preguntas sobre metodologías analíticas, contacto, ubicación, horarios, formulario de consultas, preguntas frecuentes y servicios
-5. Responde de manera CONCISA y natural: máximo 2-3 oraciones
-6. NO agregues información que no esté en la lista proporcionada
-7. NO incluyas referencias a citas, notas, fuentes o números entre corchetes como [1], [2], etc.
+1. SOLO usa la información que te proporciono a continuación sobre FARMAVET
+2. NO busques información en internet - usa SOLO el contexto proporcionado
+3. NO des explicaciones generales o educativas fuera del contexto proporcionado
+4. Puedes responder sobre: metodologías analíticas, contacto, ubicación, horarios, formulario de consultas, FAQ y servicios
+5. Responde de manera CONVERSACIONAL y NATURAL: 2-4 oraciones bien estructuradas
+6. Para metodologías: agrupa analitos similares, menciona LOD/LOQ cuando sea relevante
+7. NO incluyas referencias, citas, notas o números entre corchetes como [1], [2], etc.
 8. NO uses formato de citas como <...> o [...]
-9. Responde en texto plano, sin referencias adicionales
-10. Para preguntas sobre cómo enviar consultas o usar el formulario, explica el proceso claramente
-11. Si la pregunta no está en la información proporcionada, responde: "Para consultas específicas, puedes contactarnos directamente al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web."
+9. Responde en texto plano natural, sin marcadores adicionales
+10. Si la pregunta requiere información que NO está en el contexto, responde amablemente: "Para consultas específicas sobre ese tema, te recomiendo contactarnos directamente al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web."
 
-INFORMACIÓN DISPONIBLE DE FARMAVET:
+CONTEXTO DISPONIBLE DE FARMAVET:
 {local_context}
 
-Si la información NO está en la lista anterior, responde SOLO: "Para consultas específicas, puedes contactarnos directamente al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web."
+INSTRUCCIONES ESPECIALES:
+- Si preguntan sobre metodologías específicas (ej: "hacen tetraciclinas?"), revisa la lista de metodologías relevantes y responde de forma natural mencionando qué analizan, en qué matrices, con qué técnica, y si es acreditada
+- Si hay múltiples analitos para el mismo método, agrupa la información de forma coherente (ej: "Sí, tenemos una metodología para analizar Tetraciclina, Epi-tetraciclina, Oxitetraciclina...")
+- Si preguntan sobre límites (LOD/LOQ), incluye esa información cuando esté disponible
+- Si preguntan con negación (ej: "no hacen X en Y?"), razona sobre la pregunta y busca metodologías que coincidan con los términos mencionados
+
+Ahora, razona sobre la siguiente pregunta y responde de manera natural e inteligente:
 """
         
         system_message = context

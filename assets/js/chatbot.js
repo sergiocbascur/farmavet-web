@@ -266,17 +266,15 @@ class MetodologiasChatbot {
                 return;
             }
             
-            // Para consultas sobre metodologías, buscar localmente primero usando el query procesado
-            const results = await this.searchMetodologias(searchQuery);
+            // Usar Perplexity como motor principal de razonamiento
+            // La búsqueda local solo proporciona contexto relevante
             
-            // Si encuentra resultados locales, mostrarlos
-            if (results.length > 0) {
-                await this.showResults(query, results);
-            } else {
-                // Si no encuentra localmente, usar Perplexity (mostrará mensaje apropiado)
-                await this.showResults(query, results);
-                // showResults ya llama a searchWithPerplexity si no hay resultados
-            }
+            // Realizar búsqueda local para obtener contexto relevante (opcional)
+            const results = await this.searchMetodologias(query);
+            
+            // Usar Perplexity siempre, pasando los resultados locales como contexto
+            // Esto permite que Perplexity razone de manera inteligente sobre la pregunta
+            await this.searchWithPerplexity(query, true, false, results);
         }, 500);
     }
 
@@ -1069,7 +1067,7 @@ class MetodologiasChatbot {
         this.addMessage(message);
     }
 
-    async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false) {
+    async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false, localResults = []) {
         const typingId = this.showTyping();
         try {
             console.log('🔄 Chatbot: Buscando con Perplexity API...');
@@ -1080,7 +1078,8 @@ class MetodologiasChatbot {
                 },
                 body: JSON.stringify({ 
                     query: query,
-                    include_local: includeLocal
+                    include_local: includeLocal,
+                    local_results: localResults  // Pasar resultados locales como contexto
                 })
             });
             
