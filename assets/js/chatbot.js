@@ -299,23 +299,37 @@ class MetodologiasChatbot {
             }
             
             // 2. Detectar si la pregunta es simple o compleja
-            const isComplexQuery = /\b(no|sin|excepto|ademas|tambien|y|o|pero|si|cuando|como|que|por que|porque|porque|explique|comparar|diferencias|similar|diferente|mejor|peor|recomendar|sugerir)\b/i.test(query);
-            const needsReasoning = /\b(por que|porque|como funciona|que significa|explique|diferencia|comparar|recomendar)\b/i.test(query);
+            // Las preguntas simples son: "hacen X?", "tienen X?", "analizan X?"
+            // Las preguntas complejas requieren razonamiento: "por que?", "como funciona?", "diferencias?", "recomendar?"
+            const isSimpleQuery = /^(hacen|tienen|analizan|metodo|metodos|metodologia|metodologias|busco|buscar)\s+/i.test(query) || 
+                                   /^(hacen|tienen|analizan)\s+\w+\s*\??$/i.test(query);
+            const isComplexQuery = /\b(por que|porque|como funciona|que significa|explique|diferencia|diferencia|comparar|comparar|recomendar|recomendar|sugerir|sugerir|mejor|peor|cuando|donde|quien)\b/i.test(query);
+            const needsReasoning = /\b(por que|porque|como funciona|que significa|explique|diferencia|comparar|recomendar|sugerir)\b/i.test(query);
             
-            // 3. Si hay resultados locales Y la pregunta es simple (no compleja), usar solo búsqueda local
-            if (combinedResults.length > 0 && !isComplexQuery && !needsReasoning && !isFollowUpQuery) {
-                // Pregunta simple con resultados claros → responder directamente con búsqueda local (GRATIS)
+            // 3. Si hay resultados locales Y la pregunta es simple, responder DIRECTAMENTE sin IA
+            // Esto acelera las respuestas para preguntas básicas como "hacen tetraciclinas?"
+            if (combinedResults.length > 0 && isSimpleQuery && !isComplexQuery && !needsReasoning) {
+                // Pregunta simple con resultados claros → responder directamente con búsqueda local (GRATIS y RÁPIDO)
+                console.log('⚡ Chatbot: Pregunta simple detectada, respondiendo directamente sin IA');
                 this.showResults(query, combinedResults);
                 this.lastResults = combinedResults;
                 this.lastQuery = query;
                 return;
             }
             
-            // 4. Solo usar Perplexity si:
-            // - No hay resultados locales, O
+            // 4. Solo usar IA (Ollama/DeepSeek) si:
+            // - No hay resultados locales (buscar con IA), O
             // - La pregunta es compleja/requiere razonamiento, O
             // - Es pregunta de seguimiento que requiere contexto
-            await this.searchWithPerplexity(query, combinedResults.length > 0, false, combinedResults, hasPreviousContext ? this.lastQuery : null);
+            if (combinedResults.length === 0 || isComplexQuery || needsReasoning || isFollowUpQuery) {
+                console.log('🤖 Chatbot: Usando IA para pregunta compleja o sin resultados locales');
+                await this.searchWithPerplexity(query, combinedResults.length > 0, false, combinedResults, hasPreviousContext ? this.lastQuery : null);
+            } else {
+                // Si hay resultados pero no es simple, mostrar resultados locales de todos modos
+                this.showResults(query, combinedResults);
+                this.lastResults = combinedResults;
+                this.lastQuery = query;
+            }
         }, 500);
     }
 
@@ -825,31 +839,28 @@ class MetodologiasChatbot {
                             break;
                         }
                         
-                        // PRIORIDAD 2: Coincidencia como substring pero solo si la keyword es significativa (>=4 caracteres)
-                        // Y solo si la coincidencia es al inicio o es una palabra significativa (no al final de otra palabra)
+                        // PRIORIDAD 2: Coincidencia como substring pero SOLO si es realmente relevante
                         // Esto evita coincidencias falsas como "tetraciclina" encontrando "betalactamico" por compartir "lact"
-                        if (keywordLen >= 4) {
-                            // Verificar coincidencia en nombre o analito como substring significativo
-                            // Solo si comienza la palabra o es una palabra completa
+                        if (keywordLen >= 5) { // Solo para keywords >= 5 caracteres (más específicas)
+                            // Verificar que la coincidencia sea al inicio de una palabra (no enmedio de otra)
                             const startsWithKeyword = (str) => {
                                 const words = str.split(/\s+/);
                                 return words.some(word => 
-                                    word.toLowerCase().startsWith(cleanKeyword.toLowerCase()) ||
-                                    word.toLowerCase().includes(cleanKeyword.toLowerCase()) &&
-                                    cleanKeyword.length >= word.length * 0.5 // Al menos 50% de la palabra
+                                    word.toLowerCase().startsWith(cleanKeyword.toLowerCase())
                                 );
                             };
                             
+                            // Solo aceptar si comienza una palabra (evita "lact" en "betalactamico")
                             if (startsWithKeyword(nombreNorm) || startsWithKeyword(nombreEnNorm) ||
                                 startsWithKeyword(analitoNorm) || startsWithKeyword(analitoEnNorm)) {
                                 hasMatchInAnalitoOrNombre = true;
                                 break;
                             }
                             
-                            // Fallback: substring directo solo si la keyword es >= 5 caracteres (más específica)
-                            if (keywordLen >= 5) {
-                                if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
-                                    nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                            // Fallback: substring directo solo si la keyword es >= 7 caracteres (muy específica)
+                            // Y solo si está en el nombre (no en analito para evitar falsos positivos)
+                            if (keywordLen >= 7) {
+                                if (nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
                                     hasMatchInAnalitoOrNombre = true;
                                     break;
                                 }
