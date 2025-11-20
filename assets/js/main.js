@@ -43,7 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     navLinkItems.forEach((link) => {
-      link.addEventListener("click", () => {
+      link.addEventListener("click", (e) => {
+        // No cerrar el menú si el link tiene un dropdown y estamos en móvil
+        const parentItem = link.closest(".nav-item.has-dropdown");
+        if (parentItem && window.innerWidth <= 1024) {
+          // Si es el toggle link de un dropdown, no hacer nada (ya se maneja arriba)
+          if (parentItem.querySelector("a:first-of-type") === link) {
+            return; // Ya se maneja en el handler de dropdown
+          }
+        }
         navLinks.classList.remove("open");
         navToggle.setAttribute("aria-expanded", "false");
         document.body.classList.remove("no-scroll");
