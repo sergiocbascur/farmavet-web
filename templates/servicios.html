@@ -456,7 +456,13 @@
                           {% set nombre_anterior = get_translated_field(met_anterior, 'nombre') or met_anterior.nombre %}
                           {% set mostrar_metodologia = (metodologia_nombre != nombre_anterior) %}
                         {% endif %}
-                        <tr data-categoria="{{ cat_key }}" style="display: none;">
+                        <tr data-categoria="{{ cat_key }}" 
+                            data-metodologia="{{ metodologia_nombre }}"
+                            data-matriz="{{ get_translated_field(met, 'matriz') or met.matriz }}"
+                            data-tecnica="{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}"
+                            data-acreditada="{{ 'Sí' if met.acreditada else 'No' }}"
+                            data-mostrar-metodologia="{{ 'true' if mostrar_metodologia else 'false' }}"
+                            style="display: none;">
                           <td>
                             {% if mostrar_metodologia %}
                               <strong>{{ metodologia_nombre }}</strong>
@@ -642,6 +648,7 @@
         const filter = currentFilter;
         let visibleCount = 0;
         
+        // Primero, filtrar las filas
         tableRows.forEach(row => {
           const text = row.textContent.toLowerCase();
           const categoria = row.dataset.categoria;
@@ -653,6 +660,46 @@
             visibleCount++;
           } else {
             row.style.display = 'none';
+          }
+        });
+        
+        // Luego, recalcular qué filas deben mostrar la metodología basándose solo en filas visibles
+        let prevMetodologia = null;
+        tableRows.forEach((row) => {
+          if (row.style.display !== 'none') {
+            const metodologiaNombre = row.dataset.metodologia || '';
+            const matriz = row.dataset.matriz || '';
+            const tecnica = row.dataset.tecnica || '';
+            const acreditada = row.dataset.acreditada || '';
+            const cells = row.querySelectorAll('td');
+            
+            // Si es la primera fila visible o la metodología cambió, mostrar la información
+            if (prevMetodologia === null || metodologiaNombre !== prevMetodologia) {
+              // Mostrar metodología, matriz, técnica y acreditada
+              if (cells[0]) {
+                cells[0].innerHTML = `<strong>${metodologiaNombre}</strong>`;
+              }
+              if (cells[2]) {
+                cells[2].textContent = matriz;
+              }
+              if (cells[3]) {
+                cells[3].textContent = tecnica;
+              }
+              if (cells[6]) {
+                if (acreditada === 'Sí') {
+                  cells[6].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
+                } else {
+                  cells[6].innerHTML = '<span class="metodologias-badge metodologias-badge-secondary">No</span>';
+                }
+              }
+              prevMetodologia = metodologiaNombre;
+            } else {
+              // Ocultar metodología, matriz, técnica y acreditada
+              if (cells[0]) cells[0].innerHTML = '&nbsp;';
+              if (cells[2]) cells[2].textContent = '\u00A0';
+              if (cells[3]) cells[3].textContent = '\u00A0';
+              if (cells[6]) cells[6].innerHTML = '\u00A0';
+            }
           }
         });
         
