@@ -2815,7 +2815,7 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                     }
                 ],
                 "temperature": 0.2,  # Reducido para respuestas más rápidas
-                "max_tokens": 150  # Reducido de 200 a 150 para respuestas más rápidas
+                "max_tokens": 120  # Reducido de 150 a 120 para respuestas más rápidas
             }
             
             app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
