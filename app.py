@@ -2754,7 +2754,7 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                 "stream": False,
                 "options": {
                     "temperature": 0.2,  # Reducido para respuestas más rápidas y deterministas
-                    "num_predict": 150,  # Reducido de 200 a 150 para respuestas más rápidas
+                    "num_predict": 120,  # Reducido de 150 a 120 para respuestas más rápidas
                     "num_ctx": 2048,  # Reducir contexto del modelo para acelerar
                     "top_p": 0.9,  # Ajustar para velocidad
                     "top_k": 20  # Limitar opciones para velocidad
