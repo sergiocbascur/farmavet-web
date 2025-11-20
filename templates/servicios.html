@@ -449,7 +449,13 @@
                         {% set met = grupo.metodologia_representativa %}
                         <tr data-categoria="{{ cat_key }}" style="display: none;">
                           <td><strong>{{ get_translated_field(met, 'nombre') or met.nombre }}</strong></td>
-                          <td>{{ get_translated_field(met, 'analito') or met.analito or '—' }}</td>
+                          <td>
+                            {% if grupo.agrupado and grupo.analitos %}
+                              {{ grupo.analitos|join(', ') }}
+                            {% else %}
+                              {{ get_translated_field(met, 'analito') or met.analito or '—' }}
+                            {% endif %}
+                          </td>
                           <td>{{ get_translated_field(met, 'matriz') or met.matriz }}</td>
                           <td>{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}</td>
                           <td>{{ met.limite_deteccion or '—' }}</td>

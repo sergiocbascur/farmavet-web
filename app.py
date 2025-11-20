@@ -1282,8 +1282,8 @@ def servicios_page():
             
             metodologias_agrupadas[categoria][group_key].append(metodologia)
         
-        # Convertir a lista para el template, mostrando cada metodología individualmente
-        # Cuando tienen el mismo nombre/matriz/técnica, se muestran en filas separadas
+        # Convertir a lista para el template, agrupando analitos con mismo LOD/LOQ
+        # La metodología aparece una vez por cada combinación única de LOD/LOQ
         metodologias_por_categoria = {}
         for categoria, grupos in metodologias_agrupadas.items():
             metodologias_por_categoria[categoria] = []
@@ -1301,12 +1301,36 @@ def servicios_page():
                 tecnica_comun = group_key[2]
                 acreditada_comun = group_key[3]
                 
-                # Crear una fila por cada metodología individual
+                # Agrupar items por LOD y LOQ
+                grupos_lod_loq = {}
                 for item in items:
-                    # Convertir Row a dict para poder modificarlo
-                    met_dict = dict(item)
+                    # Obtener LOD y LOQ
+                    lod = item['limite_deteccion'] if 'limite_deteccion' in item.keys() else ''
+                    loq = item['limite_cuantificacion'] if 'limite_cuantificacion' in item.keys() else ''
                     
-                    # Agregar información común si falta
+                    # Crear clave de agrupación por LOD/LOQ
+                    lod_loq_key = (lod or '', loq or '')
+                    
+                    if lod_loq_key not in grupos_lod_loq:
+                        grupos_lod_loq[lod_loq_key] = []
+                    
+                    grupos_lod_loq[lod_loq_key].append(item)
+                
+                # Crear una fila por cada grupo de LOD/LOQ
+                for lod_loq_key, items_lod_loq in grupos_lod_loq.items():
+                    lod_valor, loq_valor = lod_loq_key
+                    
+                    # Obtener todos los analitos de este grupo LOD/LOQ
+                    analitos_agrupados = []
+                    for item in items_lod_loq:
+                        analito = get_translated_field(item, 'analito') or item['analito'] or ''
+                        if analito and analito not in analitos_agrupados:
+                            analitos_agrupados.append(analito)
+                    
+                    # Crear metodología representativa con el primer item del grupo
+                    met_dict = dict(items_lod_loq[0])
+                    
+                    # Asegurar información común
                     if not met_dict.get('nombre'):
                         met_dict['nombre'] = nombre_comun
                     if not met_dict.get('matriz'):
@@ -1316,10 +1340,15 @@ def servicios_page():
                     if 'acreditada' not in met_dict or met_dict.get('acreditada') is None:
                         met_dict['acreditada'] = acreditada_comun
                     
-                    # Agregar como metodología individual (no agrupada)
+                    # Asegurar LOD y LOQ correctos
+                    met_dict['limite_deteccion'] = lod_valor
+                    met_dict['limite_cuantificacion'] = loq_valor
+                    
+                    # Agregar como metodología agrupada por LOD/LOQ
                     metodologias_por_categoria[categoria].append({
-                        'agrupado': False,
-                        'metodologia_representativa': met_dict
+                        'agrupado': True,
+                        'metodologia_representativa': met_dict,
+                        'analitos': analitos_agrupados
                     })
         return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
     except Exception as e:
