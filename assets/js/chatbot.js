@@ -273,19 +273,44 @@ class MetodologiasChatbot {
             // SISTEMA HÍBRIDO: Búsqueda local primero (GRATIS), Perplexity solo si es necesario
             
             // DETECTAR PREGUNTAS DE SEGUIMIENTO: Si la pregunta menciona matrices/condiciones y hay contexto previo
-            const isFollowUpQuery = /\b(en|de|para|con|sin|no|tambien|ademas|otras|otros|matrices|matriz)\b/i.test(query);
+            // También detectar preguntas con negación sobre matrices: "no hacen en X?", "en X no hacen?"
+            const isFollowUpQuery = /\b(en|de|para|con|sin|tambien|ademas|otras|otros|matrices|matriz)\b/i.test(query);
+            const isNegativeFollowUp = /\b(no|sin)\s+(hacen|tienen|analizan)\b/i.test(query) || 
+                                       /\b(en|de|para)\s+\w+\s+no\s+(hacen|tienen|analizan)\b/i.test(query) ||
+                                       /^(en|de|para)\s+\w+\s+no\s*(hacen|tienen|analizan)?\s*\??$/i.test(query);
             const hasPreviousContext = this.lastQuery && this.lastResults && this.lastResults.length > 0;
             
             // Si es pregunta de seguimiento y hay contexto previo, combinar la búsqueda
             let searchQuery = query;
             let combinedResults = [];
             
-            if (isFollowUpQuery && hasPreviousContext) {
-                // Extraer términos del contexto previo (ej: "organoclorados")
-                const previousKeywords = this.lastQuery.toLowerCase();
-                // Combinar con la nueva pregunta (ej: "organoclorados en harina")
-                searchQuery = `${previousKeywords} ${query}`;
-                console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
+            if ((isFollowUpQuery || isNegativeFollowUp) && hasPreviousContext) {
+                // Extraer el tema principal del contexto previo (ej: "organoclorados" de "hacen organoclorados?")
+                // Limpiar palabras comunes para obtener solo el tema
+                let previousKeywords = this.lastQuery.toLowerCase();
+                const commonWords = ['hacen', 'tienen', 'analizan', 'metodo', 'metodos', 'metodologia', 'metodologias', 'para', 'en', 'de', 'del', 'la', 'el', 'los', 'las', 'un', 'una', 'que', 'que'];
+                for (const word of commonWords) {
+                    previousKeywords = previousKeywords.replace(new RegExp(`\\b${word}\\b`, 'gi'), ' ').trim();
+                }
+                previousKeywords = previousKeywords.replace(/[?¿!¡.,;:]/g, '').trim();
+                
+                // Si es pregunta con negación, convertirla en pregunta afirmativa para buscar
+                // Ej: "en harina no hacen?" → "organoclorados en harina"
+                if (isNegativeFollowUp) {
+                    // Extraer la matriz mencionada (ej: "harina" de "en harina no hacen?")
+                    const matrizMatch = query.match(/\b(harina|musculo|aceite|carne|leche|salmon|pecuarios|hidrobiologicos)\b/i);
+                    if (matrizMatch && previousKeywords) {
+                        searchQuery = `${previousKeywords} ${matrizMatch[0]}`;
+                        console.log(`🔄 Chatbot: Pregunta de seguimiento con negación detectada. Búsqueda combinada: "${searchQuery}"`);
+                    } else {
+                        searchQuery = `${previousKeywords} ${query}`;
+                        console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
+                    }
+                } else {
+                    // Pregunta normal de seguimiento
+                    searchQuery = `${previousKeywords} ${query}`;
+                    console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
+                }
             }
             
             // 1. Realizar búsqueda local primero
