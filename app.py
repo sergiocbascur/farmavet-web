@@ -1207,26 +1207,41 @@ def equipo_page():
 @app.route('/servicios.html')
 def servicios_page():
     """Ruta específica para página de servicios"""
-    lang = get_language()
-    locale = get_locale()
-    conn = get_db()
-    metodologias = conn.execute('''
-        SELECT * FROM metodologias WHERE activo = 1 
-        ORDER BY categoria, orden, nombre
-    ''').fetchall()
-    tarjetas_destacadas = conn.execute('''
-        SELECT * FROM tarjetas_destacadas WHERE pagina = 'servicios' AND activo = 1 
-        ORDER BY orden, id
-    ''').fetchall()
-    # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
-    imagenes_hero = conn.execute('''
-        SELECT * FROM galeria_imagenes 
-        WHERE activo = 1 AND (pagina = 'servicios' OR pagina IS NULL OR pagina = '')
-        ORDER BY orden, id DESC
-        LIMIT 10
-    ''').fetchall()
-    conn.close()
-    # Organizar metodologías por categoría y agrupar por similitudes
+    try:
+        lang = get_language()
+        locale = get_locale()
+        conn = get_db()
+        metodologias = conn.execute('''
+            SELECT * FROM metodologias WHERE activo = 1 
+            ORDER BY categoria, orden, nombre
+        ''').fetchall()
+        tarjetas_destacadas = conn.execute('''
+            SELECT * FROM tarjetas_destacadas WHERE pagina = 'servicios' AND activo = 1 
+            ORDER BY orden, id
+        ''').fetchall()
+        # Cargar imágenes de la galería para el hero slider (solo las asignadas a esta página)
+        imagenes_hero = conn.execute('''
+            SELECT * FROM galeria_imagenes 
+            WHERE activo = 1 AND (pagina = 'servicios' OR pagina IS NULL OR pagina = '')
+            ORDER BY orden, id DESC
+            LIMIT 10
+        ''').fetchall()
+        conn.close()
+    except Exception as e:
+        app.logger.error(f'Error en servicios_page al cargar datos: {str(e)}', exc_info=True)
+        if 'conn' in locals() and conn:
+            conn.close()
+        # Devolver página con datos vacíos en caso de error
+        return render_template('servicios.html', 
+                             metodologias_por_categoria={}, 
+                             categorias_nombres={}, 
+                             tarjetas_destacadas=[], 
+                             imagenes_hero=[], 
+                             lang=get_language(), 
+                             locale=get_locale())
+    
+    try:
+        # Organizar metodologías por categoría y agrupar por similitudes
     metodologias_por_categoria = {}
     categorias_nombres = {
         'residuos': 'Residuos de Medicamentos Veterinarios',
@@ -1239,10 +1254,10 @@ def servicios_page():
     # Agrupar por nombre + matriz + técnica + acreditada
     # Los analitos y LOD/LOQ pueden variar dentro del mismo grupo
     def get_group_key(metodologia):
-        nombre = get_translated_field(metodologia, 'nombre') or metodologia['nombre'] or ''
-        matriz = get_translated_field(metodologia, 'matriz') or metodologia['matriz'] or ''
-        tecnica = get_translated_field(metodologia, 'tecnica') or metodologia['tecnica'] or ''
-        acreditada = metodologia['acreditada'] or False
+        nombre = get_translated_field(metodologia, 'nombre') or (metodologia['nombre'] if 'nombre' in metodologia.keys() else '') or ''
+        matriz = get_translated_field(metodologia, 'matriz') or (metodologia['matriz'] if 'matriz' in metodologia.keys() else '') or ''
+        tecnica = get_translated_field(metodologia, 'tecnica') or (metodologia['tecnica'] if 'tecnica' in metodologia.keys() else '') or ''
+        acreditada = metodologia['acreditada'] if 'acreditada' in metodologia.keys() else False
         return (nombre, matriz, tecnica, acreditada)
     
     # Agrupar metodologías por nombre + matriz + técnica + acreditada
@@ -1290,8 +1305,9 @@ def servicios_page():
                     analitos_unicos.append(analito)
                 
                 # Extraer valores numéricos de LOD y LOQ
-                lod = item.get('limite_deteccion') or ''
-                loq = item.get('limite_cuantificacion') or ''
+                # sqlite3.Row no tiene .get(), usar acceso directo con verificación
+                lod = item['limite_deteccion'] if 'limite_deteccion' in item.keys() else ''
+                loq = item['limite_cuantificacion'] if 'limite_cuantificacion' in item.keys() else ''
                 
                 if lod:
                     try:
@@ -1317,7 +1333,7 @@ def servicios_page():
                 if len(lods) > 1 and min(lods) != max(lods):
                     lod_formato = f"{min(lods):g}-{max(lods):g}"
                     # Extraer unidad del primer LOD si está disponible
-                    primer_lod = items[0].get('limite_deteccion') or ''
+                    primer_lod = items[0]['limite_deteccion'] if 'limite_deteccion' in items[0].keys() else ''
                     if primer_lod:
                         lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
                         if lod_match:
@@ -1325,7 +1341,7 @@ def servicios_page():
                 else:
                     lod_formato = str(min(lods))
                     # Extraer unidad del primer LOD
-                    primer_lod = items[0].get('limite_deteccion') or ''
+                    primer_lod = items[0]['limite_deteccion'] if 'limite_deteccion' in items[0].keys() else ''
                     if primer_lod:
                         lod_match = re.search(r'[\d.]+(.+)', str(primer_lod))
                         if lod_match:
@@ -1335,7 +1351,7 @@ def servicios_page():
                 if len(loqs) > 1 and min(loqs) != max(loqs):
                     loq_formato = f"{min(loqs):g}-{max(loqs):g}"
                     # Extraer unidad del primer LOQ si está disponible
-                    primer_loq = items[0].get('limite_cuantificacion') or ''
+                    primer_loq = items[0]['limite_cuantificacion'] if 'limite_cuantificacion' in items[0].keys() else ''
                     if primer_loq:
                         loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
                         if loq_match:
@@ -1343,7 +1359,7 @@ def servicios_page():
                 else:
                     loq_formato = str(min(loqs))
                     # Extraer unidad del primer LOQ
-                    primer_loq = items[0].get('limite_cuantificacion') or ''
+                    primer_loq = items[0]['limite_cuantificacion'] if 'limite_cuantificacion' in items[0].keys() else ''
                     if primer_loq:
                         loq_match = re.search(r'[\d.]+(.+)', str(primer_loq))
                         if loq_match:
@@ -1362,7 +1378,17 @@ def servicios_page():
                 'analitos': analitos_unicos,
                 'metodologia_representativa': met_representativa
             })
-    return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+        return render_template('servicios.html', metodologias_por_categoria=metodologias_por_categoria, categorias_nombres=categorias_nombres, tarjetas_destacadas=tarjetas_destacadas, imagenes_hero=imagenes_hero, lang=lang, locale=locale)
+    except Exception as e:
+        app.logger.error(f'Error en servicios_page al procesar metodologías: {str(e)}', exc_info=True)
+        # Devolver página con datos vacíos en caso de error
+        return render_template('servicios.html', 
+                             metodologias_por_categoria={}, 
+                             categorias_nombres={}, 
+                             tarjetas_destacadas=tarjetas_destacadas if 'tarjetas_destacadas' in locals() else [], 
+                             imagenes_hero=imagenes_hero if 'imagenes_hero' in locals() else [], 
+                             lang=lang if 'lang' in locals() else get_language(), 
+                             locale=locale if 'locale' in locals() else get_locale())
 
 @app.route('/<page>.html')
 def page(page):
