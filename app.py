@@ -2377,19 +2377,23 @@ def api_chatbot_search():
         if not query:
             return jsonify({'error': 'Query vacía'}), 400
         
-        # Verificar si hay Ollama configurado (prioridad) o Perplexity (fallback)
+        # SISTEMA DE 3 CAPAS:
+        # 1. Ollama (local, gratis) - PRIORIDAD ALTA
+        # 2. DeepSeek (económico) - FALLBACK
+        # 3. Sin IA (búsqueda local básica) - ÚLTIMO RECURSO
+        
         ollama_url = os.environ.get('OLLAMA_API_URL', '').strip()
+        deepseek_api_key = os.environ.get('DEEPSEEK_API_KEY', '').strip()
         perplexity_api_key = os.environ.get('PERPLEXITY_API_KEY')
         
         use_ollama = bool(ollama_url)
+        use_deepseek = bool(deepseek_api_key)
         use_perplexity = bool(perplexity_api_key)
         
-        if not use_ollama and not use_perplexity:
-            app.logger.warning('Ni OLLAMA_API_URL ni PERPLEXITY_API_KEY configuradas')
-            return jsonify({
-                'error': 'Ninguna API de IA configurada',
-                'message': 'La funcionalidad de búsqueda inteligente no está disponible'
-            }), 503
+        # Si no hay ninguna API configurada, usar búsqueda local básica
+        if not use_ollama and not use_deepseek and not use_perplexity:
+            app.logger.info('Ninguna API de IA configurada, usando búsqueda local básica')
+            # No devolver error, continuar con búsqueda local básica
         
         # Detectar si es consulta general
         is_general_query = any(word in query.lower() for word in ['horario', 'contacto', 'email', 'correo', 'telefono', 'direccion', 'ubicacion', 'donde'])
@@ -2628,7 +2632,7 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         
         system_message = context
         
-        # Usar Ollama si está configurado, si no usar Perplexity
+        # CAPA 1: Intentar Ollama primero (gratis, local)
         if use_ollama:
             # Llamar a la API de Ollama
             ollama_model = os.environ.get('OLLAMA_MODEL', 'llama3.2:3b')
