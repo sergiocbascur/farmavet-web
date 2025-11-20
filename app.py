@@ -2632,9 +2632,13 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
         
         system_message = context
         
+        # Variables de control del sistema de 3 capas
+        ollama_failed = False
+        deepseek_failed = False
+        perplexity_failed = False
+        
         # CAPA 1: Intentar Ollama primero (gratis, local)
         if use_ollama:
-            # Llamar a la API de Ollama
             ollama_model = os.environ.get('OLLAMA_MODEL', 'llama3.2:3b')
             ollama_api_url = f"{ollama_url}/api/chat"
             
@@ -2642,13 +2646,12 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                 "Content-Type": "application/json"
             }
             
-            # Formato de Ollama (diferente a Perplexity)
             payload = {
                 "model": ollama_model,
                 "messages": [
                     {
                         "role": "system",
-                        "content": system_message[:4000]  # Ollama maneja mejor contexto largo
+                        "content": system_message[:4000]
                     },
                     {
                         "role": "user",
@@ -2658,7 +2661,7 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                 "stream": False,
                 "options": {
                     "temperature": 0.3,
-                    "num_predict": 200  # max_tokens en Ollama
+                    "num_predict": 200
                 }
             }
             
@@ -2681,36 +2684,78 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                         })
                     else:
                         app.logger.warning('Chatbot Ollama: Respuesta sin message.content')
-                        # Fallback a Perplexity si está configurado
-                        if use_perplexity:
-                            app.logger.info('Chatbot Ollama: Fallback a Perplexity')
-                        else:
-                            return jsonify({'error': 'Respuesta inválida de Ollama'}), 500
+                        ollama_failed = True
                 else:
                     error_text = response.text[:500]
                     app.logger.error(f'Chatbot Ollama: Error {response.status_code}: {error_text}')
-                    # Fallback a Perplexity si está configurado
-                    if use_perplexity:
-                        app.logger.info('Chatbot Ollama: Fallback a Perplexity por error')
-                    else:
-                        return jsonify({
-                            'error': f'Error en Ollama API: {response.status_code}',
-                            'details': error_text if app.debug else 'Error al procesar la consulta'
-                        }), response.status_code
+                    ollama_failed = True
                     
             except requests.exceptions.RequestException as e:
                 app.logger.error(f'Chatbot Ollama: Error de conexión: {str(e)}')
-                # Fallback a Perplexity si está configurado
-                if use_perplexity:
-                    app.logger.info('Chatbot Ollama: Fallback a Perplexity por error de conexión')
-                else:
-                    return jsonify({
-                        'error': 'Error de conexión con Ollama',
-                        'details': str(e) if app.debug else 'No se pudo conectar al servicio'
-                    }), 503
+                ollama_failed = True
+        else:
+            ollama_failed = True
         
-        # Usar Perplexity como fallback o principal si Ollama no está configurado
-        if use_perplexity:
+        # CAPA 2: Si Ollama falló, intentar DeepSeek (económico)
+        if ollama_failed and use_deepseek:
+            app.logger.info('Chatbot: Ollama no disponible, intentando DeepSeek...')
+            deepseek_api_url = "https://api.deepseek.com/v1/chat/completions"
+            
+            headers = {
+                "Authorization": f"Bearer {deepseek_api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_message[:4000]
+                    },
+                    {
+                        "role": "user",
+                        "content": query
+                    }
+                ],
+                "temperature": 0.3,
+                "max_tokens": 200
+            }
+            
+            app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
+            
+            try:
+                response = requests.post(deepseek_api_url, headers=headers, json=payload, timeout=20)
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if 'choices' in result and len(result['choices']) > 0:
+                        answer = result['choices'][0]['message']['content']
+                        app.logger.info(f'Chatbot DeepSeek: Respuesta recibida ({len(answer)} caracteres)')
+                        
+                        return jsonify({
+                            'answer': answer,
+                            'sources': [],
+                            'query': query
+                        })
+                    else:
+                        app.logger.warning('Chatbot DeepSeek: Respuesta sin choices')
+                        deepseek_failed = True
+                else:
+                    error_text = response.text[:500]
+                    app.logger.error(f'Chatbot DeepSeek: Error {response.status_code}: {error_text}')
+                    deepseek_failed = True
+                    
+            except requests.exceptions.RequestException as e:
+                app.logger.error(f'Chatbot DeepSeek: Error de conexión: {str(e)}')
+                deepseek_failed = True
+        else:
+            deepseek_failed = True
+        
+        # CAPA 3 (OPCIONAL): Si Ollama y DeepSeek fallaron, usar Perplexity como último recurso (si está configurado)
+        if ollama_failed and deepseek_failed and use_perplexity:
+            app.logger.info('Chatbot: Ollama y DeepSeek no disponibles, usando Perplexity como último recurso...')
             # Llamar a la API de Perplexity
             perplexity_url = "https://api.perplexity.ai/chat/completions"
             
@@ -2793,43 +2838,60 @@ Ahora, razona sobre la siguiente pregunta y responde de manera natural, intelige
                 last_error = str(e)
                 continue
         
-        # Verificar si todos los modelos fallaron
-        if not response:
-            app.logger.error(f'Chatbot Perplexity: Todos los modelos fallaron. Último error: {last_error}')
-            return jsonify({
-                'error': 'Error al procesar la consulta con Perplexity',
-                'details': f'No se pudo procesar con ningún modelo disponible. Último error: {last_error}' if app.debug else 'Error al procesar la consulta'
-            }), 503
-        
-        if response.status_code == 200:
-            result = response.json()
-            
-            # Extraer la respuesta del modelo
-            if 'choices' in result and len(result['choices']) > 0:
-                answer = result['choices'][0]['message']['content']
-                
-                # Extraer fuentes si están disponibles
-                sources = []
-                if 'citations' in result:
-                    sources = result['citations']
-                
-                app.logger.info(f'Chatbot Perplexity: Respuesta recibida ({len(answer)} caracteres)')
-                
-                return jsonify({
-                    'answer': answer,
-                    'sources': sources,
-                    'query': query
-                })
+            # Verificar si todos los modelos de Perplexity fallaron
+            if not response:
+                app.logger.error(f'Chatbot Perplexity: Todos los modelos fallaron. Último error: {last_error}')
+                perplexity_failed = True
             else:
-                app.logger.warning('Chatbot Perplexity: Respuesta sin choices')
-                return jsonify({'error': 'Respuesta inválida de Perplexity'}), 500
+                if response.status_code == 200:
+                    result = response.json()
+                    
+                    if 'choices' in result and len(result['choices']) > 0:
+                        answer = result['choices'][0]['message']['content']
+                        
+                        sources = []
+                        if 'citations' in result:
+                            sources = result['citations']
+                        
+                        app.logger.info(f'Chatbot Perplexity: Respuesta recibida ({len(answer)} caracteres)')
+                        
+                        return jsonify({
+                            'answer': answer,
+                            'sources': sources,
+                            'query': query
+                        })
+                    else:
+                        app.logger.warning('Chatbot Perplexity: Respuesta sin choices')
+                        perplexity_failed = True
+                else:
+                    error_text = response.text[:200] if hasattr(response, 'text') else 'Error desconocido'
+                    app.logger.error(f'Chatbot Perplexity: Error {response.status_code}: {error_text}')
+                    perplexity_failed = True
         else:
-            error_text = response.text
-            app.logger.error(f'Chatbot Perplexity: Error {response.status_code}: {error_text}')
+            perplexity_failed = True
+        
+        # CAPA 3 (FALLBACK FINAL): Si todas las APIs fallaron, usar búsqueda local básica sin IA
+        if ollama_failed and deepseek_failed and (not use_perplexity or perplexity_failed):
+            app.logger.warning('Chatbot: Todas las APIs de IA fallaron, usando búsqueda local básica')
+            
+            # Respuesta básica usando solo los resultados locales
+            if local_results and len(local_results) > 0:
+                # Formatear respuesta básica sin IA
+                if len(local_results) == 1:
+                    met = local_results[0]
+                    answer = f"Sí, tenemos metodología para analizar {met.get('analito', 'varios analitos')} en {met.get('matriz', 'diversas matrices')} mediante {met.get('tecnica', 'diversas técnicas')}."
+                    if met.get('acreditada'):
+                        answer += " Metodología acreditada ISO 17025."
+                else:
+                    answer = f"Encontré {len(local_results)} metodologías relacionadas. Puedo ayudarte con más detalles específicos."
+            else:
+                answer = "No encontré metodologías específicas en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl o usar el formulario de contacto para más información."
+            
             return jsonify({
-                'error': f'Error en Perplexity API: {response.status_code}',
-                'details': error_text[:200] if app.debug else 'Error al procesar la consulta'
-            }), response.status_code
+                'answer': answer,
+                'sources': [],
+                'query': query
+            })
             
     except requests.exceptions.Timeout:
         app.logger.error('Chatbot Perplexity: Timeout al conectar con la API')
