@@ -571,28 +571,85 @@ window.addEventListener("scroll", handleScroll);
 
 // Removed duplicate counter function - using the one inside DOMContentLoaded instead
 
-// Tabbed panels
+// Tabbed panels - Sistema con data-tabs (nuevo)
 document.querySelectorAll("[data-tabs]").forEach((tabs) => {
-  const buttons = Array.from(tabs.querySelectorAll("[data-tab-button]"));
-  const panels = Array.from(tabs.querySelectorAll("[data-tab-panel]"));
+  // Intentar primero con data-tab-button (sistema nuevo)
+  let buttons = Array.from(tabs.querySelectorAll("[data-tab-button]"));
+  let panels = Array.from(tabs.querySelectorAll("[data-tab-panel]"));
+  
+  // Si no encuentra, usar sistema con role="tab" (servicios.html)
+  if (buttons.length === 0) {
+    buttons = Array.from(tabs.querySelectorAll("button[role='tab']"));
+    panels = Array.from(tabs.querySelectorAll("[role='tabpanel']"));
+  }
 
-  const activate = (id) => {
+  if (buttons.length === 0 || panels.length === 0) return;
+
+  const activate = (buttonId) => {
     buttons.forEach((btn) => {
-      const isActive = btn.dataset.tabButton === id;
+      let isActive = false;
+      
+      // Sistema nuevo con data-tab-button
+      if (btn.dataset.tabButton) {
+        isActive = btn.dataset.tabButton === buttonId;
+      } 
+      // Sistema con role="tab" (servicios.html)
+      else if (btn.getAttribute("role") === "tab") {
+        const panelId = btn.getAttribute("aria-controls");
+        isActive = panelId === buttonId;
+      }
+      
       btn.classList.toggle("is-active", isActive);
       btn.setAttribute("aria-selected", String(isActive));
       btn.setAttribute("tabindex", isActive ? "0" : "-1");
     });
 
     panels.forEach((panel) => {
-      const isActive = panel.dataset.tabPanel === id;
-      panel.classList.toggle("is-active", isActive);
+      let isActive = false;
+      
+      // Sistema nuevo con data-tab-panel
+      if (panel.dataset.tabPanel) {
+        isActive = panel.dataset.tabPanel === buttonId;
+      }
+      // Sistema con role="tabpanel" (servicios.html)
+      else if (panel.getAttribute("role") === "tabpanel") {
+        isActive = panel.id === buttonId;
+      }
+      
+      panel.classList.toggle("active", isActive);
       panel.hidden = !isActive;
     });
   };
 
   buttons.forEach((button) => {
-    button.addEventListener("click", () => activate(button.dataset.tabButton));
+    button.addEventListener("click", (e) => {
+      e.preventDefault();
+      let targetId = null;
+      
+      // Sistema nuevo
+      if (button.dataset.tabButton) {
+        targetId = button.dataset.tabButton;
+      }
+      // Sistema con role="tab"
+      else if (button.getAttribute("role") === "tab") {
+        targetId = button.getAttribute("aria-controls");
+      }
+      
+      if (targetId) {
+        activate(targetId);
+        
+        // Scroll suave al panel en móvil
+        if (window.innerWidth <= 768) {
+          const panel = document.getElementById(targetId);
+          if (panel) {
+            setTimeout(() => {
+              panel.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+          }
+        }
+      }
+    });
+    
     button.addEventListener("keydown", (event) => {
       if (!["ArrowRight", "ArrowLeft"].includes(event.key)) return;
       event.preventDefault();
@@ -600,12 +657,32 @@ document.querySelectorAll("[data-tabs]").forEach((tabs) => {
       const offset = event.key === "ArrowRight" ? 1 : -1;
       const nextButton = buttons[(index + offset + buttons.length) % buttons.length];
       nextButton.focus();
-      activate(nextButton.dataset.tabButton);
+      
+      let targetId = null;
+      if (nextButton.dataset.tabButton) {
+        targetId = nextButton.dataset.tabButton;
+      } else if (nextButton.getAttribute("role") === "tab") {
+        targetId = nextButton.getAttribute("aria-controls");
+      }
+      
+      if (targetId) activate(targetId);
     });
   });
 
+  // Activar el primer tab por defecto
   if (buttons.length) {
-    activate(buttons[0].dataset.tabButton);
+    const firstButton = buttons[0];
+    let targetId = null;
+    
+    if (firstButton.dataset.tabButton) {
+      targetId = firstButton.dataset.tabButton;
+    } else if (firstButton.getAttribute("role") === "tab") {
+      targetId = firstButton.getAttribute("aria-controls");
+    }
+    
+    if (targetId) {
+      activate(targetId);
+    }
   }
 });
 
