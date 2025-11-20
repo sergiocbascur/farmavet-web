@@ -273,9 +273,14 @@ class MetodologiasChatbot {
                                        /^(en|de|para)\s+\w+\s+no\s*(hacen|tienen|analizan)?\s*\??$/i.test(query) ||
                                        /^(en|de|para)\s+\w+\s+no\s*\??$/i.test(query); // "en harina no?"
             
+            // Detectar si es una pregunta nueva sobre un tema específico
+            // Ej: "hacen dioxinas?", "y hacen melamina?" → NO son seguimiento, son preguntas nuevas
+            const isNewTopicQuery = /^(hacen|tienen|analizan|y)\s+\w+\s*\??$/i.test(query) ||
+                                    /^(y|tambien)\s+(hacen|tienen|analizan)\s+\w+\s*\??$/i.test(query);
+            
             // Solo considerar como seguimiento si es explícitamente una pregunta de seguimiento
-            // O si es negativa sobre matrices (ej: "en harina no hacen?")
-            const isFollowUpQuery = isExplicitFollowUp || isNegativeFollowUp;
+            // Y NO es una pregunta nueva sobre un tema diferente
+            const isFollowUpQuery = (isExplicitFollowUp || isNegativeFollowUp) && !isNewTopicQuery;
             
             const hasPreviousContext = this.lastQuery && this.lastResults && this.lastResults.length > 0;
             
