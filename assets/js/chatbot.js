@@ -338,6 +338,46 @@ class MetodologiasChatbot {
             .trim();
     }
     
+    // Formatear lista de analitos de forma natural
+    formatAnalitos(analitos) {
+        if (!analitos || analitos.length === 0) return 'varios analitos';
+        if (analitos.length === 1) return analitos[0];
+        if (analitos.length === 2) return `${analitos[0]} y ${analitos[1]}`;
+        if (analitos.length <= 5) {
+            const ultimos = analitos.slice(-1)[0];
+            const anteriores = analitos.slice(0, -1).join(', ');
+            return `${anteriores} y ${ultimos}`;
+        }
+        // Si hay más de 5, mostrar los primeros 5 y decir "y X más"
+        const primeros = analitos.slice(0, 5).join(', ');
+        const restantes = analitos.length - 5;
+        return `${primeros} y ${restantes} más`;
+    }
+    
+    // Extraer número de un string como "30 ng/g" -> 30
+    extractNumber(text) {
+        if (!text) return null;
+        const match = text.toString().match(/[\d.]+/);
+        if (match) {
+            const num = parseFloat(match[0]);
+            return isNaN(num) ? null : num;
+        }
+        return null;
+    }
+    
+    // Formatear rango de valores (min-max)
+    formatRange(values) {
+        if (!values || values.length === 0) return null;
+        const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+        if (uniqueValues.length === 0) return null;
+        if (uniqueValues.length === 1) return String(uniqueValues[0]);
+        const min = Math.min(...uniqueValues);
+        const max = Math.max(...uniqueValues);
+        if (min === max) return String(min);
+        // Incluir la unidad si está disponible (ej: "30-50 ng/g")
+        return `${min}-${max}`;
+    }
+    
     // Función de distancia de Levenshtein simplificada (para typos)
     levenshteinDistance(str1, str2) {
         const len1 = str1.length;
