@@ -804,19 +804,37 @@ class MetodologiasChatbot {
                 }
             }
             
-            // FILTRO CRÍTICO: Solo mantener metodologías con coincidencia en analito o nombre
+            // FILTRO CRÍTICO: Solo mantener metodologías con coincidencia DIRECTA en analito o nombre
             // Descarta completamente metodologías que solo coinciden en matriz o técnica
+            // También descarta coincidencias muy débiles o irrelevantes
             let hasMatchInAnalitoOrNombre = false;
             
             if (keywords.length > 0) {
                 for (const keyword of keywords) {
                     const cleanKeyword = keyword.replace(/[?¿!¡.,;:]/g, '').trim();
                     if (cleanKeyword.length >= 3) {
-                        // Verificar coincidencia directa en analito o nombre
-                        if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
-                            nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                        // Verificar coincidencia directa en analito o nombre (substring o palabra completa)
+                        // NO usar coincidencias muy débiles como solo una letra común
+                        const keywordLen = cleanKeyword.length;
+                        
+                        // Coincidencia exacta o como palabra completa (máxima confianza)
+                        const analitoRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        const nombreRegex = new RegExp(`\\b${cleanKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+                        
+                        if (analitoRegex.test(analitoNorm) || analitoRegex.test(analitoEnNorm) ||
+                            nombreRegex.test(nombreNorm) || nombreRegex.test(nombreEnNorm)) {
                             hasMatchInAnalitoOrNombre = true;
                             break;
+                        }
+                        
+                        // Coincidencia como substring pero solo si la keyword es significativa (>=4 caracteres)
+                        // Esto evita coincidencias falsas con palabras cortas comunes
+                        if (keywordLen >= 4) {
+                            if (analitoNorm.includes(cleanKeyword) || analitoEnNorm.includes(cleanKeyword) ||
+                                nombreNorm.includes(cleanKeyword) || nombreEnNorm.includes(cleanKeyword)) {
+                                hasMatchInAnalitoOrNombre = true;
+                                break;
+                            }
                         }
                         
                         // Verificar coincidencia flexible (typos) en analito o nombre

@@ -2381,7 +2381,15 @@ def api_chatbot_search():
         # Construir contexto de conversación si hay pregunta anterior
         conversation_context = ""
         if previous_query:
-            conversation_context = f"\n\nCONTEXTO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario preguntó: \"{previous_query}\"\n- Ahora pregunta: \"{query}\"\n- Esta pregunta se refiere al mismo tema que la anterior, especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', interpreta que se refiere al tema de la pregunta anterior."
+            # Extraer el tema principal de la pregunta anterior (ej: "organoclorados" de "hacen organoclorados?")
+            previous_tema = previous_query.lower()
+            # Limpiar palabras comunes para obtener el tema
+            palabras_comunes = ['hacen', 'tienen', 'analizan', 'metodo', 'metodos', 'metodologia', 'metodologias', 'para', 'en', 'de', 'del', 'la', 'el', 'los', 'las', 'un', 'una', 'que', 'que']
+            for palabra in palabras_comunes:
+                previous_tema = previous_tema.replace(f' {palabra} ', ' ').replace(f'{palabra} ', '').replace(f' {palabra}', '')
+            previous_tema = previous_tema.strip().rstrip('?').strip()
+            
+            conversation_context = f"\n\nCONTEXTO CRÍTICO DE LA CONVERSACIÓN ANTERIOR:\n- El usuario PREGUNTÓ ANTERIORMENTE: \"{previous_query}\"\n- El TEMA DE LA PREGUNTA ANTERIOR era sobre: {previous_tema}\n- AHORA el usuario pregunta: \"{query}\"\n- Esta pregunta DE SEGUIMIENTO se refiere AL MISMO TEMA ({previous_tema}), especialmente sobre matrices o variantes del mismo analito/método.\n- Si la pregunta menciona 'harina', 'músculo', 'aceite', 'en que matrices?', 'no hacen en X?', 'que limites tiene?', DEBES interpretar que se refiere AL TEMA ANTERIOR ({previous_tema}), NO a otro tema diferente.\n- RESPUESTA OBLIGATORIA: Si la pregunta es sobre matrices, límites, o variantes, busca información específica sobre {previous_tema} en el contexto proporcionado, NO sobre otros analitos o métodos."
         
         # SISTEMA DE 3 CAPAS:
         # 1. Ollama (local, gratis) - PRIORIDAD ALTA
@@ -2633,10 +2641,11 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Responde: "Sí, tenemos metodología acreditada para analizar Tetraciclina, Epi-tetraciclina, Oxitetraciclina y Clortetraciclina en [matriz específica] mediante [técnica]."
    - Si hay múltiples variantes (ej: en diferentes matrices), menciona todas las matrices disponibles
 
-2. PREGUNTAS DE SEGUIMIENTO SOBRE MATRICES:
-   - Si el usuario pregunta "en que matrices?" después de mencionar un analito, busca en el contexto las matrices específicas donde se analiza ese analito
-   - Ejemplo: Si preguntaron "organoclorados?" y luego "en que matrices?", responde: "Analizamos organoclorados en [matriz1], [matriz2] y [matriz3] (ej: músculo, aceite y harina)."
+2. PREGUNTAS DE SEGUIMIENTO SOBRE MATRICES (CRÍTICO):
+   - Si el usuario pregunta "en que matrices?" después de mencionar un analito, busca en el contexto las matrices específicas donde se analiza ESE MISMO analito
+   - Ejemplo: Si preguntaron "organoclorados?" y luego "en que matrices?", responde: "Analizamos organoclorados en músculo, aceite y harina (productos hidrobiológicos)."
    - NO confundas "matrices" con "técnicas analíticas". Las matrices son: músculo, aceite, harina, productos pecuarios, productos hidrobiológicos, etc.
+   - IMPORTANTE: Si hay CONTEXTO DE CONVERSACIÓN ANTERIOR, la pregunta sobre matrices se refiere AL TEMA ANTERIOR, NO a otro tema. Por ejemplo, si preguntaron sobre "organoclorados" y luego "en que matrices?", debes responder sobre matrices donde se analizan ORGANOCLORADOS, NO sobre matrices de otros analitos mencionados en el contexto general.
 
 3. PREGUNTAS SOBRE LÍMITES (LOD/LOQ):
    - Solo si preguntan específicamente sobre límites, incluye esa información
