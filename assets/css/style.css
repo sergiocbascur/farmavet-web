@@ -1923,6 +1923,8 @@ a.logo-card:focus {
 .carousel-wrapper {
   overflow: hidden;
   width: 100%;
+  max-width: 1600px; /* Limitar ancho máximo para pantallas muy grandes */
+  margin: 0 auto; /* Centrar el carrusel */
 }
 
 .carousel-track-infinite {
@@ -1939,6 +1941,7 @@ a.logo-card:focus {
   min-width: 0;
   max-width: calc((100% - (3 * 1.5rem)) / 4);
   scroll-snap-align: start;
+  align-self: stretch !important; /* Forzar que todas tengan la misma altura */
 }
 
 .infinite-carousel .logo-card {
