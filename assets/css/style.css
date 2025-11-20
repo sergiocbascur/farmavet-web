@@ -1391,8 +1391,7 @@ a.logo-card:focus {
 }
 
 /* Contenedor de botones dentro de cards debe empujar al final */
-.infinite-carousel .card > div:has(.cta-button-green),
-.infinite-carousel .card > div:has(.cta-button) {
+.infinite-carousel .card > div:last-child {
   margin-top: auto;
   padding-top: 1rem;
 }
