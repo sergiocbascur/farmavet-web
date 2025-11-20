@@ -196,9 +196,42 @@ a {
     position: relative;
   }
   
-  /* Asegurar que el botón de menú esté por encima cuando está abierto */
+  /* Ocultar el botón hamburguesa cuando el menú está abierto */
   body.no-scroll .nav-toggle {
-    z-index: 1000000 !important;
+    display: none !important;
+  }
+  
+  /* Mostrar y posicionar el botón de cerrar dentro del menú */
+  .nav-close-mobile {
+    display: flex !important;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .nav-close-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+  }
+  
+  .nav-close-btn:hover,
+  .nav-close-btn:active {
+    background: rgba(35, 115, 186, 0.1);
+    transform: scale(0.95);
+  }
+  
+  .nav-close-btn i {
+    font-size: 1.5rem;
   }
   
   /* Asegurar que el header esté por encima del contenido pero debajo del menú */
@@ -4126,9 +4159,9 @@ input[type="button"],
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
@@ -4141,9 +4174,7 @@ input[type="button"],
     -webkit-overflow-scrolling: touch;
     visibility: hidden;
     opacity: 0;
-    max-width: 320px;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    /* Removido isolation: isolate para evitar contextos de apilamiento */
+    box-shadow: none;
   }
   
   .nav-links.open {
