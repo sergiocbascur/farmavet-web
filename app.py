@@ -2883,8 +2883,8 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                     "content": query
                 }
             ],
-            "temperature": 0.3,
-            "max_tokens": 200  # OPTIMIZACIÓN: Reducido de 500 a 200 tokens para ahorrar
+            "temperature": 0.2,  # Reducido para respuestas más rápidas
+            "max_tokens": 120  # OPTIMIZACIÓN: Reducido de 200 a 120 tokens para respuestas más rápidas
         }
         
         app.logger.info(f'Chatbot Perplexity: Buscando - {query[:100]}...')
