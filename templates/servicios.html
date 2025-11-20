@@ -429,6 +429,7 @@
                 <i class="bi bi-file-earmark-pdf"></i>{{ _('Descargar PDF') }}
               </button>
             </div>
+            <div class="metodologias-table-mobile" id="metodologias-table-mobile"></div>
             <div class="table-responsive metodologias-table-wrapper">
               <table class="metodologias-table" id="tabla-metodologias">
                 <thead>
@@ -641,7 +642,110 @@
       const results = document.getElementById('metodologias-results');
       const countSpan = document.getElementById('metodologias-count');
       const tableRows = document.querySelectorAll('#tabla-metodologias tbody tr');
+      const mobileContainer = document.getElementById('metodologias-table-mobile');
       let currentFilter = 'all';
+      
+      // Función para crear cards móviles
+      function createMobileCards() {
+        if (window.innerWidth > 768) {
+          mobileContainer.innerHTML = '';
+          return;
+        }
+        
+        mobileContainer.innerHTML = '';
+        const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+        
+        visibleRows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          const metodologia = row.dataset.metodologia || '';
+          const matriz = row.dataset.matriz || '';
+          const tecnica = row.dataset.tecnica || '';
+          const acreditada = row.dataset.acreditada || '';
+          const mostrarMetodologia = row.dataset.mostrarMetodologia === 'true';
+          
+          // Solo crear card si debe mostrar metodología o si no hay metodología previa
+          if (mostrarMetodologia || !metodologia) {
+            const card = document.createElement('div');
+            card.className = 'metodologia-card';
+            
+            let cardHTML = '';
+            
+            // Header con metodología (solo si debe mostrarse)
+            if (mostrarMetodologia && metodologia) {
+              cardHTML += `
+                <div class="metodologia-card-header">
+                  <h4>${metodologia}</h4>
+                </div>
+              `;
+            }
+            
+            // Analito
+            if (cells[1] && cells[1].textContent.trim() && cells[1].textContent.trim() !== '—') {
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('Analito') }}</div>
+                  <div class="metodologia-card-value">${cells[1].textContent.trim()}</div>
+                </div>
+              `;
+            }
+            
+            // Matriz (solo si debe mostrarse)
+            if (mostrarMetodologia && matriz && matriz !== '—') {
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('Matriz') }}</div>
+                  <div class="metodologia-card-value">${matriz}</div>
+                </div>
+              `;
+            }
+            
+            // Técnica (solo si debe mostrarse)
+            if (mostrarMetodologia && tecnica && tecnica !== '—') {
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('Técnica') }}</div>
+                  <div class="metodologia-card-value">${tecnica}</div>
+                </div>
+              `;
+            }
+            
+            // LOD y LOQ
+            if (cells[4] && cells[4].textContent.trim() && cells[4].textContent.trim() !== '—') {
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('LOD') }}</div>
+                  <div class="metodologia-card-value">${cells[4].textContent.trim()}</div>
+                </div>
+              `;
+            }
+            
+            if (cells[5] && cells[5].textContent.trim() && cells[5].textContent.trim() !== '—') {
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('LOQ') }}</div>
+                  <div class="metodologia-card-value">${cells[5].textContent.trim()}</div>
+                </div>
+              `;
+            }
+            
+            // Acreditada (solo si debe mostrarse)
+            if (mostrarMetodologia) {
+              const badgeClass = acreditada === 'Sí' ? 'metodologia-card-badge-success' : 'metodologia-card-badge-secondary';
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('Acreditada') }}</div>
+                  <div class="metodologia-card-value">
+                    <span class="metodologia-card-badge ${badgeClass}">${acreditada}</span>
+                  </div>
+                </div>
+              `;
+            }
+            
+            card.innerHTML = cardHTML;
+            mobileContainer.appendChild(card);
+          }
+        });
+      }
       
       function updateResults() {
         const search = searchInput.value.toLowerCase().trim();
@@ -752,7 +856,14 @@
         
         // Mostrar/ocultar botón de limpiar
         clearBtn.style.display = search ? 'block' : 'none';
+        
+        // Actualizar cards móviles
+        createMobileCards();
       }
+      
+      // Crear cards móviles al cargar y al redimensionar
+      window.addEventListener('resize', createMobileCards);
+      createMobileCards();
       
       // Búsqueda
       searchInput.addEventListener('input', updateResults);
