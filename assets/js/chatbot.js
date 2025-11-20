@@ -771,91 +771,141 @@ class MetodologiasChatbot {
             return;
         }
 
-        // Generar respuesta en formato de frase legible
+        // Agrupar metodologías similares (mismo método, misma matriz, misma técnica, etc.)
+        const grupos = {};
+        
+        results.forEach(met => {
+            // Crear clave de agrupación: nombre del método + matriz + técnica + acreditada
+            const nombre = this.normalizeText(met.nombre || '');
+            const matriz = this.normalizeText(met.matriz || '');
+            const tecnica = this.normalizeText(met.tecnica || '');
+            const acreditada = met.acreditada || false;
+            
+            const grupoKey = `${nombre}|${matriz}|${tecnica}|${acreditada}`;
+            
+            if (!grupos[grupoKey]) {
+                grupos[grupoKey] = {
+                    nombre: met.nombre || '',
+                    matriz: met.matriz || '',
+                    tecnica: met.tecnica || '',
+                    acreditada: acreditada,
+                    analitos: [],
+                    lods: [],
+                    loqs: []
+                };
+            }
+            
+            // Agregar analito y límites
+            const analito = met.analito || '';
+            if (analito && !grupos[grupoKey].analitos.includes(analito)) {
+                grupos[grupoKey].analitos.push(analito);
+            }
+            
+            // Extraer valores numéricos de LOD y LOQ
+            const lod = met.limite_deteccion || '';
+            const loq = met.limite_cuantificacion || '';
+            
+            if (lod) {
+                const lodNum = this.extractNumber(lod);
+                if (lodNum !== null) {
+                    grupos[grupoKey].lods.push(lodNum);
+                }
+            }
+            
+            if (loq) {
+                const loqNum = this.extractNumber(loq);
+                if (loqNum !== null) {
+                    grupos[grupoKey].loqs.push(loqNum);
+                }
+            }
+        });
+        
+        const gruposArray = Object.values(grupos);
+        
+        // Generar respuesta en formato natural y agrupado
         let message = '';
         
-        // Función para formatear texto de manera más legible
-        const formatText = (text) => {
-            if (!text) return '';
-            // Convertir "Productos pecuarios" a "productos pecuarios", "HPLC-DAD" se mantiene
-            return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
-        };
-        
-        // Función para formatear técnica analítica
-        const formatTecnica = (tecnica) => {
-            if (!tecnica) return 'técnica analítica estándar';
-            // Mantener acrónimos en mayúsculas (LC-MS/MS, HPLC-DAD, etc.)
-            return tecnica;
-        };
-        
-        // Función para formatear matriz de manera más natural
-        const formatMatriz = (matriz) => {
-            if (!matriz) return 'diversas matrices';
+        if (gruposArray.length === 1) {
+            // Un solo método con múltiples analitos
+            const grupo = gruposArray[0];
+            const numAnalitos = grupo.analitos.length;
             
-            // Simplificar términos técnicos
-            const replacements = {
-                'productos pecuarios': 'productos de origen animal (carne, leche, huevos)',
-                'matrices pecuarias': 'productos de origen animal',
-                'productos hidrobiológicos': 'productos acuáticos (salmón, trucha, mariscos)',
-                'matrices hidrobiológicas': 'productos acuáticos',
-                'salmón': 'salmón',
-                'trucha': 'trucha',
-                'carne': 'carne',
-                'leche': 'leche',
-                'huevos': 'huevos'
-            };
+            message = `<p><strong>Sí, tenemos una metodología acreditada</strong> para analizar <strong>${this.formatAnalitos(grupo.analitos)}</strong>`;
             
-            const matrizLower = matriz.toLowerCase();
-            for (const [key, value] of Object.entries(replacements)) {
-                if (matrizLower.includes(key)) {
-                    return value;
-                }
+            if (grupo.matriz) {
+                message += ` en <strong>${grupo.matriz.toLowerCase()}</strong>`;
             }
             
-            return matriz.toLowerCase();
-        };
-        
-        if (results.length === 1) {
-            const met = results[0];
-            const analito = formatText(met.analito || met.nombre);
-            const matriz = formatMatriz(met.matriz);
-            const tecnica = formatTecnica(met.tecnica);
-            const acreditada = met.acreditada ? 'acreditada ISO 17025' : 'disponible';
+            if (grupo.tecnica) {
+                message += ` mediante <strong>${grupo.tecnica}</strong>`;
+            }
             
-            message = `<p>Sí, tenemos una metodología ${acreditada} para analizar <strong>${this.escapeHtml(analito)}</strong> en <strong>${this.escapeHtml(matriz)}</strong> mediante <strong>${this.escapeHtml(tecnica)}</strong>.</p>`;
+            message += '.</p>';
             
-            // Agregar información adicional si está disponible
-            if (met.lod || met.loq) {
-                message += '<p><small>';
-                if (met.lod && met.loq) {
-                    message += `Límites: LOD ${this.escapeHtml(String(met.lod))}, LOQ ${this.escapeHtml(String(met.loq))}`;
-                } else if (met.lod) {
-                    message += `Límite de detección: ${this.escapeHtml(String(met.lod))}`;
-                } else if (met.loq) {
-                    message += `Límite de cuantificación: ${this.escapeHtml(String(met.loq))}`;
+            // Agregar información de límites si está disponible
+            const lodRange = this.formatRange(grupo.lods);
+            const loqRange = this.formatRange(grupo.loqs);
+            
+            if (lodRange || loqRange) {
+                message += '<p><strong>Límites de detección y cuantificación:</strong></p><ul>';
+                if (lodRange) {
+                    message += `<li>LOD: ${lodRange}</li>`;
                 }
-                message += '</small></p>';
+                if (loqRange) {
+                    message += `<li>LOQ: ${loqRange}</li>`;
+                }
+                message += '</ul>';
+            }
+            
+            if (grupo.acreditada) {
+                message += '<p>✓ <strong>Metodología acreditada ISO 17025</strong></p>';
             }
         } else {
-            message = `<p>Encontré <strong>${results.length}</strong> metodología${results.length > 1 ? 's' : ''} relacionada${results.length > 1 ? 's' : ''} con tu búsqueda:</p>`;
-            message += '<div class="chatbot-results-text">';
+            // Múltiples métodos
+            message = `<p>Encontré <strong>${gruposArray.length} metodologías</strong> relacionadas con tu búsqueda:</p>`;
             
-            results.slice(0, 5).forEach((met, index) => {
-                const analito = formatText(met.analito || met.nombre);
-                const matriz = formatMatriz(met.matriz);
-                const tecnica = formatTecnica(met.tecnica);
-                const acreditada = met.acreditada ? ' ✓ acreditada' : '';
+            gruposArray.forEach((grupo, index) => {
+                const numAnalitos = grupo.analitos.length;
+                const analitosText = numAnalitos > 1 
+                    ? `${this.formatAnalitos(grupo.analitos)} (${numAnalitos} analitos)`
+                    : grupo.analitos[0] || 'varios analitos';
                 
-                message += `<p><strong>${index + 1}.</strong> <strong>${this.escapeHtml(analito)}</strong> en ${this.escapeHtml(matriz)} (${this.escapeHtml(tecnica)})${acreditada ? this.escapeHtml(acreditada) : ''}.</p>`;
+                message += `<p><strong>${index + 1}. ${grupo.nombre || 'Metodología'}</strong></p>`;
+                message += `<p>Analitos: ${analitosText}</p>`;
+                
+                if (grupo.matriz) {
+                    message += `<p>Matriz: ${grupo.matriz}</p>`;
+                }
+                
+                if (grupo.tecnica) {
+                    message += `<p>Técnica: ${grupo.tecnica}</p>`;
+                }
+                
+                const lodRange = this.formatRange(grupo.lods);
+                const loqRange = this.formatRange(grupo.loqs);
+                
+                if (lodRange || loqRange) {
+                    message += '<p>Límites: ';
+                    if (lodRange && loqRange) {
+                        message += `LOD ${lodRange}, LOQ ${loqRange}`;
+                    } else if (lodRange) {
+                        message += `LOD ${lodRange}`;
+                    } else if (loqRange) {
+                        message += `LOQ ${loqRange}`;
+                    }
+                    message += '</p>';
+                }
+                
+                if (grupo.acreditada) {
+                    message += '<p>✓ <strong>Acreditada ISO 17025</strong></p>';
+                }
+                
+                if (index < gruposArray.length - 1) {
+                    message += '<hr style="margin: 10px 0; border: none; border-top: 1px solid #ddd;">';
+                }
             });
-            
-            if (results.length > 5) {
-                message += `<p class="chatbot-more"><strong>Y ${results.length - 5} metodología${results.length - 5 > 1 ? 's' : ''} más.</strong> <a href="#metodologias-completas" onclick="document.getElementById('chatbot-window').classList.remove('open'); document.getElementById('search-metodologias').value='${this.escapeHtml(query)}'; document.getElementById('search-metodologias').dispatchEvent(new Event('input')); document.getElementById('metodologias-completas').scrollIntoView({behavior: 'smooth'});">Ver todas →</a></p>`;
-            }
-            
-            message += '</div>';
         }
-
+        
         this.addMessage(message);
     }
 
