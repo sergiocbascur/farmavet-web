@@ -7,6 +7,8 @@ class MetodologiasChatbot {
     constructor() {
         this.isOpen = false;
         this.metodologias = [];
+        this.lastResults = null; // Guardar último resultado para preguntas de seguimiento
+        this.lastQuery = null;
         this.conversationHistory = [];
         this.loadAttempts = 0;
         this.maxLoadAttempts = 3;
@@ -338,19 +340,37 @@ class MetodologiasChatbot {
             .trim();
     }
     
-    // Formatear lista de analitos de forma natural
+    // Capitalizar texto (primera letra mayúscula, resto minúsculas)
+    capitalize(text) {
+        if (!text) return '';
+        const str = text.toString();
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+    
+    // Formatear lista de analitos de forma natural con capitalización correcta
     formatAnalitos(analitos) {
         if (!analitos || analitos.length === 0) return 'varios analitos';
-        if (analitos.length === 1) return analitos[0];
-        if (analitos.length === 2) return `${analitos[0]} y ${analitos[1]}`;
-        if (analitos.length <= 5) {
-            const ultimos = analitos.slice(-1)[0];
-            const anteriores = analitos.slice(0, -1).join(', ');
+        
+        // Capitalizar cada analito correctamente (primera letra mayúscula)
+        const analitosCapitalizados = analitos.map(a => {
+            if (!a) return '';
+            // Si contiene guiones (como "EPI-TETRACICLINA"), capitalizar cada palabra
+            if (a.includes('-')) {
+                return a.split('-').map(word => this.capitalize(word)).join('-');
+            }
+            return this.capitalize(a);
+        });
+        
+        if (analitosCapitalizados.length === 1) return analitosCapitalizados[0];
+        if (analitosCapitalizados.length === 2) return `${analitosCapitalizados[0]} y ${analitosCapitalizados[1]}`;
+        if (analitosCapitalizados.length <= 5) {
+            const ultimos = analitosCapitalizados.slice(-1)[0];
+            const anteriores = analitosCapitalizados.slice(0, -1).join(', ');
             return `${anteriores} y ${ultimos}`;
         }
         // Si hay más de 5, mostrar los primeros 5 y decir "y X más"
-        const primeros = analitos.slice(0, 5).join(', ');
-        const restantes = analitos.length - 5;
+        const primeros = analitosCapitalizados.slice(0, 5).join(', ');
+        const restantes = analitosCapitalizados.length - 5;
         return `${primeros} y ${restantes} más`;
     }
     
@@ -886,13 +906,29 @@ class MetodologiasChatbot {
             const lodRange = this.formatRange(grupo.lods);
             const loqRange = this.formatRange(grupo.loqs);
             
+            // Obtener unidades de LOD/LOQ del primer resultado (si hay)
+            let lodUnit = '';
+            let loqUnit = '';
+            if (results.length > 0) {
+                const firstResult = results.find(r => r.limite_deteccion);
+                if (firstResult && firstResult.limite_deteccion) {
+                    const lodMatch = firstResult.limite_deteccion.toString().match(/[\d.]+(.+)/);
+                    if (lodMatch) lodUnit = lodMatch[1].trim();
+                }
+                const firstLoq = results.find(r => r.limite_cuantificacion);
+                if (firstLoq && firstLoq.limite_cuantificacion) {
+                    const loqMatch = firstLoq.limite_cuantificacion.toString().match(/[\d.]+(.+)/);
+                    if (loqMatch) loqUnit = loqMatch[1].trim();
+                }
+            }
+            
             if (lodRange || loqRange) {
                 message += '<p><strong>Límites de detección y cuantificación:</strong></p><ul>';
                 if (lodRange) {
-                    message += `<li>LOD: ${lodRange}</li>`;
+                    message += `<li>LOD: ${lodRange}${lodUnit || ''}</li>`;
                 }
                 if (loqRange) {
-                    message += `<li>LOQ: ${loqRange}</li>`;
+                    message += `<li>LOQ: ${loqRange}${loqUnit || ''}</li>`;
                 }
                 message += '</ul>';
             }
@@ -900,6 +936,10 @@ class MetodologiasChatbot {
             if (grupo.acreditada) {
                 message += '<p>✓ <strong>Metodología acreditada ISO 17025</strong></p>';
             }
+            
+            // Guardar contexto para preguntas de seguimiento
+            this.lastResults = [grupo];
+            this.lastQuery = query;
         } else {
             // Múltiples métodos
             message = `<p>Encontré <strong>${gruposArray.length} metodologías</strong> relacionadas con tu búsqueda:</p>`;
@@ -907,31 +947,51 @@ class MetodologiasChatbot {
             gruposArray.forEach((grupo, index) => {
                 const numAnalitos = grupo.analitos.length;
                 const analitosText = numAnalitos > 1 
-                    ? `${this.formatAnalitos(grupo.analitos)} (${numAnalitos} analitos)`
-                    : grupo.analitos[0] || 'varios analitos';
+                    ? this.formatAnalitos(grupo.analitos)
+                    : this.capitalize(grupo.analitos[0] || 'varios analitos');
                 
-                message += `<p><strong>${index + 1}. ${grupo.nombre || 'Metodología'}</strong></p>`;
-                message += `<p>Analitos: ${analitosText}</p>`;
+                message += `<p><strong>${index + 1}. ${this.capitalize(grupo.nombre || 'Metodología')}</strong></p>`;
+                message += `<p>Analitos: <strong>${analitosText}</strong></p>`;
                 
                 if (grupo.matriz) {
-                    message += `<p>Matriz: ${grupo.matriz}</p>`;
+                    message += `<p>Matriz: ${this.capitalize(grupo.matriz)}</p>`;
                 }
                 
                 if (grupo.tecnica) {
                     message += `<p>Técnica: ${grupo.tecnica}</p>`;
                 }
                 
+                // Obtener unidades de LOD/LOQ
+                let lodUnit = '';
+                let loqUnit = '';
+                const grupoResults = results.filter(r => 
+                    this.normalizeText(r.nombre || '') === this.normalizeText(grupo.nombre || '') &&
+                    this.normalizeText(r.matriz || '') === this.normalizeText(grupo.matriz || '')
+                );
+                if (grupoResults.length > 0) {
+                    const firstLod = grupoResults.find(r => r.limite_deteccion);
+                    if (firstLod && firstLod.limite_deteccion) {
+                        const lodMatch = firstLod.limite_deteccion.toString().match(/[\d.]+(.+)/);
+                        if (lodMatch) lodUnit = lodMatch[1].trim();
+                    }
+                    const firstLoq = grupoResults.find(r => r.limite_cuantificacion);
+                    if (firstLoq && firstLoq.limite_cuantificacion) {
+                        const loqMatch = firstLoq.limite_cuantificacion.toString().match(/[\d.]+(.+)/);
+                        if (loqMatch) loqUnit = loqMatch[1].trim();
+                    }
+                }
+                
                 const lodRange = this.formatRange(grupo.lods);
                 const loqRange = this.formatRange(grupo.loqs);
                 
                 if (lodRange || loqRange) {
-                    message += '<p>Límites: ';
+                    message += '<p><strong>Límites:</strong> ';
                     if (lodRange && loqRange) {
-                        message += `LOD ${lodRange}, LOQ ${loqRange}`;
+                        message += `LOD ${lodRange}${lodUnit || ''}, LOQ ${loqRange}${loqUnit || ''}`;
                     } else if (lodRange) {
-                        message += `LOD ${lodRange}`;
+                        message += `LOD ${lodRange}${lodUnit || ''}`;
                     } else if (loqRange) {
-                        message += `LOQ ${loqRange}`;
+                        message += `LOQ ${loqRange}${loqUnit || ''}`;
                     }
                     message += '</p>';
                 }
