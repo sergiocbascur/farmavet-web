@@ -648,14 +648,43 @@
         const filter = currentFilter;
         let visibleCount = 0;
         
-        // Primero, filtrar las filas
+        // Primero, identificar qué metodologías tienen al menos una fila que coincide
+        const metodologiasConCoincidencia = new Set();
+        
+        if (search) {
+          tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const categoria = row.dataset.categoria;
+            const matchesSearch = text.includes(search);
+            const matchesFilter = filter === 'all' || categoria === filter;
+            
+            if (matchesSearch && matchesFilter) {
+              // Esta fila coincide, agregar su metodología al conjunto
+              const metodologia = row.dataset.metodologia || '';
+              if (metodologia) {
+                metodologiasConCoincidencia.add(metodologia);
+              }
+            }
+          });
+        }
+        
+        // Luego, filtrar las filas: mostrar todas las filas de metodologías que tienen coincidencia
         tableRows.forEach(row => {
-          const text = row.textContent.toLowerCase();
           const categoria = row.dataset.categoria;
-          const matchesSearch = !search || text.includes(search);
+          const metodologia = row.dataset.metodologia || '';
           const matchesFilter = filter === 'all' || categoria === filter;
           
-          if (matchesSearch && matchesFilter) {
+          let shouldShow = false;
+          
+          if (!search) {
+            // Sin búsqueda, solo aplicar filtro de categoría
+            shouldShow = matchesFilter;
+          } else {
+            // Con búsqueda, mostrar si la metodología tiene al menos una coincidencia
+            shouldShow = matchesFilter && (metodologiasConCoincidencia.has(metodologia) || row.textContent.toLowerCase().includes(search));
+          }
+          
+          if (shouldShow) {
             row.style.display = '';
             visibleCount++;
           } else {
@@ -663,7 +692,7 @@
           }
         });
         
-        // Luego, recalcular qué filas deben mostrar la metodología basándose solo en filas visibles
+        // Finalmente, recalcular qué filas deben mostrar la metodología basándose solo en filas visibles
         let prevMetodologia = null;
         tableRows.forEach((row) => {
           if (row.style.display !== 'none') {
