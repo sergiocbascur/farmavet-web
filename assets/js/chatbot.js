@@ -88,7 +88,6 @@ class MetodologiasChatbot {
         try {
             // Siempre cargar desde la API - esto funciona en todas las páginas
             const apiUrl = '/api/metodologias';
-            console.log(`🔄 Chatbot: Intentando cargar metodologías desde ${apiUrl} (intento ${this.loadAttempts}/${this.maxLoadAttempts})`);
             
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -99,35 +98,25 @@ class MetodologiasChatbot {
                 cache: 'no-cache'
             });
             
-            console.log(`📡 Chatbot: Respuesta recibida - Status: ${response.status}, OK: ${response.ok}`);
-            
             if (response.ok) {
                 try {
                     const data = await response.json();
-                    console.log(`📦 Chatbot: Datos recibidos:`, typeof data, Array.isArray(data) ? `Array de ${data.length} elementos` : 'No es array');
                     
                     if (Array.isArray(data)) {
                         if (data.length > 0) {
                             this.metodologias = data;
-                            console.log(`✅ Chatbot: ${this.metodologias.length} metodologías cargadas desde API`);
                             this.loadAttempts = 0; // Reset contador en caso de éxito
                             return;
                         } else {
-                            console.warn('⚠️ Chatbot: La API devolvió un array vacío. Puede que no haya metodologías activas.');
                             // Si no hay metodologías, intentar fallback solo en página de servicios
                             if (document.querySelector('#tabla-metodologias')) {
-                                console.log('🔄 Chatbot: Intentando fallback DOM...');
                                 this.loadFromDOM();
                                 return;
                             }
                         }
-                    } else {
-                        console.error('❌ Chatbot: La API no devolvió un array válido. Tipo recibido:', typeof data, data);
                     }
                 } catch (jsonError) {
-                    console.error('❌ Chatbot: Error al parsear JSON de la respuesta:', jsonError);
                     const text = await response.text();
-                    console.error('❌ Chatbot: Respuesta recibida (texto):', text.substring(0, 500));
                 }
             } else {
                 // Intentar leer el mensaje de error
@@ -138,17 +127,11 @@ class MetodologiasChatbot {
                 } catch (e) {
                     errorText = await response.text();
                 }
-                console.error(`❌ Chatbot: Error HTTP ${response.status}:`, response.statusText);
-                console.error(`❌ Chatbot: Detalles del error:`, errorText);
             }
         } catch (error) {
-            console.error('❌ Chatbot: Error de red al cargar metodologías desde API:', error);
-            console.error('❌ Chatbot: Detalles del error:', error.message, error.stack);
-            
             // Intentar de nuevo si no hemos alcanzado el límite
             if (this.loadAttempts < this.maxLoadAttempts) {
                 const delay = this.loadAttempts * 1000; // Delay progresivo: 1s, 2s, 3s
-                console.log(`🔄 Chatbot: Reintentando carga en ${delay/1000} segundos... (intento ${this.loadAttempts}/${this.maxLoadAttempts})`);
                 setTimeout(() => {
                     this.loadMetodologias();
                 }, delay);
@@ -158,14 +141,10 @@ class MetodologiasChatbot {
         
         // Si llegamos aquí después de todos los intentos, usar fallback
         if (this.loadAttempts >= this.maxLoadAttempts) {
-            console.warn(`⚠️ Chatbot: Se agotaron los intentos (${this.maxLoadAttempts}). Intentando fallback...`);
-            
             // Intentar fallback solo en la página de servicios (donde existe la tabla)
             if (document.querySelector('#tabla-metodologias')) {
-                console.warn('⚠️ Chatbot: Usando fallback DOM (solo disponible en página de servicios)');
                 this.loadFromDOM();
             } else {
-                console.error('❌ Chatbot: No se pudieron cargar metodologías. La API no está disponible y no hay tabla en esta página.');
                 this.metodologias = [];
                 // Mostrar mensaje al usuario si intenta buscar
                 this.showErrorMessage = true;
@@ -177,7 +156,6 @@ class MetodologiasChatbot {
         // Fallback: cargar metodologías desde la tabla en el DOM (solo en página de servicios)
         const rows = document.querySelectorAll('#tabla-metodologias tbody tr');
         if (rows.length === 0) {
-            console.warn('⚠️ Chatbot: No se encontró tabla de metodologías en el DOM');
             this.metodologias = [];
             return;
         }
@@ -199,7 +177,6 @@ class MetodologiasChatbot {
                 categoria: row.dataset.categoria || ''
             };
         });
-        console.log(`⚠️ Chatbot: ${this.metodologias.length} metodologías cargadas desde DOM (fallback)`);
     }
 
     setupEventListeners() {
@@ -313,15 +290,12 @@ class MetodologiasChatbot {
                     const matrizMatch = query.match(/\b(harina|musculo|aceite|carne|leche|salmon|pecuarios|hidrobiologicos)\b/i);
                     if (matrizMatch && previousKeywords) {
                         searchQuery = `${previousKeywords} ${matrizMatch[0]}`;
-                        console.log(`🔄 Chatbot: Pregunta de seguimiento con negación detectada. Búsqueda combinada: "${searchQuery}"`);
                     } else {
                         searchQuery = `${previousKeywords} ${query}`;
-                        console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
                     }
                 } else {
                     // Pregunta normal de seguimiento
                     searchQuery = `${previousKeywords} ${query}`;
-                    console.log(`🔄 Chatbot: Pregunta de seguimiento detectada. Búsqueda combinada: "${searchQuery}"`);
                 }
             }
             
@@ -347,7 +321,6 @@ class MetodologiasChatbot {
             // Esto acelera las respuestas para preguntas básicas como "hacen tetraciclinas?"
             if (combinedResults.length > 0 && isSimpleQuery && !isComplexQuery && !needsReasoning) {
                 // Pregunta simple con resultados claros → responder directamente con búsqueda local (GRATIS y RÁPIDO)
-                console.log('⚡ Chatbot: Pregunta simple detectada, respondiendo directamente sin IA');
                 this.showResults(query, combinedResults);
                 this.lastResults = combinedResults;
                 this.lastQuery = query;
@@ -359,7 +332,6 @@ class MetodologiasChatbot {
             // - La pregunta es compleja/requiere razonamiento, O
             // - Es pregunta de seguimiento que requiere contexto
             if (combinedResults.length === 0 || isComplexQuery || needsReasoning || isFollowUpQuery) {
-                console.log('🤖 Chatbot: Usando IA para pregunta compleja o sin resultados locales');
                 await this.searchWithPerplexity(query, combinedResults.length > 0, false, combinedResults, hasPreviousContext ? this.lastQuery : null);
             } else {
                 // Si hay resultados pero no es simple, mostrar resultados locales de todos modos
@@ -1242,7 +1214,6 @@ class MetodologiasChatbot {
     async showResults(query, results) {
         // Verificar si hay metodologías cargadas
         if (this.metodologias.length === 0) {
-            console.warn('⚠️ Chatbot: No hay metodologías cargadas para buscar');
             let message = `
                 <p>⚠️ No se pudieron cargar las metodologías en este momento.</p>
                 <p>Por favor, intenta recargar la página o contacta al administrador.</p>
@@ -1489,7 +1460,6 @@ class MetodologiasChatbot {
     async searchWithPerplexity(query, includeLocal = true, isGeneralQuery = false, localResults = [], previousQuery = null) {
         const typingId = this.showTyping();
         try {
-            console.log('🔄 Chatbot: Buscando con IA (Ollama/DeepSeek)...');
             const perplexityResponse = await fetch('/api/chatbot/search', {
                 method: 'POST',
                 headers: {
@@ -1505,11 +1475,8 @@ class MetodologiasChatbot {
             
             this.hideTyping(typingId);
             
-            console.log(`📡 Chatbot Perplexity: Status ${perplexityResponse.status}`);
-            
             if (perplexityResponse.ok) {
                 const data = await perplexityResponse.json();
-                console.log('✅ Chatbot Perplexity: Respuesta recibida', data);
                 
                 if (data.answer) {
                     let message = `
@@ -1526,7 +1493,6 @@ class MetodologiasChatbot {
                     
                     this.addMessage(message);
                 } else {
-                    console.warn('⚠️ Chatbot Perplexity: Respuesta sin answer');
                     if (isGeneralQuery) {
                         this.showGeneralInfoHelp();
                     } else {
@@ -1536,7 +1502,6 @@ class MetodologiasChatbot {
             } else {
                 // Si Perplexity falla, mostrar ayuda apropiada
                 const errorData = await perplexityResponse.json().catch(() => ({}));
-                console.error('❌ Chatbot Perplexity: Error', perplexityResponse.status, errorData);
                 
                 if (perplexityResponse.status === 503 && errorData.error === 'API de Perplexity no configurada') {
                     // API no configurada, mostrar información básica para consultas generales
@@ -1555,7 +1520,6 @@ class MetodologiasChatbot {
                 }
             }
         } catch (error) {
-            console.error('❌ Chatbot Perplexity: Error de red', error);
             this.hideTyping(typingId);
             if (isGeneralQuery) {
                 this.showGeneralInfoHelp();
