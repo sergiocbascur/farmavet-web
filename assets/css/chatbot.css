@@ -391,6 +391,15 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    /* Ocultar chatbot cuando el menú móvil está abierto */
+    body.no-scroll .chatbot-toggle,
+    body.no-scroll .chatbot-window {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
     .chatbot-window {
         width: calc(100vw - 1rem);
         right: 0.5rem;

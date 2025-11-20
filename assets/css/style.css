@@ -181,11 +181,29 @@ a {
     z-index: 1;
   }
   
-  /* Cuando el menú está abierto, bajar z-index del contenido */
+  /* Cuando el menú está abierto, bajar z-index del contenido y tarjetas */
   body.no-scroll main,
   body.no-scroll .hero,
-  body.no-scroll .section {
-    z-index: 0;
+  body.no-scroll .section,
+  body.no-scroll .container,
+  body.no-scroll .card,
+  body.no-scroll .list-card,
+  body.no-scroll .pillar-card,
+  body.no-scroll .news-card,
+  body.no-scroll .stat-card,
+  body.no-scroll article {
+    z-index: 0 !important;
+    position: relative;
+  }
+  
+  /* Asegurar que el botón de menú esté por encima cuando está abierto */
+  body.no-scroll .nav-toggle {
+    z-index: 1000000 !important;
+  }
+  
+  /* Asegurar que el header esté por encima del contenido pero debajo del menú */
+  body.no-scroll .site-header {
+    z-index: 999997 !important;
   }
 }
 
@@ -4091,7 +4109,7 @@ input[type="button"],
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 99998;
+    z-index: 999998;
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -4118,14 +4136,14 @@ input[type="button"],
     gap: 0.5rem;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 99999 !important;
+    z-index: 999999 !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     visibility: hidden;
     opacity: 0;
     max-width: 320px;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-    isolation: isolate;
+    /* Removido isolation: isolate para evitar contextos de apilamiento */
   }
   
   .nav-links.open {
