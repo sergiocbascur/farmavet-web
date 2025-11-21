@@ -592,8 +592,8 @@
                   <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
                     <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
                   </a>
-                  {% endif %}
-                  {% if publicacion.doi %}
+                  {% elif publicacion.doi %}
+                  {# Solo mostrar "Ver en DOI" si hay enlace configurado, de lo contrario el DOI ya se muestra arriba #}
                   <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
                   </a>
@@ -701,8 +701,8 @@
                   <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
                     <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
                   </a>
-                  {% endif %}
-                  {% if publicacion.doi %}
+                  {% elif publicacion.doi %}
+                  {# Solo mostrar "Ver en DOI" si hay enlace configurado, de lo contrario el DOI ya se muestra arriba #}
                   <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
                   </a>
