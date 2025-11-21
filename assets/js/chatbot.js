@@ -12,6 +12,7 @@ class MetodologiasChatbot {
         this.conversationHistory = [];
         this.loadAttempts = 0;
         this.maxLoadAttempts = 3;
+        this.notificationDismissed = false;
         this.init();
     }
 
@@ -29,6 +30,31 @@ class MetodologiasChatbot {
         chatbotButton.setAttribute('aria-label', 'Abrir chatbot de búsqueda');
         chatbotButton.innerHTML = '<i class="bi bi-chat-dots"></i>';
         document.body.appendChild(chatbotButton);
+
+        // Notificación de ayuda
+        const notification = document.createElement('div');
+        notification.id = 'chatbot-notification';
+        notification.className = 'chatbot-notification';
+        notification.innerHTML = `
+            <div class="chatbot-notification-content">
+                <i class="bi bi-question-circle"></i>
+                <div class="chatbot-notification-text">
+                    <strong>¿Necesitas ayuda?</strong>
+                    <p>Pregúntame lo que necesites</p>
+                </div>
+                <button class="chatbot-notification-close" aria-label="Cerrar notificación">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        `;
+        // Hacer la notificación clickeable (excepto el botón de cerrar)
+        notification.addEventListener('click', (e) => {
+            if (!e.target.closest('.chatbot-notification-close')) {
+                this.hideNotification();
+                this.toggle();
+            }
+        });
+        document.body.appendChild(notification);
 
         // Ventana del chatbot
         const chatbotWindow = document.createElement('div');
@@ -184,8 +210,13 @@ class MetodologiasChatbot {
         const close = document.getElementById('chatbot-close');
         const send = document.getElementById('chatbot-send');
         const input = document.getElementById('chatbot-input');
+        const notification = document.getElementById('chatbot-notification');
+        const notificationClose = notification?.querySelector('.chatbot-notification-close');
 
-        toggle?.addEventListener('click', () => this.toggle());
+        toggle?.addEventListener('click', () => {
+            this.hideNotification();
+            this.toggle();
+        });
         close?.addEventListener('click', () => this.close());
         send?.addEventListener('click', () => this.sendMessage());
         
@@ -199,6 +230,16 @@ class MetodologiasChatbot {
         input?.addEventListener('input', (e) => {
             // Sugerencias deshabilitadas - usando búsqueda inteligente
         });
+
+        // Cerrar notificación al hacer clic en el botón de cerrar
+        notificationClose?.addEventListener('click', () => {
+            this.hideNotification();
+        });
+
+        // Mostrar notificación después de 5 segundos
+        setTimeout(() => {
+            this.showNotification();
+        }, 5000);
     }
 
     toggle() {
@@ -215,6 +256,34 @@ class MetodologiasChatbot {
     close() {
         this.isOpen = false;
         document.getElementById('chatbot-window')?.classList.remove('open');
+    }
+
+    showNotification() {
+        // Verificar si el usuario ya cerró la notificación en esta sesión
+        const wasDismissed = sessionStorage.getItem('chatbot-notification-dismissed');
+        if (wasDismissed === 'true') {
+            this.notificationDismissed = true;
+            return;
+        }
+
+        const notification = document.getElementById('chatbot-notification');
+        if (notification && !this.isOpen && !this.notificationDismissed) {
+            notification.classList.add('show');
+            // Auto-ocultar después de 10 segundos
+            setTimeout(() => {
+                this.hideNotification();
+            }, 10000);
+        }
+    }
+
+    hideNotification() {
+        const notification = document.getElementById('chatbot-notification');
+        if (notification) {
+            notification.classList.remove('show');
+            this.notificationDismissed = true;
+            // Guardar en sessionStorage para no mostrar de nuevo en esta sesión
+            sessionStorage.setItem('chatbot-notification-dismissed', 'true');
+        }
     }
 
     async sendMessage() {
