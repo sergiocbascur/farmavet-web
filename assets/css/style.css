@@ -5160,17 +5160,6 @@ input[type="button"],
   .metodologias-table-mobile:empty {
     display: none !important;
   }
-}
-
-/* Mostrar tabla en escritorio, ocultar cards */
-@media (min-width: 769px) {
-  .metodologias-table-wrapper {
-    display: block !important;
-  }
-  
-  .metodologias-table-mobile {
-    display: none !important;
-  }
   
   .metodologias-table-mobile .metodologia-card {
     background-color: var(--color-white) !important;
@@ -5251,7 +5240,7 @@ input[type="button"],
     font-weight: 500 !important;
   }
   
-  /* Estilo especial para analito (puede ser largo) */
+  /* Estilo especial para analito (primera fila) */
   .metodologias-table-mobile .metodologia-card-row:first-of-type .metodologia-card-value {
     background-color: rgba(35, 115, 186, 0.03) !important;
     padding: 0.75rem !important;
@@ -5293,6 +5282,17 @@ input[type="button"],
     border-radius: 6px !important;
     font-weight: 600 !important;
     color: var(--color-primary-dark) !important;
+  }
+}
+
+/* Mostrar tabla en escritorio, ocultar cards */
+@media (min-width: 769px) {
+  .metodologias-table-wrapper {
+    display: block !important;
+  }
+  
+  .metodologias-table-mobile {
+    display: none !important;
   }
 }
 
