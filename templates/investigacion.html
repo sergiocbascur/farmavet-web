@@ -592,11 +592,12 @@
                   <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
                     <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
                   </a>
-                  {% elif publicacion.doi %}
-                  {# Solo mostrar "Ver en DOI" si hay enlace configurado, de lo contrario el DOI ya se muestra arriba #}
+                  {# Solo mostrar "Ver en DOI" si hay enlace configurado en el formulario #}
+                  {% if publicacion.doi %}
                   <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
                   </a>
+                  {% endif %}
                   {% endif %}
                 </div>
               </article>
@@ -701,11 +702,12 @@
                   <a class="cta-inline" href="{{ publicacion.enlace }}" {% if 'http' in publicacion.enlace|lower %}target="_blank" rel="noopener noreferrer"{% endif %}>
                     <i class="bi bi-box-arrow-up-right"></i> {{ _('Ver publicación') }}
                   </a>
-                  {% elif publicacion.doi %}
-                  {# Solo mostrar "Ver en DOI" si hay enlace configurado, de lo contrario el DOI ya se muestra arriba #}
+                  {# Solo mostrar "Ver en DOI" si hay enlace configurado en el formulario #}
+                  {% if publicacion.doi %}
                   <a class="cta-inline" href="https://doi.org/{{ publicacion.doi }}" target="_blank" rel="noopener noreferrer">
                     <i class="bi bi-link-45deg"></i> {{ _('Ver en DOI') }}
                   </a>
+                  {% endif %}
                   {% endif %}
                 </div>
               </article>
