@@ -336,7 +336,9 @@ class MetodologiasChatbot {
             // Ej: "y hacen melamina?" después de "hacen esteroides?" → NO es seguimiento ✗
             const isExplicitFollowUp = /^(en|de|para|con|sin)\s+\w+\s*(hacen|tienen|analizan|no)?\s*\??$/i.test(query) ||
                 /^(en|de|para|con|sin|que|cuantos|cuales)\s+(matrices?|matriz|matrices)\s*\??$/i.test(query) ||
-                /\b(tambien|ademas|otras|otros)\s+(hacen|tienen|analizan|matrices?)\b/i.test(query);
+                /\b(tambien|ademas|otras|otros)\s+(hacen|tienen|analizan|matrices?)\b/i.test(query) ||
+                /^(que|cual|cuales)\s+(limite|limites|lod|loq)\s*\??$/i.test(query) ||
+                /\b(limite|limites|lod|loq)\s+(tiene|tienen|es|son)\b/i.test(query);
             const isNegativeFollowUp = /\b(no|sin)\s+(hacen|tienen|analizan)\b/i.test(query) ||
                 /\b(en|de|para)\s+\w+\s+no\s+(hacen|tienen|analizan)\b/i.test(query) ||
                 /^(en|de|para)\s+\w+\s+no\s*(hacen|tienen|analizan)?\s*\??$/i.test(query) ||
