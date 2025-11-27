@@ -37,3 +37,4 @@ if [ "$reiniciar" = "s" ] || [ "$reiniciar" = "S" ]; then
     echo "✅ Servicio reiniciado"
 fi
 
+

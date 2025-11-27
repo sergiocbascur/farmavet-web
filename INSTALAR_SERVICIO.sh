@@ -92,3 +92,4 @@ echo ""
 echo "🌐 El servicio está corriendo en: http://127.0.0.1:5001"
 echo "   (Puerto 5001 - diferente a farmavet-bodega en 5000)"
 
+

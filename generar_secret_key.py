@@ -30,3 +30,4 @@ if __name__ == '__main__':
     print(f'   SECRET_KEY={secret_key}')
     print("=" * 60)
 
+

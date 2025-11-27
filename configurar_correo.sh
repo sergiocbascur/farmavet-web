@@ -104,3 +104,4 @@ echo "1. Configura los correos de destino en /admin/correos-contacto"
 echo "2. Prueba el formulario de contacto en /contacto.html"
 echo "3. Revisa los logs si hay problemas: sudo journalctl -u farmavet-web -f"
 
+

@@ -100,3 +100,4 @@ pybabel compile -d translations
 3. Agregar traducciones completas en inglés
 4. Configurar detección automática de idioma basada en preferencias del navegador
 
+
