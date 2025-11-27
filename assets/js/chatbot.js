@@ -434,7 +434,9 @@ class MetodologiasChatbot {
             // - La pregunta es compleja/requiere razonamiento, O
             // - Es pregunta de seguimiento que requiere contexto
             if (combinedResults.length === 0 || isComplexQuery || needsReasoning || isFollowUpQuery) {
-                await this.searchWithPerplexity(query, combinedResults.length > 0, false, combinedResults, hasPreviousContext ? this.lastQuery : null);
+                // Si hay contexto previo y es pregunta de seguimiento, usar resultados anteriores
+                const resultsToSend = (hasPreviousContext && (isFollowUpQuery || needsReasoning)) ? this.lastResults : combinedResults;
+                await this.searchWithPerplexity(query, resultsToSend.length > 0, false, resultsToSend, hasPreviousContext ? this.lastQuery : null);
             } else {
                 // Si hay resultados pero no es simple, mostrar resultados locales de todos modos
                 this.showResults(query, combinedResults);
