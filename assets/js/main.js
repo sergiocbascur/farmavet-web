@@ -963,11 +963,11 @@ document.addEventListener("DOMContentLoaded", () => {
         // Calcular qué elementos deben estar visibles (grupos de 3)
         let relativeIndex = (index - startIndex + totalItems) % totalItems;
         if (relativeIndex < itemsPerView) {
-          item.style.display = 'block';
-          item.style.opacity = '1';
-          item.style.visibility = 'visible';
+          item.style.setProperty('display', 'block', 'important');
+          item.style.setProperty('opacity', '1', 'important');
+          item.style.setProperty('visibility', 'visible', 'important');
         } else {
-          item.style.display = 'none';
+          item.style.setProperty('display', 'none', 'important');
         }
       });
       
