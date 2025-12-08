@@ -634,6 +634,27 @@ document.querySelectorAll("[data-tabs]").forEach((tabs) => {
     });
   };
 
+  // Función para centrar la pestaña activa en móvil
+  const scrollTabIntoView = (activeButton) => {
+    if (window.innerWidth <= 768 && tabs) {
+      const tabList = tabs.querySelector('.tab-list');
+      if (tabList && activeButton) {
+        const tabListRect = tabList.getBoundingClientRect();
+        const buttonRect = activeButton.getBoundingClientRect();
+        const scrollLeft = tabList.scrollLeft;
+        const buttonLeft = buttonRect.left - tabListRect.left + scrollLeft;
+        const buttonWidth = buttonRect.width;
+        const tabListWidth = tabListRect.width;
+        const centerPosition = buttonLeft - (tabListWidth / 2) + (buttonWidth / 2);
+        
+        tabList.scrollTo({
+          left: centerPosition,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
   buttons.forEach((button) => {
     button.addEventListener("click", (e) => {
       e.preventDefault();
@@ -651,15 +672,22 @@ document.querySelectorAll("[data-tabs]").forEach((tabs) => {
       if (targetId) {
         activate(targetId);
         
-        // Scroll suave al panel en móvil
+        // Centrar la pestaña activa en móvil
         if (window.innerWidth <= 768) {
-          const panel = document.getElementById(targetId);
-          if (panel) {
-            setTimeout(() => {
-              panel.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 100);
-          }
+          setTimeout(() => {
+            scrollTabIntoView(button);
+          }, 50);
         }
+        
+        // Scroll suave al panel en móvil (opcional, puede ser molesto)
+        // if (window.innerWidth <= 768) {
+        //   const panel = document.getElementById(targetId);
+        //   if (panel) {
+        //     setTimeout(() => {
+        //       panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        //     }, 200);
+        //   }
+        // }
       }
     });
     
@@ -695,6 +723,12 @@ document.querySelectorAll("[data-tabs]").forEach((tabs) => {
     
     if (targetId) {
       activate(targetId);
+      // Centrar la primera pestaña en móvil al cargar
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          scrollTabIntoView(firstButton);
+        }, 100);
+      }
     }
   }
 });
