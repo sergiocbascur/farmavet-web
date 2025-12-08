@@ -948,9 +948,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (originalItems.length === 0) return;
       
       const itemsPerView = 3;
-      // Calcular el índice base (grupo de 3)
-      const baseIndex = Math.floor(currentIndex / itemsPerView) * itemsPerView;
-      const startIndex = baseIndex % totalItems;
+      // currentIndex representa el índice del primer elemento visible
+      const startIndex = currentIndex % totalItems;
       
       originalItems.forEach((item, index) => {
         // Calcular qué elementos deben estar visibles (grupos de 3)
