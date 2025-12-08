@@ -2467,13 +2467,14 @@ a.logo-card:focus {
 
   .infinite-carousel .list-card,
   .infinite-carousel .card {
-    flex: 0 0 calc(100% - 2rem) !important;
-    max-width: calc(100% - 2rem) !important;
-    min-width: calc(100% - 2rem) !important;
+    display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
-    display: flex !important;
-    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    flex: none !important;
+    position: relative !important;
   }
   
   /* Mejorar padding de cards en móvil */
@@ -2532,16 +2533,40 @@ a.logo-card:focus {
     flex-wrap: wrap !important;
   }
   
-  /* Para carruseles con 2 columnas en móvil (opcional) */
-  .infinite-carousel[data-items-per-view="4"] .carousel-track-infinite {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 1rem !important;
-  }
-  
-  /* Para carruseles con 3+ items, mantener 1 columna */
+  /* Todos los carruseles infinitos usan 1 columna en móvil */
   .infinite-carousel[data-items-per-view="3"] .carousel-track-infinite,
   .infinite-carousel[data-items-per-view="4"] .carousel-track-infinite {
     grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+  
+  /* Asegurar que todas las list-card sean visibles */
+  .infinite-carousel .list-card,
+  .infinite-carousel .card {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    flex: none !important;
+    position: relative !important;
+  }
+  
+  /* Asegurar que el wrapper y track sean visibles */
+  .infinite-carousel .carousel-wrapper {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  .infinite-carousel .carousel-track-infinite {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
   }
   
   .infinite-carousel .logo-card {
