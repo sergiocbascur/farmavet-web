@@ -2552,8 +2552,9 @@ a.logo-card:focus {
     display: none;
   }
   
-  .infinite-carousel .carousel-track-infinite > [data-carousel-original="true"]:nth-child(-n+3) {
-    display: block;
+  /* Fallback: mostrar primeros 3 si JS aún no ha ejecutado */
+  .infinite-carousel .carousel-track-infinite > [data-carousel-original="true"]:nth-of-type(-n+3) {
+    display: block !important;
   }
   
   /* Asegurar que las list-card visibles tengan el estilo correcto */
