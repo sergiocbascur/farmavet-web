@@ -875,6 +875,26 @@ document.addEventListener("DOMContentLoaded", () => {
       return itemsPerView;
     }
     
+    // Función para actualizar estado de botones
+    function updateButtons() {
+      if (!prevBtn || !nextBtn) return;
+      
+      const itemsPerView = getItemsPerView();
+      
+      // En móvil, usar lógica diferente
+      if (window.innerWidth <= 768) {
+        const mobileItemsPerView = 3;
+        const maxIndex = totalItems - mobileItemsPerView;
+        prevBtn.disabled = currentIndex <= 0;
+        nextBtn.disabled = currentIndex >= maxIndex;
+        return;
+      }
+      
+      const maxIndex = Math.max(0, totalItems - itemsPerView);
+      prevBtn.disabled = currentIndex <= 0;
+      nextBtn.disabled = currentIndex >= maxIndex;
+    }
+    
     // Función para actualizar visibilidad en móvil (mostrar grupo de 3)
     function updateMobileVisibility() {
       if (window.innerWidth > 768) return; // Solo en móvil
