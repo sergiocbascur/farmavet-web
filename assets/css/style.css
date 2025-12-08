@@ -2547,8 +2547,13 @@ a.logo-card:focus {
   }
   
   /* Ocultar todos los elementos originales inicialmente (JS los mostrará según el índice) */
+  /* Pero mostrar los primeros 3 como fallback si JS no se ejecuta */
   .infinite-carousel .carousel-track-infinite > [data-carousel-original="true"] {
-    display: none !important;
+    display: none;
+  }
+  
+  .infinite-carousel .carousel-track-infinite > [data-carousel-original="true"]:nth-child(-n+3) {
+    display: block;
   }
   
   /* Asegurar que las list-card visibles tengan el estilo correcto */

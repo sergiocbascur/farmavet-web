@@ -826,12 +826,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Detectar si estamos en móvil
     const isMobile = () => window.innerWidth <= 768;
     
+    // Variables para clones (necesarias para desktop)
+    let cloneCount = 0;
+    let beginningCloneCount = 0;
+    
     // Solo clonar si NO estamos en móvil
     if (!isMobile()) {
       // For very few items, clone more times to ensure smooth infinite scroll
       // Always clone at least enough for seamless scrolling
-      const cloneCount = totalItems <= itemsPerView ? 6 : 4;
-      const beginningCloneCount = totalItems <= itemsPerView ? 4 : 3;
+      cloneCount = totalItems <= itemsPerView ? 6 : 4;
+      beginningCloneCount = totalItems <= itemsPerView ? 4 : 3;
 
       // Clone items multiple times for seamless infinite effect
       // Clone more copies when we have few items to ensure smooth scrolling
@@ -854,8 +858,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Start position: after the cloned items at the beginning
-    let currentIndex = totalItems * beginningCloneCount;
+    // Start position: en móvil empezar en 0, en desktop después de los clones
+    let currentIndex = isMobile() ? 0 : (totalItems * beginningCloneCount);
     let autoplayInterval = null;
     let animationFrameId = null;
     let lastFrameTime = null;
@@ -945,7 +949,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.innerWidth > 768) return; // Solo en móvil
       
       const originalItems = Array.from(track.querySelectorAll('[data-carousel-original="true"]'));
-      if (originalItems.length === 0) return;
+      if (originalItems.length === 0) {
+        // Si no hay elementos aún, reintentar después de un breve delay
+        setTimeout(() => updateMobileVisibility(), 100);
+        return;
+      }
       
       const itemsPerView = 3;
       // currentIndex representa el índice del primer elemento visible
@@ -1244,10 +1252,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // En móvil, inicializar currentIndex a 0 y mostrar primeros 3
       if (window.innerWidth <= 768) {
         currentIndex = 0;
-        updateMobileVisibility();
+        // Pequeño delay para asegurar que los elementos estén en el DOM
+        setTimeout(() => {
+          updateMobileVisibility();
+        }, 100);
       } else {
         // En desktop, usar el sistema de clones
-        currentIndex = totalItems * beginningCloneCount;
+        if (beginningCloneCount > 0) {
+          currentIndex = totalItems * beginningCloneCount;
+        }
         updateTransform(true);
       }
       
