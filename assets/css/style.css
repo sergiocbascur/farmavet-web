@@ -2533,23 +2533,28 @@ a.logo-card:focus {
     flex-wrap: wrap !important;
   }
   
-  /* Todos los carruseles infinitos usan 1 columna en móvil */
+  /* En móvil, mostrar 3 elementos por vista en grid */
   .infinite-carousel[data-items-per-view="3"] .carousel-track-infinite,
   .infinite-carousel[data-items-per-view="4"] .carousel-track-infinite {
     grid-template-columns: 1fr !important;
     gap: 1.25rem !important;
+    display: grid !important;
   }
   
-  /* En móvil, mostrar solo los elementos originales (ocultar clones) */
+  /* En móvil, ocultar clones pero mantener funcionalidad de navegación */
   .infinite-carousel .carousel-track-infinite > *:not([data-carousel-original="true"]) {
     display: none !important;
   }
   
-  /* Asegurar que todas las list-card originales sean visibles */
+  /* Ocultar todos los elementos originales inicialmente (JS los mostrará según el índice) */
+  .infinite-carousel .carousel-track-infinite > [data-carousel-original="true"] {
+    display: none !important;
+  }
+  
+  /* Asegurar que las list-card visibles tengan el estilo correcto */
   .infinite-carousel .list-card[data-carousel-original="true"],
   .infinite-carousel .card[data-carousel-original="true"],
   .infinite-carousel .logo-card[data-carousel-original="true"] {
-    display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
     width: 100% !important;
@@ -2557,6 +2562,15 @@ a.logo-card:focus {
     min-width: 100% !important;
     flex: none !important;
     position: relative !important;
+  }
+  
+  /* Mostrar botones de navegación en móvil */
+  .infinite-carousel .carousel-nav-infinite {
+    display: flex !important;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 0 !important;
   }
   
   /* Asegurar que el wrapper y track sean visibles */

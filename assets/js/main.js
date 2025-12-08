@@ -865,10 +865,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getItemsPerView() {
       const width = window.innerWidth;
-      if (width <= 600) return 1;
+      if (width <= 768) return 3; // En móvil mostrar 3 elementos a la vez
       if (width <= 900) return 2;
       if (width <= 1200) return 3;
       return itemsPerView;
+    }
+    
+    // Función para actualizar visibilidad en móvil (mostrar grupo de 3)
+    function updateMobileVisibility() {
+      if (window.innerWidth > 768) return; // Solo en móvil
+      
+      const originalItems = Array.from(track.querySelectorAll('[data-carousel-original="true"]'));
+      if (originalItems.length === 0) return;
+      
+      const itemsPerView = 3;
+      // currentIndex representa el índice del primer elemento visible
+      const startIndex = currentIndex % totalItems;
+      
+      originalItems.forEach((item, index) => {
+        // Calcular qué elementos deben estar visibles (grupos de 3)
+        let relativeIndex = (index - startIndex + totalItems) % totalItems;
+        if (relativeIndex < itemsPerView) {
+          item.style.display = 'block';
+          item.style.opacity = '1';
+          item.style.visibility = 'visible';
+        } else {
+          item.style.display = 'none';
+        }
+      });
     }
 
     function getItemWidth() {
@@ -884,6 +908,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateTransform(instant = false) {
+      // En móvil, usar sistema de visibilidad en lugar de transform
+      if (window.innerWidth <= 768) {
+        updateMobileVisibility();
+        return;
+      }
+      
       const itemWidth = getItemWidth();
       if (itemWidth <= 0 || isNaN(itemWidth)) {
         // If width not ready, retry after a short delay
@@ -909,12 +939,52 @@ document.addEventListener("DOMContentLoaded", () => {
         track.style.transform = `translateX(${offset}px)`;
       }
     }
+    
+    // Función para actualizar visibilidad en móvil (mostrar grupo de 3)
+    function updateMobileVisibility() {
+      if (window.innerWidth > 768) return; // Solo en móvil
+      
+      const originalItems = Array.from(track.querySelectorAll('[data-carousel-original="true"]'));
+      if (originalItems.length === 0) return;
+      
+      const itemsPerView = 3;
+      // Calcular el índice base (grupo de 3)
+      const baseIndex = Math.floor(currentIndex / itemsPerView) * itemsPerView;
+      const startIndex = baseIndex % totalItems;
+      
+      originalItems.forEach((item, index) => {
+        // Calcular qué elementos deben estar visibles (grupos de 3)
+        let relativeIndex = (index - startIndex + totalItems) % totalItems;
+        if (relativeIndex < itemsPerView) {
+          item.style.display = 'block';
+          item.style.opacity = '1';
+          item.style.visibility = 'visible';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Actualizar botones
+      updateButtons();
+    }
 
     function nextSlide() {
       if (isTransitioning) return;
       
       isTransitioning = true;
       stopAutoplay(); // Stop autoplay when manually navigating
+      
+      // En móvil, avanzar de 3 en 3
+      if (window.innerWidth <= 768) {
+        const itemsPerView = 3;
+        const maxIndex = totalItems - 1;
+        currentIndex = Math.min(currentIndex + itemsPerView, maxIndex);
+        updateTransform();
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 300);
+        return;
+      }
       
       currentIndex++;
       updateTransform();
@@ -966,6 +1036,17 @@ document.addEventListener("DOMContentLoaded", () => {
       
       isTransitioning = true;
       stopAutoplay(); // Stop autoplay when manually navigating
+
+      // En móvil, retroceder de 3 en 3
+      if (window.innerWidth <= 768) {
+        const itemsPerView = 3;
+        currentIndex = Math.max(currentIndex - itemsPerView, 0);
+        updateTransform();
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 300);
+        return;
+      }
 
       // Calculate positions
       const startPosition = totalItems * beginningCloneCount;
@@ -1139,7 +1220,15 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        updateTransform();
+        if (window.innerWidth <= 768) {
+          // En móvil, reinicializar
+          currentIndex = 0;
+          updateMobileVisibility();
+        } else {
+          // En desktop, usar transform
+          updateTransform();
+        }
+        updateButtons();
       }, 250);
     });
 
@@ -1153,10 +1242,20 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       
-      updateTransform(true);
+      // En móvil, inicializar currentIndex a 0 y mostrar primeros 3
+      if (window.innerWidth <= 768) {
+        currentIndex = 0;
+        updateMobileVisibility();
+      } else {
+        // En desktop, usar el sistema de clones
+        currentIndex = totalItems * beginningCloneCount;
+        updateTransform(true);
+      }
       
-      // Only start autoplay if enabled
-      if (autoplayEnabled) {
+      updateButtons();
+      
+      // Solo iniciar autoplay si está habilitado y NO estamos en móvil
+      if (autoplayEnabled && window.innerWidth > 768) {
         // Small delay to ensure everything is ready
         setTimeout(() => {
           startAutoplay();
@@ -1715,7 +1814,19 @@ function initVerticalCarousels(verticalCarousels) {
     }
 
     function updateButtons() {
-      itemsPerView = getItemsPerView(); // Recalcular en cada actualización
+      if (!prevBtn || !nextBtn) return;
+      
+      const itemsPerView = getItemsPerView();
+      
+      // En móvil, usar lógica diferente
+      if (window.innerWidth <= 768) {
+        const mobileItemsPerView = 3;
+        const maxIndex = totalItems - mobileItemsPerView;
+        prevBtn.disabled = currentIndex <= 0;
+        nextBtn.disabled = currentIndex >= maxIndex;
+        return;
+      }
+      
       const maxIndex = Math.max(0, totalItems - itemsPerView);
       prevBtn.disabled = currentIndex <= 0;
       nextBtn.disabled = currentIndex >= maxIndex;
