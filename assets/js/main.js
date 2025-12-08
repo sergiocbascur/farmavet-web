@@ -817,25 +817,41 @@ document.addEventListener("DOMContentLoaded", () => {
     // Don't initialize carousel if we have no items
     if (totalItems === 0) return;
     
-    // For very few items, clone more times to ensure smooth infinite scroll
-    // Always clone at least enough for seamless scrolling
-    const cloneCount = totalItems <= itemsPerView ? 6 : 4;
-    const beginningCloneCount = totalItems <= itemsPerView ? 4 : 3;
-
-    // Clone items multiple times for seamless infinite effect
-    // Clone more copies when we have few items to ensure smooth scrolling
-    for (let i = 0; i < cloneCount; i++) {
-      originalItems.forEach((item) => {
-        track.appendChild(item.cloneNode(true));
-      });
-    }
+    // Marcar elementos originales para poder ocultar clones en móvil
+    originalItems.forEach((item, index) => {
+      item.setAttribute('data-carousel-original', 'true');
+      item.setAttribute('data-carousel-index', index);
+    });
     
-    // Clone items at the beginning (reversed order for going backwards)
-    for (let i = 0; i < beginningCloneCount; i++) {
-      const reversedItems = [...originalItems].reverse();
-      reversedItems.forEach((item) => {
-        track.insertBefore(item.cloneNode(true), track.firstChild);
-      });
+    // Detectar si estamos en móvil
+    const isMobile = () => window.innerWidth <= 768;
+    
+    // Solo clonar si NO estamos en móvil
+    if (!isMobile()) {
+      // For very few items, clone more times to ensure smooth infinite scroll
+      // Always clone at least enough for seamless scrolling
+      const cloneCount = totalItems <= itemsPerView ? 6 : 4;
+      const beginningCloneCount = totalItems <= itemsPerView ? 4 : 3;
+
+      // Clone items multiple times for seamless infinite effect
+      // Clone more copies when we have few items to ensure smooth scrolling
+      for (let i = 0; i < cloneCount; i++) {
+        originalItems.forEach((item) => {
+          const clone = item.cloneNode(true);
+          clone.removeAttribute('data-carousel-original');
+          track.appendChild(clone);
+        });
+      }
+      
+      // Clone items at the beginning (reversed order for going backwards)
+      for (let i = 0; i < beginningCloneCount; i++) {
+        const reversedItems = [...originalItems].reverse();
+        reversedItems.forEach((item) => {
+          const clone = item.cloneNode(true);
+          clone.removeAttribute('data-carousel-original');
+          track.insertBefore(clone, track.firstChild);
+        });
+      }
     }
 
     // Start position: after the cloned items at the beginning

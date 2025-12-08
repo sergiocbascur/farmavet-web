@@ -2540,9 +2540,15 @@ a.logo-card:focus {
     gap: 1.25rem !important;
   }
   
-  /* Asegurar que todas las list-card sean visibles */
-  .infinite-carousel .list-card,
-  .infinite-carousel .card {
+  /* En móvil, mostrar solo los elementos originales (ocultar clones) */
+  .infinite-carousel .carousel-track-infinite > *:not([data-carousel-original="true"]) {
+    display: none !important;
+  }
+  
+  /* Asegurar que todas las list-card originales sean visibles */
+  .infinite-carousel .list-card[data-carousel-original="true"],
+  .infinite-carousel .card[data-carousel-original="true"],
+  .infinite-carousel .logo-card[data-carousel-original="true"] {
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
