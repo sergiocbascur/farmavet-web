@@ -1004,7 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // En móvil, avanzar de 3 en 3
       if (window.innerWidth <= 768) {
         const itemsPerView = 3;
-        const maxIndex = totalItems - 1;
+        const maxIndex = Math.max(0, totalItems - itemsPerView);
         currentIndex = Math.min(currentIndex + itemsPerView, maxIndex);
         updateTransform();
         setTimeout(() => {
