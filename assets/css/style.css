@@ -2501,28 +2501,47 @@ a.logo-card:focus {
     margin-bottom: 0 !important;
   }
   
-  /* Carrusel infinito - asegurar visibilidad en móvil */
+  /* Carrusel infinito: convertir a grid/listas simples en móvil */
   .infinite-carousel {
     width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative;
-    padding: 0 1rem !important;
+    padding: 0 !important;
+  }
+  
+  /* Ocultar navegación del carrusel en móvil */
+  .carousel-nav-infinite {
+    display: none !important;
   }
   
   .carousel-wrapper {
     width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     position: relative;
   }
   
+  /* Convertir track a grid o lista vertical */
   .carousel-track-infinite {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 1rem !important;
-    width: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+    width: 100% !important;
     min-width: 100% !important;
     position: relative;
-    padding: 0.5rem 0 !important;
+    padding: 0 !important;
+    flex-wrap: wrap !important;
+  }
+  
+  /* Para carruseles con 2 columnas en móvil (opcional) */
+  .infinite-carousel[data-items-per-view="4"] .carousel-track-infinite {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Para carruseles con 3+ items, mantener 1 columna */
+  .infinite-carousel[data-items-per-view="3"] .carousel-track-infinite,
+  .infinite-carousel[data-items-per-view="4"] .carousel-track-infinite {
+    grid-template-columns: 1fr !important;
   }
   
   .infinite-carousel .logo-card {
@@ -3215,17 +3234,150 @@ div[data-hero-slide].card .cta-link-red:focus,
     gap: 2rem;
   }
 
+  /* Stat cards: convertir a lista vertical en móvil */
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+  
+  .stat-card {
+    width: 100% !important;
+    padding: 1.5rem !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1.25rem;
+  }
+  
+  .stat-card > div:first-child {
+    font-size: 2rem !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0;
+  }
+  
+  .stat-card h3 {
+    font-size: 1.75rem !important;
+    margin: 0 !important;
+    flex: 1;
+  }
+  
+  .stat-card p {
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    flex: 1;
+  }
+  
+  /* Layout alternativo: icono y número arriba, texto abajo */
+  .stat-card {
+    flex-direction: column !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+  
+  .stat-card > div:first-child {
+    font-size: 2.5rem !important;
+  }
+  
+  .stat-card h3 {
+    font-size: 2rem !important;
+  }
+  
+  .stat-card p {
+    margin-top: 0.5rem !important;
   }
 
   .footer-grid {
     gap: 1.75rem;
   }
 
+  /* Timeline: convertir a lista vertical en móvil */
   .timeline {
-    padding: 4rem 1rem 3rem;
-    gap: 1.5rem;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 2rem 1rem !important;
+    gap: 2rem !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    position: relative;
+  }
+  
+  /* Línea vertical en lugar de horizontal */
+  .timeline::before,
+  .timeline::after {
+    left: 1.5rem !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 3px !important;
+    height: auto !important;
+    right: auto !important;
+    transform: none !important;
+    transform-origin: top !important;
+  }
+  
+  .timeline::before {
+    background: rgba(35, 115, 186, 0.12) !important;
+    transform: scaleY(1) !important;
+  }
+  
+  .timeline.animated::after {
+    width: 3px !important;
+    height: var(--line-height, 100%) !important;
+    transform: scaleY(1) !important;
+    left: 1.5rem !important;
+    top: 0 !important;
+  }
+  
+  .timeline-item {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    margin-top: 0 !important;
+    padding-left: 3rem;
+    position: relative;
+  }
+  
+  .timeline-item::before {
+    left: 1.5rem !important;
+    top: 0.5rem !important;
+    transform: translate(-50%, 0) scale(1) !important;
+  }
+  
+  .timeline-item::after {
+    display: none !important;
+  }
+  
+  .timeline-year {
+    font-size: 1.5rem !important;
+    margin-bottom: 0 !important;
+    margin-right: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-white);
+    border: 2px solid var(--color-primary);
+    border-radius: 8px;
+    min-width: 80px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  
+  .timeline-card {
+    flex: 1;
+    margin-top: 0 !important;
+    padding: 1.5rem !important;
+  }
+  
+  .timeline-item:nth-child(even) .timeline-card {
+    margin-top: 0 !important;
+  }
+  
+  .timeline-card-title {
+    font-size: 1.1rem !important;
+  }
+  
+  .timeline-card-text {
+    font-size: 0.95rem !important;
   }
 
   .timeline::before,
@@ -4093,6 +4245,30 @@ div[data-hero-slide].card .cta-link-red:focus,
 }
 
 @media (max-width: 768px) {
+  /* Carrusel vertical: convertir a lista simple en móvil */
+  .vertical-carousel {
+    overflow: visible !important;
+  }
+  
+  .vertical-carousel-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  
+  .vertical-carousel-track {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    transform: none !important;
+    flex-direction: column !important;
+  }
+  
+  /* Ocultar navegación del carrusel vertical en móvil */
+  .vertical-carousel-nav {
+    display: none !important;
+  }
+  
   .publicacion-meta {
     flex-direction: column;
     gap: 0.75rem;
