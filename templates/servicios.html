@@ -902,9 +902,18 @@
               if (cells[0]) cells[0].innerHTML = '&nbsp;';
               if (cells[2]) cells[2].textContent = '\u00A0';
               if (cells[3]) cells[3].textContent = '\u00A0';
-              if (cells[6]) cells[6].innerHTML = '\u00A0';
-              if (cells[7]) cells[7].innerHTML = '\u00A0';
-              if (cells[8]) cells[8].innerHTML = '\u00A0';
+              if (cells[6]) {
+                cells[6].style.textAlign = 'center';
+                cells[6].innerHTML = '\u00A0';
+              }
+              if (cells[7]) {
+                cells[7].style.textAlign = 'center';
+                cells[7].innerHTML = '\u00A0';
+              }
+              if (cells[8]) {
+                cells[8].style.textAlign = 'center';
+                cells[8].innerHTML = '\u00A0';
+              }
             }
           }
         });
