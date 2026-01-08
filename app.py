@@ -3336,6 +3336,14 @@ def admin_metodologia_nuevo():
         # Obtener analitos del formulario (pueden venir como array o como campos simples)
         analitos_data = []
         
+        # Debug: mostrar todos los campos del formulario
+        debug_info = []
+        debug_info.append(f"Total de campos en formulario: {len(request.form)}")
+        analitos_keys = [k for k in request.form.keys() if 'analito' in k.lower()]
+        debug_info.append(f"Campos relacionados con analitos: {len(analitos_keys)}")
+        for k in sorted(analitos_keys):
+            debug_info.append(f"  - {k} = '{request.form.get(k)}'")
+        
         # Buscar todos los keys que siguen el patrón analitos[índice][campo]
         analitos_dict = {}
         for key in request.form:
@@ -3362,6 +3370,15 @@ def admin_metodologia_nuevo():
                     value = raw_value if raw_value else None
                 
                 analitos_dict[index][field] = value
+        
+        # Debug: mostrar qué se encontró
+        debug_info.append(f"Índices de analitos encontrados: {sorted(analitos_dict.keys())}")
+        for idx, data in analitos_dict.items():
+            debug_info.append(f"  Analito {idx}: {data}")
+        
+        # Guardar info de debug para mostrar en mensaje
+        debug_message = "\n".join(debug_info)
+        print(f'\n[DEBUG] Información del formulario:\n{debug_message}\n')
         
         # Convertir dict a lista ordenada
         if analitos_dict:
@@ -3488,7 +3505,9 @@ def admin_metodologia_nuevo():
         elif created_count == 1:
             flash(f'Metodología creada correctamente: {analitos_validos[0]}', 'success')
         else:
-            flash('No se pudo crear ninguna metodología. Verifica que los analitos tengan nombres válidos. Revisa la consola del servidor para más detalles.', 'error')
+            error_msg = f'No se pudo crear ninguna metodología. Verifica que los analitos tengan nombres válidos.\n\n[DEBUG] Información recibida:\n{debug_message}'
+            flash(error_msg, 'error')
+            app.logger.error(f'No se crearon metodologías. Debug info:\n{debug_message}')
         return redirect(url_for('admin_metodologias'))
     
     return render_template('admin/metodologia_form.html')
