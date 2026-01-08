@@ -3394,13 +3394,21 @@ def admin_metodologia_nuevo():
             return render_template('admin/metodologia_form.html')
         
         # Debug: verificar qué analitos se están procesando
+        print(f'\n{"="*60}')
+        print(f'[DEBUG] Analitos recibidos del formulario: {len(analitos_data)} analitos')
+        print(f'{"="*60}')
+        for idx, a in enumerate(analitos_data):
+            print(f'[DEBUG] Analito {idx}: {a}')
+        print(f'{"="*60}\n')
+        
         app.logger.info(f'Analitos recibidos del formulario: {len(analitos_data)} analitos')
         for idx, a in enumerate(analitos_data):
             app.logger.info(f'Analito {idx}: {a}')
         
         created_count = 0
         analitos_validos = []
-        for analito_data in analitos_data:
+        for idx, analito_data in enumerate(analitos_data):
+            print(f'[DEBUG] Procesando analito {idx}: {analito_data}')
             # Validar que el analito tenga nombre
             analito_nombre = analito_data.get('analito', '').strip() if analito_data.get('analito') else ''
             if not analito_nombre:
@@ -3422,6 +3430,7 @@ def admin_metodologia_nuevo():
             if limite_cuantificacion == '':
                 limite_cuantificacion = None
             
+            print(f'[DEBUG] Insertando analito {created_count + 1}: {analito_nombre}, LOD: {limite_deteccion}, LOQ: {limite_cuantificacion}')
             app.logger.info(f'Insertando analito: {analito_nombre}, LOD: {limite_deteccion}, LOQ: {limite_cuantificacion}')
             
             try:
@@ -3452,23 +3461,34 @@ def admin_metodologia_nuevo():
                     activo
                 ))
                 created_count += 1
+                print(f'[DEBUG] ✓ Analito {analito_nombre} insertado correctamente (total: {created_count})')
                 app.logger.info(f'Analito {analito_nombre} insertado correctamente')
             except Exception as e:
-                app.logger.error(f'Error al insertar analito {analito_nombre}: {str(e)}', exc_info=True)
+                error_msg = f'Error al insertar analito {analito_nombre}: {str(e)}'
+                print(f'[DEBUG] ✗ ERROR: {error_msg}')
+                print(f'[DEBUG] Traceback completo:')
+                import traceback
+                traceback.print_exc()
+                app.logger.error(error_msg, exc_info=True)
                 conn.rollback()
-                flash(f'Error al guardar analito "{analito_nombre}": {str(e)}', 'error')
+                flash(f'Error al guardar analito "{analito_nombre}": {str(e)}. Revisa la consola del servidor para más detalles.', 'error')
                 conn.close()
                 return redirect(url_for('admin_metodologias'))
         
         conn.commit()
         conn.close()
         
+        print(f'\n[DEBUG] {"="*60}')
+        print(f'[DEBUG] RESUMEN: Se crearon {created_count} registros de metodología')
+        print(f'[DEBUG] Analitos guardados: {", ".join(analitos_validos)}')
+        print(f'[DEBUG] {"="*60}\n')
+        
         if created_count > 1:
-            flash(f'Metodología creada con {created_count} analitos. En la vista pública se mostrarán agrupados automáticamente.', 'success')
+            flash(f'Metodología creada con {created_count} analitos: {", ".join(analitos_validos)}. En la vista pública se mostrarán agrupados automáticamente.', 'success')
         elif created_count == 1:
-            flash('Metodología creada correctamente', 'success')
+            flash(f'Metodología creada correctamente: {analitos_validos[0]}', 'success')
         else:
-            flash('No se pudo crear ninguna metodología. Verifica que los analitos tengan nombres válidos.', 'error')
+            flash('No se pudo crear ninguna metodología. Verifica que los analitos tengan nombres válidos. Revisa la consola del servidor para más detalles.', 'error')
         return redirect(url_for('admin_metodologias'))
     
     return render_template('admin/metodologia_form.html')
