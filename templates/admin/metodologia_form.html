@@ -400,27 +400,31 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Actualizar números de analitos
         actualizarNumerosAnalitos();
-        
-        // Agregar evento de eliminación al nuevo botón
-        nuevoAnalito.querySelector('.btn-eliminar-analito').addEventListener('click', function() {
-            nuevoAnalito.remove();
-            actualizarNumerosAnalitos();
-        });
     });
     
-    // Función para eliminar analito (delegación de eventos)
+    // Función para eliminar analito (delegación de eventos - maneja todos los botones)
     analitosContainer.addEventListener('click', function(e) {
         if (e.target.closest('.btn-eliminar-analito')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const analitoItem = e.target.closest('.analito-item');
+            if (!analitoItem) return;
+            
+            // Contar analitos ANTES de eliminar
             const totalAnalitos = analitosContainer.querySelectorAll('.analito-item').length;
             
             // No permitir eliminar si solo hay un analito
-            if (totalAnalitos > 1) {
-                analitoItem.remove();
-                actualizarNumerosAnalitos();
-            } else {
+            if (totalAnalitos <= 1) {
                 alert('Debe haber al menos un analito');
+                return;
             }
+            
+            // Eliminar el analito
+            analitoItem.remove();
+            
+            // Actualizar números de analitos después de eliminar
+            actualizarNumerosAnalitos();
         }
     });
     
@@ -447,22 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Inicializar estado de botones y números al cargar
     actualizarNumerosAnalitos();
-    
-    // Asegurar que los botones de eliminar funcionen para los analitos cargados desde el servidor
-    analitosContainer.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-eliminar-analito')) {
-            const analitoItem = e.target.closest('.analito-item');
-            const totalAnalitos = analitosContainer.querySelectorAll('.analito-item').length;
-            
-            // No permitir eliminar si solo hay un analito
-            if (totalAnalitos > 1) {
-                analitoItem.remove();
-                actualizarNumerosAnalitos();
-            } else {
-                alert('Debe haber al menos un analito');
-            }
-        }
-    });
 });
 </script>
 {% endblock %}
