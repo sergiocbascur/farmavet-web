@@ -3357,9 +3357,12 @@ def admin_metodologia_nuevo():
         # Convertir dict a lista ordenada
         if analitos_dict:
             max_index = max(analitos_dict.keys())
+            app.logger.info(f'Índices de analitos encontrados en formulario: {sorted(analitos_dict.keys())}, máximo: {max_index}')
             for i in range(max_index + 1):
                 if i in analitos_dict:
+                    app.logger.info(f'Procesando analito índice {i}: {analitos_dict[i]}')
                     analitos_data.append(analitos_dict[i])
+            app.logger.info(f'Total de analitos procesados: {len(analitos_data)}')
         
         # Si no hay analitos en formato array, usar formato simple (compatibilidad hacia atrás)
         if not analitos_data:
