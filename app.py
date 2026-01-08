@@ -3330,7 +3330,7 @@ def admin_metodologia_nuevo():
         acreditada = 1 if request.form.get('acreditada') == 'on' else 0
         autorizado_sag = 1 if request.form.get('autorizado_sag') == 'on' else 0
         autorizado_sernapesca = 1 if request.form.get('autorizado_sernapesca') == 'on' else 0
-        orden = int(request.form.get('orden', 0))
+        orden = int(request.form.get('orden') or 0)
         activo = 1 if request.form.get('activo') == 'on' else 0
         
         # Obtener analitos del formulario (pueden venir como array o como campos simples)
@@ -3469,7 +3469,7 @@ def admin_metodologia_editar(metodologia_id):
                 1 if request.form.get('acreditada') == 'on' else 0,
                 1 if request.form.get('autorizado_sag') == 'on' else 0,
                 1 if request.form.get('autorizado_sernapesca') == 'on' else 0,
-                int(request.form.get('orden', 0)),
+                int(request.form.get('orden') or 0),
                 1 if request.form.get('activo') == 'on' else 0,
                 metodologia_id
             ))
