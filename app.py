@@ -3306,8 +3306,49 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
 @login_required
 def admin_metodologias():
     conn = get_db()
-    metodologias = conn.execute('SELECT * FROM metodologias ORDER BY categoria, orden, id DESC').fetchall()
+    metodologias_raw = conn.execute('SELECT * FROM metodologias ORDER BY categoria, orden, nombre, id').fetchall()
     conn.close()
+    
+    # Agrupar metodologías por nombre + matriz + técnica
+    metodologias_agrupadas = {}
+    
+    for metodologia in metodologias_raw:
+        # Crear clave de agrupación
+        nombre = metodologia['nombre'] or ''
+        matriz = metodologia['matriz'] or ''
+        tecnica = metodologia['tecnica'] or ''
+        categoria = metodologia['categoria'] or 'otros'
+        
+        group_key = (nombre, matriz, tecnica, categoria)
+        
+        if group_key not in metodologias_agrupadas:
+            metodologias_agrupadas[group_key] = {
+                'metodologia_representativa': dict(metodologia),
+                'analitos': [],
+                'ids': []
+            }
+        
+        # Agregar analito a la lista
+        analito = metodologia['analito'] or ''
+        if analito and analito not in metodologias_agrupadas[group_key]['analitos']:
+            metodologias_agrupadas[group_key]['analitos'].append(analito)
+        
+        # Guardar IDs para edición/eliminación
+        metodologias_agrupadas[group_key]['ids'].append(metodologia['id'])
+    
+    # Convertir a lista para el template
+    metodologias = []
+    for group_key, grupo in metodologias_agrupadas.items():
+        met = grupo['metodologia_representativa']
+        met['analitos_agrupados'] = ', '.join(grupo['analitos'])
+        met['total_analitos'] = len(grupo['analitos'])
+        met['ids_relacionados'] = grupo['ids']
+        met['id_principal'] = grupo['ids'][0]  # ID del primer registro para editar
+        metodologias.append(met)
+    
+    # Ordenar por categoría y nombre
+    metodologias.sort(key=lambda x: (x['categoria'] or 'otros', x['nombre'] or ''))
+    
     return render_template('admin/metodologias.html', metodologias=metodologias)
 
 @app.route('/admin/metodologias/nuevo', methods=['GET', 'POST'])
@@ -3715,13 +3756,29 @@ def admin_metodologia_editar(metodologia_id):
     
     try:
         metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
-        conn.close()
         
         if not metodologia:
+            conn.close()
             flash('Metodología no encontrada', 'error')
             return redirect(url_for('admin_metodologias'))
         
-        return render_template('admin/metodologia_form.html', metodologia=metodologia)
+        # Buscar todos los analitos relacionados (mismo nombre, matriz, técnica)
+        nombre = metodologia['nombre'] or ''
+        matriz = metodologia['matriz'] or ''
+        tecnica = metodologia['tecnica'] or ''
+        
+        analitos_relacionados = conn.execute('''
+            SELECT * FROM metodologias 
+            WHERE nombre = ? AND matriz = ? AND (tecnica = ? OR (tecnica IS NULL AND ? IS NULL))
+            ORDER BY id
+        ''', (nombre, matriz, tecnica, tecnica)).fetchall()
+        
+        conn.close()
+        
+        # Pasar la metodología principal y los analitos relacionados al template
+        return render_template('admin/metodologia_form.html', 
+                             metodologia=metodologia, 
+                             analitos_relacionados=analitos_relacionados)
     except Exception as e:
         if 'conn' in locals():
             conn.close()

@@ -229,6 +229,60 @@ document.addEventListener('DOMContentLoaded', function() {
     const analitosContainer = document.getElementById('analitos-container');
     const btnAgregarAnalito = document.getElementById('btnAgregarAnalito');
     
+    // Si hay analitos relacionados (al editar), cargarlos todos
+    {% if analitos_relacionados and analitos_relacionados|length > 1 %}
+    // Limpiar el contenedor y crear campos para todos los analitos relacionados
+    analitosContainer.innerHTML = '';
+    analitoIndex = 0;
+    
+    {% for analito_rel in analitos_relacionados %}
+    const analito{{ loop.index0 }} = document.createElement('div');
+    analito{{ loop.index0 }}.className = 'analito-item card mb-3';
+    analito{{ loop.index0 }}.setAttribute('data-analito-index', {{ loop.index0 }});
+    analito{{ loop.index0 }}.innerHTML = `
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0"><i class="bi bi-flask me-2"></i>Analito {{ loop.index }} <span class="text-danger">*</span></h6>
+                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-analito" ${analitos_relacionados|length > 1 ? '' : 'style="display: none;"'}>
+                    <i class="bi bi-trash"></i> Eliminar
+                </button>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="analitos[{{ loop.index0 }}][analito]" required
+                           value="{{ analito_rel.analito if analito_rel.analito else '' }}"
+                           placeholder="Ej: Tetraciclinas, Aflatoxina B1">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Límite de Detección (LOD)</label>
+                    <input type="text" class="form-control" name="analitos[{{ loop.index0 }}][limite_deteccion]" 
+                           value="{{ analito_rel.limite_deteccion if analito_rel.limite_deteccion else '' }}" 
+                           placeholder="Ej: 0.5 µg/kg">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Límite de Cuantificación (LOQ)</label>
+                    <input type="text" class="form-control" name="analitos[{{ loop.index0 }}][limite_cuantificacion]" 
+                           value="{{ analito_rel.limite_cuantificacion if analito_rel.limite_cuantificacion else '' }}" 
+                           placeholder="Ej: 1.0 µg/kg">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" name="analitos[{{ loop.index0 }}][analito_en]" 
+                           value="{{ analito_rel.analito_en if analito_rel.analito_en and analito_rel.analito_en != 'None' else '' }}" 
+                           placeholder="Analyte in English">
+                </div>
+            </div>
+        </div>
+    `;
+    analitosContainer.appendChild(analito{{ loop.index0 }});
+    analitoIndex = {{ loop.index }};
+    {% endfor %}
+    
+    // Actualizar números de analitos
+    actualizarNumerosAnalitos();
+    {% endif %}
+    
     // Función para dividir analitos separados por coma al cargar
     function dividirAnalitosAlCargar() {
         const primerAnalitoInput = document.querySelector('input[name="analitos[0][analito]"]');

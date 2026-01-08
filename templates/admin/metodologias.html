@@ -19,7 +19,7 @@
                         <th>Código</th>
                         <th>Nombre</th>
                         <th>Categoría</th>
-                        <th>Analito</th>
+                        <th>Analitos</th>
                         <th>Matriz</th>
                         <th>Técnica</th>
                         <th>Acreditada</th>
@@ -40,7 +40,14 @@
                                 {% else %}Otros{% endif %}
                             </span>
                         </td>
-                        <td>{{ metodologia.analito }}</td>
+                        <td>
+                            {% if metodologia.total_analitos and metodologia.total_analitos > 1 %}
+                                <span class="badge bg-primary me-1">{{ metodologia.total_analitos }} analitos</span>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.85em;">{{ metodologia.analitos_agrupados }}</small>
+                            {% else %}
+                                {{ metodologia.analito or metodologia.analitos_agrupados or '—' }}
+                            {% endif %}
+                        </td>
                         <td>{{ metodologia.matriz }}</td>
                         <td>{{ metodologia.tecnica or '—' }}</td>
                         <td>
@@ -58,12 +65,12 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="{{ url_for('admin_metodologia_editar', metodologia_id=metodologia.id) }}" class="btn btn-sm btn-outline-primary">
+                            <a href="{{ url_for('admin_metodologia_editar', metodologia_id=metodologia.id_principal) }}" class="btn btn-sm btn-outline-primary" title="Editar metodología (se cargarán todos los analitos relacionados)">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form method="POST" action="{{ url_for('admin_metodologia_eliminar', metodologia_id=metodologia.id) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta metodología?');">
+                            <form method="POST" action="{{ url_for('admin_metodologia_eliminar', metodologia_id=metodologia.id_principal) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta metodología y todos sus analitos relacionados ({{ metodologia.total_analitos }} registro{{ 's' if metodologia.total_analitos > 1 else '' }})?');">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar metodología completa">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
