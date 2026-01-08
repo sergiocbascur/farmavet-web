@@ -3347,10 +3347,19 @@ def admin_metodologia_nuevo():
                 if index not in analitos_dict:
                     analitos_dict[index] = {}
                 
-                value = request.form.get(key, '').strip() or None
-                if field == 'analito_en' and value:
-                    # Normalizar valores vacíos o 'none'
-                    value = None if value.strip().lower() in ['none', ''] else value.strip()
+                # Obtener valor del formulario
+                raw_value = request.form.get(key, '').strip()
+                
+                # Para campos opcionales, convertir cadenas vacías a None
+                if field in ['analito_en', 'limite_deteccion', 'limite_cuantificacion']:
+                    if not raw_value or raw_value.lower() in ['none', '']:
+                        value = None
+                    else:
+                        value = raw_value
+                else:
+                    # Para campos requeridos como 'analito', mantener el valor incluso si está vacío
+                    # (la validación se hará después)
+                    value = raw_value if raw_value else None
                 
                 analitos_dict[index][field] = value
         
