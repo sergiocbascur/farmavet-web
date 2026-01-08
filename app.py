@@ -3445,6 +3445,76 @@ def admin_metodologia_editar(metodologia_id):
     
     if request.method == 'POST':
         try:
+            # Obtener analitos del formulario (pueden venir como array o como campos simples)
+            analitos_data = []
+            
+            # Buscar todos los keys que siguen el patrón analitos[índice][campo]
+            analitos_dict = {}
+            for key in request.form:
+                match = re.match(r'analitos\[(\d+)\]\[(\w+)\]', key)
+                if match:
+                    index = int(match.group(1))
+                    field = match.group(2)
+                    
+                    if index not in analitos_dict:
+                        analitos_dict[index] = {}
+                    
+                    value = request.form.get(key, '').strip() or None
+                    if field == 'analito_en' and value:
+                        # Normalizar valores vacíos o 'none'
+                        value = None if value.strip().lower() in ['none', ''] else value.strip()
+                    
+                    analitos_dict[index][field] = value
+            
+            # Convertir dict a lista ordenada
+            if analitos_dict:
+                max_index = max(analitos_dict.keys())
+                for i in range(max_index + 1):
+                    if i in analitos_dict:
+                        analitos_data.append(analitos_dict[i])
+            
+            # Si no hay analitos en formato array, usar formato simple (compatibilidad hacia atrás)
+            if not analitos_data:
+                analito = request.form.get('analito', '').strip()
+                analito_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', ''))
+                limite_deteccion = request.form.get('limite_deteccion', '').strip() or None
+                limite_cuantificacion = request.form.get('limite_cuantificacion', '').strip() or None
+                
+                if analito:
+                    analitos_data.append({
+                        'analito': analito,
+                        'analito_en': analito_en,
+                        'limite_deteccion': limite_deteccion,
+                        'limite_cuantificacion': limite_cuantificacion
+                    })
+            
+            # Validar que haya al menos un analito
+            if not analitos_data or not analitos_data[0].get('analito'):
+                flash('Debe ingresar al menos un analito', 'error')
+                metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
+                conn.close()
+                return render_template('admin/metodologia_form.html', metodologia=metodologia)
+            
+            # Obtener el primer analito para actualizar la metodología existente
+            primer_analito = analitos_data[0]
+            
+            # Datos comunes para la metodología
+            codigo = request.form.get('codigo', '').strip() or None
+            nombre = request.form.get('nombre')
+            nombre_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', ''))
+            categoria = request.form.get('categoria')
+            matriz = request.form.get('matriz')
+            matriz_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', ''))
+            tecnica = request.form.get('tecnica', '').strip() or None
+            tecnica_en = (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', ''))
+            norma_referencia = request.form.get('norma_referencia', '').strip() or None
+            vigencia = request.form.get('vigencia', '').strip() or None
+            acreditada = 1 if request.form.get('acreditada') == 'on' else 0
+            autorizado_sag = 1 if request.form.get('autorizado_sag') == 'on' else 0
+            autorizado_sernapesca = 1 if request.form.get('autorizado_sernapesca') == 'on' else 0
+            orden = int(request.form.get('orden') or 0)
+            activo = 1 if request.form.get('activo') == 'on' else 0
+            
             conn.execute('''
                 UPDATE metodologias 
                 SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
@@ -3452,25 +3522,25 @@ def admin_metodologia_editar(metodologia_id):
                     vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
                 WHERE id=?
             ''', (
-                request.form.get('codigo', '').strip() or None,
-                request.form.get('nombre'),
-                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
-                request.form.get('categoria'),
-                request.form.get('analito'),
-                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
-                request.form.get('matriz'),
-                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
-                request.form.get('tecnica', '').strip() or None,
-                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
-                request.form.get('limite_deteccion', '').strip() or None,
-                request.form.get('limite_cuantificacion', '').strip() or None,
-                request.form.get('norma_referencia', '').strip() or None,
-                request.form.get('vigencia', '').strip() or None,
-                1 if request.form.get('acreditada') == 'on' else 0,
-                1 if request.form.get('autorizado_sag') == 'on' else 0,
-                1 if request.form.get('autorizado_sernapesca') == 'on' else 0,
-                int(request.form.get('orden') or 0),
-                1 if request.form.get('activo') == 'on' else 0,
+                codigo,
+                nombre,
+                nombre_en,
+                categoria,
+                primer_analito.get('analito'),
+                primer_analito.get('analito_en'),
+                matriz,
+                matriz_en,
+                tecnica,
+                tecnica_en,
+                primer_analito.get('limite_deteccion'),
+                primer_analito.get('limite_cuantificacion'),
+                norma_referencia,
+                vigencia,
+                acreditada,
+                autorizado_sag,
+                autorizado_sernapesca,
+                orden,
+                activo,
                 metodologia_id
             ))
             conn.commit()
