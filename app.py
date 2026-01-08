@@ -3376,16 +3376,82 @@ def admin_metodologia_nuevo():
                     'limite_cuantificacion': limite_cuantificacion
                 })
         
-        # Insertar cada analito como una metodología separada
+        # Validar que haya al menos un analito
         if not analitos_data:
             flash('Debe ingresar al menos un analito', 'error')
             return render_template('admin/metodologia_form.html')
         
-        created_count = 0
-        for analito_data in analitos_data:
-            if not analito_data.get('analito'):
-                continue  # Saltar analitos sin nombre
+        # Filtrar analitos válidos (que tengan nombre)
+        analitos_validos = [a for a in analitos_data if a.get('analito') and a.get('analito').strip()]
+        
+        if not analitos_validos:
+            flash('Debe ingresar al menos un analito válido', 'error')
+            return render_template('admin/metodologia_form.html')
+        
+        # Si hay múltiples analitos, combinarlos en uno solo
+        if len(analitos_validos) > 1:
+            # Combinar todos los analitos separados por coma
+            analitos_nombres = [a.get('analito').strip() for a in analitos_validos]
+            analito_combinado = ', '.join(analitos_nombres)
             
+            # Combinar analitos en inglés si existen
+            analitos_en = []
+            for a in analitos_validos:
+                if a.get('analito_en') and a.get('analito_en').strip():
+                    analitos_en.append(a.get('analito_en').strip())
+            analito_en_combinado = ', '.join(analitos_en) if analitos_en else None
+            
+            # Usar LOD/LOQ del primer analito (o el que tenga valores)
+            limite_deteccion = None
+            limite_cuantificacion = None
+            for a in analitos_validos:
+                if a.get('limite_deteccion') and a.get('limite_deteccion').strip():
+                    limite_deteccion = a.get('limite_deteccion').strip()
+                    break
+            
+            for a in analitos_validos:
+                if a.get('limite_cuantificacion') and a.get('limite_cuantificacion').strip():
+                    limite_cuantificacion = a.get('limite_cuantificacion').strip()
+                    break
+            
+            # Si no se encontraron LOD/LOQ, usar los del primer analito
+            if not limite_deteccion:
+                limite_deteccion = analitos_validos[0].get('limite_deteccion', '').strip() or None
+            if not limite_cuantificacion:
+                limite_cuantificacion = analitos_validos[0].get('limite_cuantificacion', '').strip() or None
+            
+            # Insertar un solo registro con todos los analitos combinados
+            conn.execute('''
+                INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                                         tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
+                                         vigencia, acreditada, autorizado_sag, autorizado_sernapesca, orden, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                codigo,
+                nombre,
+                nombre_en,
+                categoria,
+                analito_combinado,
+                analito_en_combinado,
+                matriz,
+                matriz_en,
+                tecnica,
+                tecnica_en,
+                limite_deteccion,
+                limite_cuantificacion,
+                norma_referencia,
+                vigencia,
+                acreditada,
+                autorizado_sag,
+                autorizado_sernapesca,
+                orden,
+                activo
+            ))
+            created_count = 1
+            flash(f'Metodología creada con {len(analitos_validos)} analitos correctamente', 'success')
+        else:
+            # Solo un analito, guardar normalmente
+            analito_data = analitos_validos[0]
             conn.execute('''
                 INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
                                          tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
@@ -3412,15 +3478,11 @@ def admin_metodologia_nuevo():
                 orden,
                 activo
             ))
-            created_count += 1
+            created_count = 1
+            flash('Metodología creada correctamente', 'success')
         
         conn.commit()
         conn.close()
-        
-        if created_count > 1:
-            flash(f'Metodología creada con {created_count} analitos correctamente', 'success')
-        else:
-            flash('Metodología creada correctamente', 'success')
         return redirect(url_for('admin_metodologias'))
     
     return render_template('admin/metodologia_form.html')
@@ -3488,15 +3550,15 @@ def admin_metodologia_editar(metodologia_id):
                         'limite_cuantificacion': limite_cuantificacion
                     })
             
+            # Filtrar analitos válidos (que tengan nombre)
+            analitos_validos = [a for a in analitos_data if a.get('analito') and a.get('analito').strip()]
+            
             # Validar que haya al menos un analito
-            if not analitos_data or not analitos_data[0].get('analito'):
-                flash('Debe ingresar al menos un analito', 'error')
+            if not analitos_validos:
+                flash('Debe ingresar al menos un analito válido', 'error')
                 metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
                 conn.close()
                 return render_template('admin/metodologia_form.html', metodologia=metodologia)
-            
-            # Obtener el primer analito para actualizar la metodología existente
-            primer_analito = analitos_data[0]
             
             # Datos comunes para la metodología
             codigo = request.form.get('codigo', '').strip() or None
@@ -3515,34 +3577,97 @@ def admin_metodologia_editar(metodologia_id):
             orden = int(request.form.get('orden') or 0)
             activo = 1 if request.form.get('activo') == 'on' else 0
             
-            conn.execute('''
-                UPDATE metodologias 
-                SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
-                    tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
-                    vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
-                WHERE id=?
-            ''', (
-                codigo,
-                nombre,
-                nombre_en,
-                categoria,
-                primer_analito.get('analito'),
-                primer_analito.get('analito_en'),
-                matriz,
-                matriz_en,
-                tecnica,
-                tecnica_en,
-                primer_analito.get('limite_deteccion'),
-                primer_analito.get('limite_cuantificacion'),
-                norma_referencia,
-                vigencia,
-                acreditada,
-                autorizado_sag,
-                autorizado_sernapesca,
-                orden,
-                activo,
-                metodologia_id
-            ))
+            # Si hay múltiples analitos, combinarlos en uno solo
+            if len(analitos_validos) > 1:
+                # Combinar todos los analitos separados por coma
+                analitos_nombres = [a.get('analito').strip() for a in analitos_validos]
+                analito_combinado = ', '.join(analitos_nombres)
+                
+                # Combinar analitos en inglés si existen
+                analitos_en = []
+                for a in analitos_validos:
+                    if a.get('analito_en') and a.get('analito_en').strip():
+                        analitos_en.append(a.get('analito_en').strip())
+                analito_en_combinado = ', '.join(analitos_en) if analitos_en else None
+                
+                # Usar LOD/LOQ del primer analito (o el que tenga valores)
+                limite_deteccion = None
+                limite_cuantificacion = None
+                for a in analitos_validos:
+                    if a.get('limite_deteccion') and a.get('limite_deteccion').strip():
+                        limite_deteccion = a.get('limite_deteccion').strip()
+                        break
+                
+                for a in analitos_validos:
+                    if a.get('limite_cuantificacion') and a.get('limite_cuantificacion').strip():
+                        limite_cuantificacion = a.get('limite_cuantificacion').strip()
+                        break
+                
+                # Si no se encontraron LOD/LOQ, usar los del primer analito
+                if not limite_deteccion:
+                    limite_deteccion = analitos_validos[0].get('limite_deteccion', '').strip() or None
+                if not limite_cuantificacion:
+                    limite_cuantificacion = analitos_validos[0].get('limite_cuantificacion', '').strip() or None
+                
+                conn.execute('''
+                    UPDATE metodologias 
+                    SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
+                        tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
+                        vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+                    WHERE id=?
+                ''', (
+                    codigo,
+                    nombre,
+                    nombre_en,
+                    categoria,
+                    analito_combinado,
+                    analito_en_combinado,
+                    matriz,
+                    matriz_en,
+                    tecnica,
+                    tecnica_en,
+                    limite_deteccion,
+                    limite_cuantificacion,
+                    norma_referencia,
+                    vigencia,
+                    acreditada,
+                    autorizado_sag,
+                    autorizado_sernapesca,
+                    orden,
+                    activo,
+                    metodologia_id
+                ))
+            else:
+                # Solo un analito, actualizar normalmente
+                primer_analito = analitos_validos[0]
+                conn.execute('''
+                    UPDATE metodologias 
+                    SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
+                        tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
+                        vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+                    WHERE id=?
+                ''', (
+                    codigo,
+                    nombre,
+                    nombre_en,
+                    categoria,
+                    primer_analito.get('analito'),
+                    primer_analito.get('analito_en'),
+                    matriz,
+                    matriz_en,
+                    tecnica,
+                    tecnica_en,
+                    primer_analito.get('limite_deteccion'),
+                    primer_analito.get('limite_cuantificacion'),
+                    norma_referencia,
+                    vigencia,
+                    acreditada,
+                    autorizado_sag,
+                    autorizado_sernapesca,
+                    orden,
+                    activo,
+                    metodologia_id
+                ))
             conn.commit()
             conn.close()
             flash('Metodología actualizada correctamente', 'success')

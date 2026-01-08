@@ -229,6 +229,88 @@ document.addEventListener('DOMContentLoaded', function() {
     const analitosContainer = document.getElementById('analitos-container');
     const btnAgregarAnalito = document.getElementById('btnAgregarAnalito');
     
+    // Función para dividir analitos separados por coma al cargar
+    function dividirAnalitosAlCargar() {
+        const primerAnalitoInput = document.querySelector('input[name="analitos[0][analito]"]');
+        const primerLODInput = document.querySelector('input[name="analitos[0][limite_deteccion]"]');
+        const primerLOQInput = document.querySelector('input[name="analitos[0][limite_cuantificacion]"]');
+        const primerAnalitoEnInput = document.querySelector('input[name="analitos[0][analito_en]"]');
+        
+        if (!primerAnalitoInput) return;
+        
+        const valorCompleto = primerAnalitoInput.value.trim();
+        // Detectar si hay múltiples analitos separados por coma
+        if (valorCompleto.includes(',')) {
+            const analitos = valorCompleto.split(',').map(a => a.trim()).filter(a => a);
+            const lodValor = primerLODInput ? primerLODInput.value : '';
+            const loqValor = primerLOQInput ? primerLOQInput.value : '';
+            const analitoEnValor = primerAnalitoEnInput ? primerAnalitoEnInput.value : '';
+            
+            // Dividir también analitos en inglés si existen
+            let analitosEn = [];
+            if (analitoEnValor && analitoEnValor.includes(',')) {
+                analitosEn = analitoEnValor.split(',').map(a => a.trim()).filter(a => a);
+            }
+            
+            if (analitos.length > 1) {
+                // Limpiar el contenedor y crear un campo por cada analito
+                analitosContainer.innerHTML = '';
+                analitoIndex = 0;
+                
+                analitos.forEach((analitoNombre, index) => {
+                    const nuevoAnalito = document.createElement('div');
+                    nuevoAnalito.className = 'analito-item card mb-3';
+                    nuevoAnalito.setAttribute('data-analito-index', index);
+                    nuevoAnalito.innerHTML = `
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0"><i class="bi bi-flask me-2"></i>Analito ${index + 1} <span class="text-danger">*</span></h6>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-analito" ${analitos.length > 1 ? '' : 'style="display: none;"'}>
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Analito (Sustancia) <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="analitos[${index}][analito]" required
+                                           value="${analitoNombre}"
+                                           placeholder="Ej: Tetraciclinas, Aflatoxina B1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite de Detección (LOD)</label>
+                                    <input type="text" class="form-control" name="analitos[${index}][limite_deteccion]" 
+                                           value="${index === 0 ? lodValor : ''}" 
+                                           placeholder="Ej: 0.5 µg/kg">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite de Cuantificación (LOQ)</label>
+                                    <input type="text" class="form-control" name="analitos[${index}][limite_cuantificacion]" 
+                                           value="${index === 0 ? loqValor : ''}" 
+                                           placeholder="Ej: 1.0 µg/kg">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Analito (English) <span class="text-muted">(opcional)</span></label>
+                                    <input type="text" class="form-control" name="analitos[${index}][analito_en]" 
+                                           value="${index < analitosEn.length ? analitosEn[index] : ''}" 
+                                           placeholder="Analyte in English">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    analitosContainer.appendChild(nuevoAnalito);
+                    analitoIndex = index + 1;
+                });
+                
+                // Agregar eventos de eliminación
+                actualizarNumerosAnalitos();
+            }
+        }
+    }
+    
+    // Ejecutar al cargar la página (después de que se inicialice actualizarNumerosAnalitos)
+    setTimeout(dividirAnalitosAlCargar, 100);
+    
     // Función para agregar un nuevo analito
     btnAgregarAnalito.addEventListener('click', function() {
         const nuevoAnalito = document.createElement('div');
