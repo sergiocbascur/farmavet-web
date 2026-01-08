@@ -3643,6 +3643,25 @@ def admin_metodologia_editar(metodologia_id):
             orden = int(request.form.get('orden') or 0)
             activo = 1 if request.form.get('activo') == 'on' else 0
             
+            # Obtener la metodología actual para identificar analitos relacionados
+            metodologia_actual = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
+            if not metodologia_actual:
+                flash('Metodología no encontrada', 'error')
+                conn.close()
+                return redirect(url_for('admin_metodologias'))
+            
+            # Obtener todos los IDs de analitos relacionados existentes (mismo nombre, matriz, técnica)
+            nombre_actual = metodologia_actual['nombre'] or ''
+            matriz_actual = metodologia_actual['matriz'] or ''
+            tecnica_actual = metodologia_actual['tecnica'] or ''
+            
+            analitos_existentes = conn.execute('''
+                SELECT id FROM metodologias 
+                WHERE nombre = ? AND matriz = ? AND (tecnica = ? OR (tecnica IS NULL AND ? IS NULL))
+            ''', (nombre_actual, matriz_actual, tecnica_actual, tecnica_actual)).fetchall()
+            
+            ids_existentes = [row['id'] for row in analitos_existentes]
+            
             # Actualizar el registro actual con el primer analito
             primer_analito = analitos_validos[0]
             
@@ -3689,9 +3708,10 @@ def admin_metodologia_editar(metodologia_id):
                 metodologia_id
             ))
             
-            # Si hay más analitos, crear nuevos registros para ellos
+            # Crear nuevos registros para todos los analitos adicionales del formulario
             created_count = 1
             analitos_creados = [analito_nombre]
+            ids_mantenidos = [metodologia_id]  # El registro principal siempre se mantiene
             
             if len(analitos_validos) > 1:
                 for analito_data in analitos_validos[1:]:
@@ -3740,13 +3760,33 @@ def admin_metodologia_editar(metodologia_id):
                     created_count += 1
                     analitos_creados.append(analito_nombre_extra)
             
+            # Eliminar analitos que ya no están en el formulario
+            # Solo eliminar los que no son el registro principal y que ya no están presentes
+            ids_a_eliminar = [id_existente for id_existente in ids_existentes if id_existente != metodologia_id]
+            
+            if ids_a_eliminar:
+                # Construir la consulta de eliminación
+                placeholders = ','.join(['?'] * len(ids_a_eliminar))
+                conn.execute(f'DELETE FROM metodologias WHERE id IN ({placeholders})', ids_a_eliminar)
+                deleted_count = len(ids_a_eliminar)
+                app.logger.info(f'Eliminados {deleted_count} analitos que ya no están en el formulario')
+            
             conn.commit()
             conn.close()
             
+            # Mensaje de éxito con información sobre cambios
+            deleted_count = len(ids_a_eliminar) if 'ids_a_eliminar' in locals() else 0
             if created_count > 1:
-                flash(f'Metodología actualizada. Se actualizó 1 analito y se crearon {created_count - 1} nuevos analitos: {", ".join(analitos_creados)}. En la vista pública se mostrarán agrupados automáticamente.', 'success')
+                mensaje = f'Metodología actualizada. Se actualizó 1 analito y se crearon {created_count - 1} nuevos analitos: {", ".join(analitos_creados)}.'
+                if deleted_count > 0:
+                    mensaje += f' Se eliminaron {deleted_count} analito(s) que fueron removidos del formulario.'
+                mensaje += ' En la vista pública se mostrarán agrupados automáticamente.'
+                flash(mensaje, 'success')
             else:
-                flash(f'Metodología actualizada correctamente: {analito_nombre}', 'success')
+                mensaje = f'Metodología actualizada correctamente: {analito_nombre}.'
+                if deleted_count > 0:
+                    mensaje += f' Se eliminaron {deleted_count} analito(s) que fueron removidos del formulario.'
+                flash(mensaje, 'success')
             return redirect(url_for('admin_metodologias'))
         except Exception as e:
             conn.close()
