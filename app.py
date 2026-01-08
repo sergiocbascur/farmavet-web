@@ -3430,48 +3430,74 @@ def admin_metodologia_nuevo():
 def admin_metodologia_editar(metodologia_id):
     conn = get_db()
     
-    if request.method == 'POST':
-        conn.execute('''
-            UPDATE metodologias 
-            SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
-                tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
-                vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
-            WHERE id=?
-        ''', (
-            request.form.get('codigo', '').strip() or None,
-            request.form.get('nombre'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
-            request.form.get('categoria'),
-            request.form.get('analito'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
-            request.form.get('matriz'),
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
-            request.form.get('tecnica', '').strip() or None,
-            (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
-            request.form.get('limite_deteccion', '').strip() or None,
-            request.form.get('limite_cuantificacion', '').strip() or None,
-            request.form.get('norma_referencia', '').strip() or None,
-            request.form.get('vigencia', '').strip() or None,
-            1 if request.form.get('acreditada') == 'on' else 0,
-            1 if request.form.get('autorizado_sag') == 'on' else 0,
-            1 if request.form.get('autorizado_sernapesca') == 'on' else 0,
-            int(request.form.get('orden', 0)),
-            1 if request.form.get('activo') == 'on' else 0,
-            metodologia_id
-        ))
+    # Asegurar que las columnas existan antes de usarlas
+    try:
+        conn.execute('ALTER TABLE metodologias ADD COLUMN autorizado_sag INTEGER DEFAULT 0')
         conn.commit()
+    except sqlite3.OperationalError:
+        pass  # La columna ya existe
+    
+    try:
+        conn.execute('ALTER TABLE metodologias ADD COLUMN autorizado_sernapesca INTEGER DEFAULT 0')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # La columna ya existe
+    
+    if request.method == 'POST':
+        try:
+            conn.execute('''
+                UPDATE metodologias 
+                SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
+                    tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
+                    vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+                WHERE id=?
+            ''', (
+                request.form.get('codigo', '').strip() or None,
+                request.form.get('nombre'),
+                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('nombre_en', '')),
+                request.form.get('categoria'),
+                request.form.get('analito'),
+                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('analito_en', '')),
+                request.form.get('matriz'),
+                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('matriz_en', '')),
+                request.form.get('tecnica', '').strip() or None,
+                (lambda x: None if not x or x.strip().lower() == 'none' else x.strip())(request.form.get('tecnica_en', '')),
+                request.form.get('limite_deteccion', '').strip() or None,
+                request.form.get('limite_cuantificacion', '').strip() or None,
+                request.form.get('norma_referencia', '').strip() or None,
+                request.form.get('vigencia', '').strip() or None,
+                1 if request.form.get('acreditada') == 'on' else 0,
+                1 if request.form.get('autorizado_sag') == 'on' else 0,
+                1 if request.form.get('autorizado_sernapesca') == 'on' else 0,
+                int(request.form.get('orden', 0)),
+                1 if request.form.get('activo') == 'on' else 0,
+                metodologia_id
+            ))
+            conn.commit()
+            conn.close()
+            flash('Metodología actualizada correctamente', 'success')
+            return redirect(url_for('admin_metodologias'))
+        except Exception as e:
+            conn.close()
+            app.logger.error(f'Error al actualizar metodología: {str(e)}', exc_info=True)
+            flash(f'Error al actualizar metodología: {str(e)}', 'error')
+            return redirect(url_for('admin_metodologias'))
+    
+    try:
+        metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
         conn.close()
-        flash('Metodología actualizada correctamente', 'success')
+        
+        if not metodologia:
+            flash('Metodología no encontrada', 'error')
+            return redirect(url_for('admin_metodologias'))
+        
+        return render_template('admin/metodologia_form.html', metodologia=metodologia)
+    except Exception as e:
+        if 'conn' in locals():
+            conn.close()
+        app.logger.error(f'Error al cargar metodología para editar: {str(e)}', exc_info=True)
+        flash(f'Error al cargar metodología: {str(e)}', 'error')
         return redirect(url_for('admin_metodologias'))
-    
-    metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
-    conn.close()
-    
-    if not metodologia:
-        flash('Metodología no encontrada', 'error')
-        return redirect(url_for('admin_metodologias'))
-    
-    return render_template('admin/metodologia_form.html', metodologia=metodologia)
 
 @app.route('/admin/metodologias/<int:metodologia_id>/eliminar', methods=['POST'])
 @login_required

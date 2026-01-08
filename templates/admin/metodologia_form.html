@@ -139,7 +139,7 @@
                 <div class="col-md-6">
                     <div class="form-check mt-4">
                         <input class="form-check-input" type="checkbox" id="autorizado_sag" name="autorizado_sag" 
-                               {% if metodologia and metodologia.autorizado_sag %}checked{% endif %}>
+                               {% if metodologia and 'autorizado_sag' in metodologia.keys() and metodologia.autorizado_sag %}checked{% endif %}>
                         <label class="form-check-label" for="autorizado_sag">
                             Autorizado por SAG
                         </label>
@@ -149,7 +149,7 @@
                 <div class="col-md-6">
                     <div class="form-check mt-4">
                         <input class="form-check-input" type="checkbox" id="autorizado_sernapesca" name="autorizado_sernapesca" 
-                               {% if metodologia and metodologia.autorizado_sernapesca %}checked{% endif %}>
+                               {% if metodologia and 'autorizado_sernapesca' in metodologia.keys() and metodologia.autorizado_sernapesca %}checked{% endif %}>
                         <label class="form-check-label" for="autorizado_sernapesca">
                             Autorizado por SERNAPESCA
                         </label>
