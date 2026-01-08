@@ -3381,49 +3381,82 @@ def admin_metodologia_nuevo():
             flash('Debe ingresar al menos un analito', 'error')
             return render_template('admin/metodologia_form.html')
         
+        # Debug: verificar qué analitos se están procesando
+        app.logger.info(f'Analitos recibidos del formulario: {len(analitos_data)} analitos')
+        for idx, a in enumerate(analitos_data):
+            app.logger.info(f'Analito {idx}: {a}')
+        
         created_count = 0
         analitos_validos = []
         for analito_data in analitos_data:
-            if not analito_data.get('analito') or not analito_data.get('analito').strip():
+            # Validar que el analito tenga nombre
+            analito_nombre = analito_data.get('analito', '').strip() if analito_data.get('analito') else ''
+            if not analito_nombre:
+                app.logger.warning(f'Analito sin nombre omitido: {analito_data}')
                 continue  # Saltar analitos sin nombre
             
-            analitos_validos.append(analito_data.get('analito').strip())
+            analitos_validos.append(analito_nombre)
             
-            conn.execute('''
-                INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
-                                         tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
-                                         vigencia, acreditada, autorizado_sag, autorizado_sernapesca, orden, activo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                codigo,
-                nombre,
-                nombre_en,
-                categoria,
-                analito_data.get('analito'),
-                analito_data.get('analito_en'),
-                matriz,
-                matriz_en,
-                tecnica,
-                tecnica_en,
-                analito_data.get('limite_deteccion'),
-                analito_data.get('limite_cuantificacion'),
-                norma_referencia,
-                vigencia,
-                acreditada,
-                autorizado_sag,
-                autorizado_sernapesca,
-                orden,
-                activo
-            ))
-            created_count += 1
+            # Obtener valores con valores por defecto seguros
+            analito_en = analito_data.get('analito_en', '').strip() if analito_data.get('analito_en') else None
+            if analito_en and analito_en.lower() in ['none', '']:
+                analito_en = None
+            
+            limite_deteccion = analito_data.get('limite_deteccion', '').strip() if analito_data.get('limite_deteccion') else None
+            if limite_deteccion == '':
+                limite_deteccion = None
+            
+            limite_cuantificacion = analito_data.get('limite_cuantificacion', '').strip() if analito_data.get('limite_cuantificacion') else None
+            if limite_cuantificacion == '':
+                limite_cuantificacion = None
+            
+            app.logger.info(f'Insertando analito: {analito_nombre}, LOD: {limite_deteccion}, LOQ: {limite_cuantificacion}')
+            
+            try:
+                conn.execute('''
+                    INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                                             tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
+                                             vigencia, acreditada, autorizado_sag, autorizado_sernapesca, orden, activo)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    codigo,
+                    nombre,
+                    nombre_en,
+                    categoria,
+                    analito_nombre,
+                    analito_en,
+                    matriz,
+                    matriz_en,
+                    tecnica,
+                    tecnica_en,
+                    limite_deteccion,
+                    limite_cuantificacion,
+                    norma_referencia,
+                    vigencia,
+                    acreditada,
+                    autorizado_sag,
+                    autorizado_sernapesca,
+                    orden,
+                    activo
+                ))
+                created_count += 1
+                app.logger.info(f'Analito {analito_nombre} insertado correctamente')
+            except Exception as e:
+                app.logger.error(f'Error al insertar analito {analito_nombre}: {str(e)}', exc_info=True)
+                conn.rollback()
+                flash(f'Error al guardar analito "{analito_nombre}": {str(e)}', 'error')
+                conn.close()
+                return redirect(url_for('admin_metodologias'))
         
         conn.commit()
         conn.close()
         
         if created_count > 1:
             flash(f'Metodología creada con {created_count} analitos. En la vista pública se mostrarán agrupados automáticamente.', 'success')
-        else:
+        elif created_count == 1:
             flash('Metodología creada correctamente', 'success')
+        else:
+            flash('No se pudo crear ninguna metodología. Verifica que los analitos tengan nombres válidos.', 'error')
         return redirect(url_for('admin_metodologias'))
     
     return render_template('admin/metodologia_form.html')
