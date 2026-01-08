@@ -441,6 +441,8 @@
                     <th>{{ _('LOD') }}</th>
                     <th>{{ _('LOQ') }}</th>
                     <th>{{ _('Acreditada') }}</th>
+                    <th>{{ _('SAG') }}</th>
+                    <th>{{ _('SERNAPESCA') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -462,6 +464,8 @@
                             data-matriz="{{ get_translated_field(met, 'matriz') or met.matriz }}"
                             data-tecnica="{{ get_translated_field(met, 'tecnica') or met.tecnica or '—' }}"
                             data-acreditada="{{ 'Sí' if met.acreditada else 'No' }}"
+                            data-autorizado-sag="{{ 'Sí' if (met.autorizado_sag if 'autorizado_sag' in met.keys() else 0) else 'No' }}"
+                            data-autorizado-sernapesca="{{ 'Sí' if (met.autorizado_sernapesca if 'autorizado_sernapesca' in met.keys() else 0) else 'No' }}"
                             data-mostrar-metodologia="{{ 'true' if mostrar_metodologia else 'false' }}"
                             style="display: none;">
                           <td>
@@ -497,6 +501,30 @@
                           <td>
                             {% if mostrar_metodologia %}
                               {% if met.acreditada %}
+                                <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
+                              {% else %}
+                                <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
+                              {% endif %}
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if mostrar_metodologia %}
+                              {% set autorizado_sag = met.autorizado_sag if 'autorizado_sag' in met.keys() else 0 %}
+                              {% if autorizado_sag %}
+                                <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
+                              {% else %}
+                                <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
+                              {% endif %}
+                            {% else %}
+                              &nbsp;
+                            {% endif %}
+                          </td>
+                          <td>
+                            {% if mostrar_metodologia %}
+                              {% set autorizado_sernapesca = met.autorizado_sernapesca if 'autorizado_sernapesca' in met.keys() else 0 %}
+                              {% if autorizado_sernapesca %}
                                 <span class="metodologias-badge metodologias-badge-success">{{ _('Sí') }}</span>
                               {% else %}
                                 <span class="metodologias-badge metodologias-badge-secondary">{{ _('No') }}</span>
@@ -657,11 +685,13 @@
         
         visibleRows.forEach(row => {
           const cells = row.querySelectorAll('td');
-          const metodologia = row.dataset.metodologia || '';
-          const matriz = row.dataset.matriz || '';
-          const tecnica = row.dataset.tecnica || '';
-          const acreditada = row.dataset.acreditada || '';
-          const mostrarMetodologia = row.dataset.mostrarMetodologia === 'true';
+            const metodologia = row.dataset.metodologia || '';
+            const matriz = row.dataset.matriz || '';
+            const tecnica = row.dataset.tecnica || '';
+            const acreditada = row.dataset.acreditada || '';
+            const autorizadoSag = row.dataset.autorizadoSag || '';
+            const autorizadoSernapesca = row.dataset.autorizadoSernapesca || '';
+            const mostrarMetodologia = row.dataset.mostrarMetodologia === 'true';
           
           // Solo crear card si debe mostrar metodología o si no hay metodología previa
           if (mostrarMetodologia || !metodologia) {
@@ -739,6 +769,28 @@
                   </div>
                 </div>
               `;
+              
+              // SAG
+              const sagBadgeClass = autorizadoSag === 'Sí' ? 'metodologia-card-badge-success' : 'metodologia-card-badge-secondary';
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('SAG') }}</div>
+                  <div class="metodologia-card-value">
+                    <span class="metodologia-card-badge ${sagBadgeClass}">${autorizadoSag}</span>
+                  </div>
+                </div>
+              `;
+              
+              // SERNAPESCA
+              const sernapescaBadgeClass = autorizadoSernapesca === 'Sí' ? 'metodologia-card-badge-success' : 'metodologia-card-badge-secondary';
+              cardHTML += `
+                <div class="metodologia-card-row">
+                  <div class="metodologia-card-label">{{ _('SERNAPESCA') }}</div>
+                  <div class="metodologia-card-value">
+                    <span class="metodologia-card-badge ${sernapescaBadgeClass}">${autorizadoSernapesca}</span>
+                  </div>
+                </div>
+              `;
             }
             
             card.innerHTML = cardHTML;
@@ -804,11 +856,13 @@
             const matriz = row.dataset.matriz || '';
             const tecnica = row.dataset.tecnica || '';
             const acreditada = row.dataset.acreditada || '';
+            const autorizadoSag = row.dataset.autorizadoSag || '';
+            const autorizadoSernapesca = row.dataset.autorizadoSernapesca || '';
             const cells = row.querySelectorAll('td');
             
             // Si es la primera fila visible o la metodología cambió, mostrar la información
             if (prevMetodologia === null || metodologiaNombre !== prevMetodologia) {
-              // Mostrar metodología, matriz, técnica y acreditada
+              // Mostrar metodología, matriz, técnica, acreditada, SAG y SERNAPESCA
               if (cells[0]) {
                 cells[0].innerHTML = `<strong>${metodologiaNombre}</strong>`;
               }
@@ -825,13 +879,29 @@
                   cells[6].innerHTML = '<span class="metodologias-badge metodologias-badge-secondary">No</span>';
                 }
               }
+              if (cells[7]) {
+                if (autorizadoSag === 'Sí') {
+                  cells[7].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
+                } else {
+                  cells[7].innerHTML = '<span class="metodologias-badge metodologias-badge-secondary">No</span>';
+                }
+              }
+              if (cells[8]) {
+                if (autorizadoSernapesca === 'Sí') {
+                  cells[8].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
+                } else {
+                  cells[8].innerHTML = '<span class="metodologias-badge metodologias-badge-secondary">No</span>';
+                }
+              }
               prevMetodologia = metodologiaNombre;
             } else {
-              // Ocultar metodología, matriz, técnica y acreditada
+              // Ocultar metodología, matriz, técnica, acreditada, SAG y SERNAPESCA
               if (cells[0]) cells[0].innerHTML = '&nbsp;';
               if (cells[2]) cells[2].textContent = '\u00A0';
               if (cells[3]) cells[3].textContent = '\u00A0';
               if (cells[6]) cells[6].innerHTML = '\u00A0';
+              if (cells[7]) cells[7].innerHTML = '\u00A0';
+              if (cells[8]) cells[8].innerHTML = '\u00A0';
             }
           }
         });

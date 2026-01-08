@@ -806,12 +806,25 @@ def init_db():
             norma_referencia TEXT,  -- Norma o guía que sigue
             vigencia TEXT,  -- Fecha de vigencia de la acreditación
             acreditada INTEGER DEFAULT 1,  -- Si está acreditada ISO 17025
+            autorizado_sag INTEGER DEFAULT 0,  -- Si está autorizado por SAG
+            autorizado_sernapesca INTEGER DEFAULT 0,  -- Si está autorizado por SERNAPESCA
             orden INTEGER DEFAULT 0,
             activo INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    
+    # Migración: agregar columnas de autorización si no existen
+    try:
+        conn.execute('ALTER TABLE metodologias ADD COLUMN autorizado_sag INTEGER DEFAULT 0')
+    except sqlite3.OperationalError:
+        pass  # La columna ya existe
+    
+    try:
+        conn.execute('ALTER TABLE metodologias ADD COLUMN autorizado_sernapesca INTEGER DEFAULT 0')
+    except sqlite3.OperationalError:
+        pass  # La columna ya existe
     
     # Crear usuario admin por defecto si no existe
     cursor = conn.execute('SELECT COUNT(*) as count FROM admins')
@@ -3315,6 +3328,8 @@ def admin_metodologia_nuevo():
         norma_referencia = request.form.get('norma_referencia', '').strip() or None
         vigencia = request.form.get('vigencia', '').strip() or None
         acreditada = 1 if request.form.get('acreditada') == 'on' else 0
+        autorizado_sag = 1 if request.form.get('autorizado_sag') == 'on' else 0
+        autorizado_sernapesca = 1 if request.form.get('autorizado_sernapesca') == 'on' else 0
         orden = int(request.form.get('orden', 0))
         activo = 1 if request.form.get('activo') == 'on' else 0
         
@@ -3374,8 +3389,8 @@ def admin_metodologia_nuevo():
             conn.execute('''
                 INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
                                          tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
-                                         vigencia, acreditada, orden, activo)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                         vigencia, acreditada, autorizado_sag, autorizado_sernapesca, orden, activo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 codigo,
                 nombre,
@@ -3392,6 +3407,8 @@ def admin_metodologia_nuevo():
                 norma_referencia,
                 vigencia,
                 acreditada,
+                autorizado_sag,
+                autorizado_sernapesca,
                 orden,
                 activo
             ))
@@ -3418,7 +3435,7 @@ def admin_metodologia_editar(metodologia_id):
             UPDATE metodologias 
             SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
                 tecnica=?, tecnica_en=?, limite_deteccion=?, limite_cuantificacion=?, norma_referencia=?,
-                vigencia=?, acreditada=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
+                vigencia=?, acreditada=?, autorizado_sag=?, autorizado_sernapesca=?, orden=?, activo=?, updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         ''', (
             request.form.get('codigo', '').strip() or None,
@@ -3436,6 +3453,8 @@ def admin_metodologia_editar(metodologia_id):
             request.form.get('norma_referencia', '').strip() or None,
             request.form.get('vigencia', '').strip() or None,
             1 if request.form.get('acreditada') == 'on' else 0,
+            1 if request.form.get('autorizado_sag') == 'on' else 0,
+            1 if request.form.get('autorizado_sernapesca') == 'on' else 0,
             int(request.form.get('orden', 0)),
             1 if request.form.get('activo') == 'on' else 0,
             metodologia_id
