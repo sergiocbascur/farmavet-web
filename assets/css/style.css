@@ -3626,6 +3626,12 @@ div[data-hero-slide].card .cta-link-red:focus,
   border-bottom: 2px solid rgba(35, 115, 186, 0.1);
 }
 
+.metodologias-table td:nth-child(7),
+.metodologias-table td:nth-child(8),
+.metodologias-table td:nth-child(9) {
+  text-align: center;
+}
+
 .metodologias-table td {
   padding: 1rem;
   border-bottom: 1px solid rgba(35, 115, 186, 0.08);

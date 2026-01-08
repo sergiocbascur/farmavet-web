@@ -873,6 +873,7 @@
                 cells[3].textContent = tecnica;
               }
               if (cells[6]) {
+                cells[6].style.textAlign = 'center';
                 if (acreditada === 'Sí') {
                   cells[6].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
                 } else {
@@ -880,6 +881,7 @@
                 }
               }
               if (cells[7]) {
+                cells[7].style.textAlign = 'center';
                 if (autorizadoSag === 'Sí') {
                   cells[7].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
                 } else {
@@ -887,6 +889,7 @@
                 }
               }
               if (cells[8]) {
+                cells[8].style.textAlign = 'center';
                 if (autorizadoSernapesca === 'Sí') {
                   cells[8].innerHTML = '<span class="metodologias-badge metodologias-badge-success">Sí</span>';
                 } else {
@@ -906,6 +909,18 @@
           }
         });
         
+        // Contar metodologías únicas en lugar de filas
+        const metodologiasUnicas = new Set();
+        tableRows.forEach(row => {
+          if (row.style.display !== 'none') {
+            const metodologia = row.dataset.metodologia || '';
+            if (metodologia) {
+              metodologiasUnicas.add(metodologia);
+            }
+          }
+        });
+        const metodologiasCount = metodologiasUnicas.size > 0 ? metodologiasUnicas.size : visibleCount;
+        
         // Mostrar/ocultar estados
         if (!search && filter === 'all') {
           emptyState.style.display = 'block';
@@ -921,7 +936,7 @@
           results.style.display = 'block';
           const singularText = '{{ _("metodología encontrada") }}';
           const pluralText = '{{ _("metodologías encontradas") }}';
-          countSpan.textContent = `${visibleCount} ${visibleCount === 1 ? singularText : pluralText}`;
+          countSpan.textContent = `${metodologiasCount} ${metodologiasCount === 1 ? singularText : pluralText}`;
         }
         
         // Mostrar/ocultar botón de limpiar
