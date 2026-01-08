@@ -3575,17 +3575,15 @@ def admin_metodologia_editar(metodologia_id):
                         'limite_cuantificacion': limite_cuantificacion
                     })
             
+            # Filtrar analitos válidos (que tengan nombre)
+            analitos_validos = [a for a in analitos_data if a.get('analito') and a.get('analito').strip()]
+            
             # Validar que haya al menos un analito
-            if not analitos_data or not analitos_data[0].get('analito'):
-                flash('Debe ingresar al menos un analito', 'error')
+            if not analitos_validos:
+                flash('Debe ingresar al menos un analito válido', 'error')
                 metodologia = conn.execute('SELECT * FROM metodologias WHERE id = ?', (metodologia_id,)).fetchone()
                 conn.close()
                 return render_template('admin/metodologia_form.html', metodologia=metodologia)
-            
-            # Obtener el primer analito para actualizar la metodología existente
-            # Nota: Al editar, solo se actualiza el primer analito. Para agregar más analitos,
-            # se debe crear una nueva metodología con el mismo nombre/matriz/técnica
-            primer_analito = analitos_data[0]
             
             # Datos comunes para la metodología
             codigo = request.form.get('codigo', '').strip() or None
@@ -3604,6 +3602,23 @@ def admin_metodologia_editar(metodologia_id):
             orden = int(request.form.get('orden') or 0)
             activo = 1 if request.form.get('activo') == 'on' else 0
             
+            # Actualizar el registro actual con el primer analito
+            primer_analito = analitos_validos[0]
+            
+            # Obtener valores con valores por defecto seguros
+            analito_nombre = primer_analito.get('analito', '').strip() if primer_analito.get('analito') else ''
+            analito_en = primer_analito.get('analito_en', '').strip() if primer_analito.get('analito_en') else None
+            if analito_en and analito_en.lower() in ['none', '']:
+                analito_en = None
+            
+            limite_deteccion = primer_analito.get('limite_deteccion', '').strip() if primer_analito.get('limite_deteccion') else None
+            if limite_deteccion == '':
+                limite_deteccion = None
+            
+            limite_cuantificacion = primer_analito.get('limite_cuantificacion', '').strip() if primer_analito.get('limite_cuantificacion') else None
+            if limite_cuantificacion == '':
+                limite_cuantificacion = None
+            
             conn.execute('''
                 UPDATE metodologias 
                 SET codigo=?, nombre=?, nombre_en=?, categoria=?, analito=?, analito_en=?, matriz=?, matriz_en=?,
@@ -3615,14 +3630,14 @@ def admin_metodologia_editar(metodologia_id):
                 nombre,
                 nombre_en,
                 categoria,
-                primer_analito.get('analito'),
-                primer_analito.get('analito_en'),
+                analito_nombre,
+                analito_en,
                 matriz,
                 matriz_en,
                 tecnica,
                 tecnica_en,
-                primer_analito.get('limite_deteccion'),
-                primer_analito.get('limite_cuantificacion'),
+                limite_deteccion,
+                limite_cuantificacion,
                 norma_referencia,
                 vigencia,
                 acreditada,
@@ -3632,9 +3647,65 @@ def admin_metodologia_editar(metodologia_id):
                 activo,
                 metodologia_id
             ))
+            
+            # Si hay más analitos, crear nuevos registros para ellos
+            created_count = 1
+            analitos_creados = [analito_nombre]
+            
+            if len(analitos_validos) > 1:
+                for analito_data in analitos_validos[1:]:
+                    analito_nombre_extra = analito_data.get('analito', '').strip() if analito_data.get('analito') else ''
+                    if not analito_nombre_extra:
+                        continue
+                    
+                    analito_en_extra = analito_data.get('analito_en', '').strip() if analito_data.get('analito_en') else None
+                    if analito_en_extra and analito_en_extra.lower() in ['none', '']:
+                        analito_en_extra = None
+                    
+                    limite_deteccion_extra = analito_data.get('limite_deteccion', '').strip() if analito_data.get('limite_deteccion') else None
+                    if limite_deteccion_extra == '':
+                        limite_deteccion_extra = None
+                    
+                    limite_cuantificacion_extra = analito_data.get('limite_cuantificacion', '').strip() if analito_data.get('limite_cuantificacion') else None
+                    if limite_cuantificacion_extra == '':
+                        limite_cuantificacion_extra = None
+                    
+                    conn.execute('''
+                        INSERT INTO metodologias (codigo, nombre, nombre_en, categoria, analito, analito_en, matriz, matriz_en, 
+                                                 tecnica, tecnica_en, limite_deteccion, limite_cuantificacion, norma_referencia, 
+                                                 vigencia, acreditada, autorizado_sag, autorizado_sernapesca, orden, activo)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        codigo,
+                        nombre,
+                        nombre_en,
+                        categoria,
+                        analito_nombre_extra,
+                        analito_en_extra,
+                        matriz,
+                        matriz_en,
+                        tecnica,
+                        tecnica_en,
+                        limite_deteccion_extra,
+                        limite_cuantificacion_extra,
+                        norma_referencia,
+                        vigencia,
+                        acreditada,
+                        autorizado_sag,
+                        autorizado_sernapesca,
+                        orden,
+                        activo
+                    ))
+                    created_count += 1
+                    analitos_creados.append(analito_nombre_extra)
+            
             conn.commit()
             conn.close()
-            flash('Metodología actualizada correctamente', 'success')
+            
+            if created_count > 1:
+                flash(f'Metodología actualizada. Se actualizó 1 analito y se crearon {created_count - 1} nuevos analitos: {", ".join(analitos_creados)}. En la vista pública se mostrarán agrupados automáticamente.', 'success')
+            else:
+                flash(f'Metodología actualizada correctamente: {analito_nombre}', 'success')
             return redirect(url_for('admin_metodologias'))
         except Exception as e:
             conn.close()
