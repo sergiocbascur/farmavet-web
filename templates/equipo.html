@@ -261,19 +261,12 @@
               </article>
               {% endfor %}
             {% else %}
-              <!-- Contenido por defecto si no hay miembros -->
-              <article class="card">
-                <h3 class="pillar-title">Dra. Javiera Cornejo Kelly</h3>
-                <p>
-                  {{ _('Directora FARMAVET e INOCUIVET. Directora Ejecutiva CASA-OMSA. Médico Veterinario y Doctora en Ciencias Silvoagropecuarias y Veterinarias. Especialista en inocuidad alimentaria, gestión de antimicrobianos e investigación aplicada.') }}
-                </p>
-                <div class="news-tags">
-                  <span class="chip">{{ _('Inocuidad alimentaria') }}</span>
-                  <span class="chip">CASA-OMSA</span>
-                </div>
-              </article>
-              <article class="card">
-                <h3 class="pillar-title">Dr. Aldo Maddaleno</h3>
+              <!-- Mensaje cuando no hay miembros disponibles -->
+              <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+                <i class="bi bi-people" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay miembros del equipo disponibles en este momento.') }}</p>
+                <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicará la información del equipo.') }}</p>
+              </div>
                 <p>
                   {{ _('Encargado del laboratorio FARMAVET. Médico Veterinario con trayectoria en farmacología, validación de metodologías y aseguramiento de calidad en laboratorios acreditados.') }}
                 </p>

@@ -305,14 +305,12 @@
               </article>
               {% endfor %}
             {% else %}
-              <!-- Contenido por defecto si no hay programas -->
-              <article class="card">
-                <span class="badge">{{ _('Diplomado') }}</span>
-                <h3 class="pillar-title">{{ _('Buenas prácticas en uso de fármacos en salmonicultura') }}</h3>
-                <p>{{ _('Modalidad online (Zoom). Miércoles 17:30-19:45 y sábados 08:00-13:00. Contenidos: farmacocinética, normativas nacionales e internacionales, stewardship, casos prácticos.') }}</p>
-                <p>{{ _('Patrocinio') }}: SAG, SERNAPESCA, {{ _('Subsecretaría de Pesca') }} · {{ _('Auspicio') }}: INTESAL.</p>
-                <a class="cta-inline" href="mailto:postitulo@veterinaria.uchile.cl">{{ _('Postular') }}</a>
-              </article>
+              <!-- Mensaje cuando no hay programas disponibles -->
+              <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+                <i class="bi bi-calendar-x" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay programas de educación continua disponibles en este momento.') }}</p>
+                <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevos programas y cursos.') }}</p>
+              </div>
             {% endif %}
           </div>
         </div>
@@ -350,15 +348,12 @@
               </article>
               {% endfor %}
             {% else %}
-              <!-- Contenido por defecto si no hay testimonios -->
-              <article class="news-item">
-                <h3 class="pillar-title">"{{ _('FARMAVET impulsó mi tesis en inocuidad alimentaria') }}"</h3>
-                <p>{{ _('Camila, médico veterinario FAVET, desarrolló una metodología de control de residuos en mejillones con apoyo de profesionales y equipamiento del laboratorio.') }}</p>
-                <div class="news-tags">
-                  <span class="chip">{{ _('Pregrado') }}</span>
-                  <span class="chip">{{ _('Investigación aplicada') }}</span>
-                </div>
-              </article>
+              <!-- Mensaje cuando no hay testimonios disponibles -->
+              <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+                <i class="bi bi-chat-quote" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay historias y testimonios disponibles en este momento.') }}</p>
+                <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevas historias y testimonios.') }}</p>
+              </div>
             {% endif %}
           </div>
         </div>

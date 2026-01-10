@@ -377,17 +377,11 @@
               </div>
             {% endif %}
           {% else %}
-            <!-- Aliados por defecto si no hay en BD -->
-            <div class="clientes-grid">
-              <a href="https://www.woah.org" target="_blank" rel="noopener noreferrer" class="logo-card" aria-label="OMSA - Organización Mundial de Sanidad Animal">
-                <img src="{{ url_for('logos', filename='OMSA.png') }}" alt="OMSA" />
-              </a>
-              <a href="https://www.sernapesca.cl" target="_blank" rel="noopener noreferrer" class="logo-card" aria-label="SERNAPESCA - Servicio Nacional de Pesca y Acuicultura">
-                <img src="{{ url_for('logos', filename='Sernapesca.png') }}" alt="SERNAPESCA" />
-              </a>
-              <a href="https://www.sag.gob.cl" target="_blank" rel="noopener noreferrer" class="logo-card" aria-label="SAG - Servicio Agrícola y Ganadero">
-                <img src="{{ url_for('logos', filename='LOGOSAG.png') }}" alt="SAG" />
-              </a>
+            <!-- Mensaje cuando no hay aliados disponibles -->
+            <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+              <i class="bi bi-handshake" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay aliados estratégicos disponibles en este momento.') }}</p>
+              <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán los aliados estratégicos.') }}</p>
             </div>
           {% endif %}
         </div>

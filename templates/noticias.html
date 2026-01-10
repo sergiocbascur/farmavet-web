@@ -257,18 +257,12 @@
                 </article>
                 {% endfor %}
               {% else %}
-                <!-- Noticias por defecto si no hay en BD -->
-                <article class="news-card">
-                  <img src="{{ url_for('assets', filename='images/noticias/alianza-omsa.svg') }}" alt="{{ _('Sesión de educación continua de FARMAVET') }}" />
-                  <div class="news-body">
-                    <span class="news-meta">ABR 2025 · {{ _('Educación continua') }}</span>
-                    <h3 class="news-title">{{ _('Calendario de cursos y diplomados FARMAVET 2025') }}</h3>
-                    <p>
-                      {{ _('Diplomado en buenas prácticas, cursos de gestión de antimicrobianos y talleres especializados para reforzar capacidades en inocuidad alimentaria. Modalidad híbrida y certificación FAVET.') }}
-                    </p>
-                    <a class="news-link" href="{{ url_for('page', page='docencia') }}#educacion-continua">{{ _('Ver programas') }}</a>
-                  </div>
-                </article>
+                <!-- Mensaje cuando no hay noticias disponibles -->
+                <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+                  <i class="bi bi-newspaper" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                  <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay noticias disponibles en este momento.') }}</p>
+                  <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevas noticias y actualizaciones.') }}</p>
+                </div>
               {% endif %}
             </div>
             <div class="carousel-buttons">
@@ -437,34 +431,12 @@
               </article>
               {% endfor %}
             {% else %}
-              <!-- Eventos por defecto si no hay en BD -->
-              <article class="event-card">
-                <div class="event-date">{{ _('Abril 2025') }}</div>
-                <h3 class="pillar-title">{{ _('Workshop internacional: Stewardship en acuicultura') }}</h3>
-                <div class="event-meta">{{ _('Modalidad híbrida') }} · Santiago / Online</div>
-                <p>
-                  {{ _('Taller de dos días en colaboración con OMSA y SERNAPESCA. Cupos limitados para profesionales y autoridades.') }}
-                </p>
-                <a class="cta-inline" href="#">{{ _('Inscribirse') }}</a>
-              </article>
-              <article class="event-card">
-                <div class="event-date">{{ _('Mayo 2025') }}</div>
-                <h3 class="pillar-title">{{ _('Jornadas de Investigación FARMAVET') }}</h3>
-                <div class="event-meta">{{ _('Auditorio FAVET') }} · Santiago</div>
-                <p>
-                  {{ _('Presentación de avances en farmacología veterinaria, matrices alternativas y resistencia antimicrobiana.') }}
-                </p>
-                <a class="cta-inline" href="#">{{ _('Ver programa') }}</a>
-              </article>
-              <article class="event-card">
-                <div class="event-date">{{ _('Junio 2025') }}</div>
-                <h3 class="pillar-title">{{ _('Curso intensivo de toma de muestras acreditadas') }}</h3>
-                <div class="event-meta">{{ _('Modalidad presencial') }} · {{ _('Laboratorio FARMAVET') }}</div>
-                <p>
-                  {{ _('Entrenamiento práctico para profesionales de la industria pecuaria e hidrobiológica.') }}
-                </p>
-                <a class="cta-inline" href="#">{{ _('Postular') }}</a>
-              </article>
+              <!-- Mensaje cuando no hay eventos disponibles -->
+              <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+                <i class="bi bi-calendar-event" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay eventos disponibles en este momento.') }}</p>
+                <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevos eventos y actividades.') }}</p>
+              </div>
             {% endif %}
           </div>
         </div>

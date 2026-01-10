@@ -460,32 +460,12 @@
               {% endfor %}
             </div>
           {% else %}
-            <!-- Proyectos por defecto si no hay en BD -->
-            <div class="cards-grid proyectos-grid-centrado">
-              <article class="card">
-                <span class="badge">{{ _('FONDECYT Regular') }}</span>
-                <h3 class="pillar-title">{{ _('Farmacocinética de antimicrobianos en salmón Atlántico') }}</h3>
-                <p>
-                  {{ _('Optimización de esquemas terapéuticos para reducir la persistencia de residuos en productos de exportación. Colaboración con Universidad de Tromsø y empresas acuícolas nacionales.') }}
-                </p>
-              </article>
-              <article class="card">
-                <span class="badge">FONDEF</span>
-                <h3 class="pillar-title">{{ _('Biomarcadores de resistencia antimicrobiana') }}</h3>
-                <p>
-                  {{ _('Desarrollo de paneles moleculares para la detección temprana de RAM en centros de cultivo acuícola. Alianza con SERNAPESCA y SalmonChile.') }}
-                </p>
-              </article>
-              <article class="card">
-                <span class="badge">{{ _('Cooperación internacional') }}</span>
-                <h3 class="pillar-title">{{ _('CASA-OMSA: Stewardship en acuicultura') }}</h3>
-                <p>
-                  {{ _('Asistencia técnica a países miembros de la OMSA para implementar estándares de gestión de antimicrobianos y monitorear resistencia.') }}
-                </p>
-              </article>
-              <article class="card">
-                <span class="badge">{{ _('FONDECYT Iniciación') }}</span>
-                <h3 class="pillar-title">{{ _('Nuevas metodologías LC-MS/MS para matrices alternativas') }}</h3>
+            <!-- Mensaje cuando no hay proyectos disponibles -->
+            <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+              <i class="bi bi-clipboard-data" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay proyectos destacados disponibles en este momento.') }}</p>
+              <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevos proyectos de investigación.') }}</p>
+            </div>
                 <p>
                   {{ _('Validación de métodos rápidos para detectar residuos en plumas y deyecciones, facilitando la vigilancia ambiental.') }}
                 </p>

@@ -450,40 +450,11 @@
               </div>
             </div>
           {% else %}
-            {# Fallback con certificados estáticos si no hay en BD #}
-            <div class="infinite-carousel" data-carousel-infinite data-items-per-view="4" data-autoplay="true" data-autoplay-speed="4500">
-              <div class="carousel-wrapper">
-                <div class="carousel-track-infinite" data-carousel-track-infinite>
-                  <article class="card">
-                    <h3 class="pillar-title">ISO 17025 - INN</h3>
-                    <p>
-                      {{ _('Acreditación continua por más de 20 años. Certifica la competencia técnica y la validez de los resultados analíticos emitidos por el laboratorio.') }}
-                    </p>
-                  </article>
-                  <article class="card">
-                    <h3 class="pillar-title">{{ _('Laboratorio Verificador SERNAPESCA') }}</h3>
-                    <p>
-                      {{ _('Apoyamos el control de residuos de medicamentos veterinarios y contaminantes químicos en productos hidrobiológicos para exportación.') }}
-                    </p>
-                  </article>
-                  <article class="card">
-                    <h3 class="pillar-title">{{ _('Laboratorio Verificador SAG') }}</h3>
-                    <p>
-                      {{ _('Respaldamos programas oficiales de monitoreo en carnes, lácteos y matrices pecuarias, asegurando el cumplimiento de normativas internacionales.') }}
-                    </p>
-                  </article>
-                  <article class="card">
-                    <h3 class="pillar-title">{{ _('Centro Colaborador OMSA') }}</h3>
-                    <p>
-                      {{ _('Único centro en Latinoamérica dedicado a la gestión de antimicrobianos en acuicultura, colaborando con países miembros de la OMSA.') }}
-                    </p>
-                  </article>
-                </div>
-              </div>
-              <div class="carousel-nav-infinite">
-                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Anterior') }}" data-carousel-prev-infinite>‹</button>
-                <button class="carousel-nav-btn" type="button" aria-label="{{ _('Siguiente') }}" data-carousel-next-infinite>›</button>
-              </div>
+            {# Mensaje cuando no hay certificados disponibles #}
+            <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+              <i class="bi bi-award" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay acreditaciones y reconocimientos disponibles en este momento.') }}</p>
+              <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán las acreditaciones y reconocimientos.') }}</p>
             </div>
           {% endif %}
           <div style="margin-top: 2.5rem; text-align: center">
