@@ -5234,12 +5234,28 @@ def enviar_correo_contacto(nombre, email, telefono, tipo_consulta, mensaje, inst
     if not correos_destino:
         return False, "No hay correos configurados para este tipo de consulta"
     
-    # Configuración SMTP desde variables de entorno
+    # Configuración SMTP: primero desde variables de entorno, luego desde archivo de configuración
     smtp_host = os.environ.get('SMTP_HOST', '')
     smtp_port = int(os.environ.get('SMTP_PORT', '587'))
     smtp_user = os.environ.get('SMTP_USER', '')
     smtp_password = os.environ.get('SMTP_PASSWORD', '')
     smtp_from = os.environ.get('SMTP_FROM', smtp_user)
+    
+    # Si no están en variables de entorno, intentar leer desde archivo de configuración
+    if not smtp_host or not smtp_user or not smtp_password:
+        config_file = os.path.join(os.path.dirname(__file__), 'smtp_config.json')
+        if os.path.exists(config_file):
+            try:
+                import json
+                with open(config_file, 'r') as f:
+                    smtp_config = json.load(f)
+                smtp_host = smtp_config.get('SMTP_HOST', '')
+                smtp_port = int(smtp_config.get('SMTP_PORT', 587))
+                smtp_user = smtp_config.get('SMTP_USER', '')
+                smtp_password = smtp_config.get('SMTP_PASSWORD', '')
+                smtp_from = smtp_config.get('SMTP_FROM', smtp_user)
+            except Exception as e:
+                app.logger.error(f'Error al leer configuración SMTP desde archivo: {e}')
     
     if not smtp_host or not smtp_user or not smtp_password:
         return False, "Configuración SMTP no encontrada"
