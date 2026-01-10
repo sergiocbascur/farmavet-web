@@ -539,38 +539,110 @@
     
     <script>
     // Script para igualar alturas de cards en carrusel de acreditaciones
-    document.addEventListener('DOMContentLoaded', function() {
-      const acreditacionesCarousel = document.querySelector('#acreditaciones .infinite-carousel');
-      if (!acreditacionesCarousel) return;
-      
+    (function() {
       function equalizeCardHeights() {
-        const cards = acreditacionesCarousel.querySelectorAll('.card');
-        if (cards.length === 0) return;
+        const acreditacionesCarousel = document.querySelector('#acreditaciones .infinite-carousel');
+        if (!acreditacionesCarousel) return;
+        
+        // Solo trabajar con cards originales (no clones)
+        const track = acreditacionesCarousel.querySelector('.carousel-track-infinite');
+        if (!track) return;
+        
+        const originalCards = Array.from(track.querySelectorAll('.card[data-carousel-original="true"]'));
+        if (originalCards.length === 0) {
+          // Si no hay atributo data-carousel-original, usar todas las cards visibles
+          const allCards = Array.from(track.querySelectorAll('.card'));
+          const visibleCards = allCards.filter(card => {
+            const rect = card.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
+          
+          if (visibleCards.length === 0) return;
+          
+          // Reset heights
+          visibleCards.forEach(card => {
+            card.style.height = '';
+            card.style.minHeight = '';
+          });
+          
+          // Force reflow
+          visibleCards[0].offsetHeight;
+          
+          // Find max height among visible cards
+          let maxHeight = 0;
+          visibleCards.forEach(card => {
+            const height = card.offsetHeight;
+            if (height > maxHeight) {
+              maxHeight = height;
+            }
+          });
+          
+          // Apply max height to all visible cards
+          if (maxHeight > 0) {
+            visibleCards.forEach(card => {
+              card.style.height = maxHeight + 'px';
+              card.style.minHeight = maxHeight + 'px';
+            });
+          }
+          return;
+        }
         
         // Reset heights
-        cards.forEach(card => {
-          card.style.height = 'auto';
+        originalCards.forEach(card => {
+          card.style.height = '';
+          card.style.minHeight = '';
         });
+        
+        // Force reflow
+        if (originalCards.length > 0) {
+          originalCards[0].offsetHeight;
+        }
         
         // Find max height
         let maxHeight = 0;
-        cards.forEach(card => {
+        originalCards.forEach(card => {
           const height = card.offsetHeight;
           if (height > maxHeight) {
             maxHeight = height;
           }
         });
         
-        // Apply max height to all cards
+        // Apply max height to all original cards
         if (maxHeight > 0) {
-          cards.forEach(card => {
+          originalCards.forEach(card => {
             card.style.height = maxHeight + 'px';
+            card.style.minHeight = maxHeight + 'px';
+          });
+          
+          // También aplicar a clones si existen
+          const allCards = track.querySelectorAll('.card');
+          allCards.forEach(card => {
+            if (!card.hasAttribute('data-carousel-original')) {
+              card.style.height = maxHeight + 'px';
+              card.style.minHeight = maxHeight + 'px';
+            }
           });
         }
       }
       
-      // Equalize on load
-      setTimeout(equalizeCardHeights, 100);
+      // Ejecutar cuando el DOM esté listo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(equalizeCardHeights, 300);
+          setTimeout(equalizeCardHeights, 800);
+          setTimeout(equalizeCardHeights, 1500);
+        });
+      } else {
+        setTimeout(equalizeCardHeights, 300);
+        setTimeout(equalizeCardHeights, 800);
+        setTimeout(equalizeCardHeights, 1500);
+      }
+      
+      // Ejecutar después de que se carguen las imágenes
+      window.addEventListener('load', function() {
+        setTimeout(equalizeCardHeights, 100);
+        setTimeout(equalizeCardHeights, 500);
+      });
       
       // Equalize on window resize
       let resizeTimeout;
@@ -579,15 +651,24 @@
         resizeTimeout = setTimeout(equalizeCardHeights, 250);
       });
       
-      // Equalize when carousel moves (for cloned items)
-      const track = acreditacionesCarousel.querySelector('.carousel-track-infinite');
-      if (track) {
-        const observer = new MutationObserver(function() {
-          setTimeout(equalizeCardHeights, 100);
-        });
-        observer.observe(track, { childList: true, subtree: true });
-      }
-    });
+      // Observar cambios en el track del carrusel
+      const observer = new MutationObserver(function() {
+        setTimeout(equalizeCardHeights, 200);
+      });
+      
+      // Iniciar observación cuando el carrusel esté disponible
+      setTimeout(function() {
+        const track = document.querySelector('#acreditaciones .carousel-track-infinite');
+        if (track) {
+          observer.observe(track, { 
+            childList: true, 
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+          });
+        }
+      }, 500);
+    })();
     </script>
   </body>
 </html>
