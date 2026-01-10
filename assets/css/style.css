@@ -1457,11 +1457,15 @@ a.logo-card:focus {
   align-self: stretch !important;
 }
 
-/* Específico para carrusel de acreditaciones - altura mínima dinámica */
+/* Específico para carrusel de acreditaciones - ancho y altura correctos */
 #acreditaciones .infinite-carousel .card {
   display: flex !important;
   flex-direction: column !important;
   align-self: stretch !important;
+  flex: 0 0 calc((100% - (3 * 1.5rem)) / 4) !important;
+  min-width: 0 !important;
+  max-width: calc((100% - (3 * 1.5rem)) / 4) !important;
+  width: calc((100% - (3 * 1.5rem)) / 4) !important;
 }
 
 /* Asegurar que el contenedor de botones esté siempre al final en acreditaciones */
