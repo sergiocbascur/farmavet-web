@@ -1423,6 +1423,14 @@ a.logo-card:focus {
   flex-grow: 0 !important;
   min-height: fit-content !important;
   align-self: flex-end !important;
+  width: 100% !important;
+}
+
+/* Asegurar que el contenedor de botones con margin-top: auto funcione */
+.infinite-carousel .card > div[style*="margin-top: auto"] {
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
 }
 
 /* Asegurar que todas las cards tengan la misma altura */
@@ -1443,11 +1451,27 @@ a.logo-card:focus {
 }
 
 /* Asegurar que el párrafo de descripción crezca para empujar botones al final */
-.infinite-carousel .card > p:not(:first-of-type) {
+/* Selector más específico: párrafo que NO es el primero Y que NO tiene estilos de fecha */
+.infinite-carousel .card > p:not(:first-of-type):not([style*="font-size: 0.9em"]) {
   flex-grow: 1 !important;
   flex-shrink: 1 !important;
   margin-bottom: 0 !important;
   min-height: 0 !important;
+}
+
+/* Alternativa: cualquier párrafo que tenga flex-grow en su estilo inline */
+.infinite-carousel .card > p[style*="flex-grow"] {
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+}
+
+/* Selector específico para párrafo de descripción de certificados */
+.infinite-carousel .card > p.certificado-descripcion {
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .card:hover {
