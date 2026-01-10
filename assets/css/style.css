@@ -1407,6 +1407,8 @@ a.logo-card:focus {
   display: flex !important;
   align-items: stretch !important;
   align-content: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 /* Todos los elementos dentro de la card de acreditaciones deben tener flex-shrink excepto el contenedor de botones */
