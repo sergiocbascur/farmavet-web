@@ -1422,6 +1422,19 @@ a.logo-card:focus {
   flex-shrink: 0 !important;
   flex-grow: 0 !important;
   min-height: fit-content !important;
+  align-self: flex-end !important;
+}
+
+/* Asegurar que todas las cards tengan la misma altura */
+.infinite-carousel .carousel-track-infinite {
+  align-items: stretch !important;
+}
+
+.infinite-carousel .card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  align-self: stretch !important;
 }
 
 /* Asegurar que el contenedor con botones verdes se alinee */

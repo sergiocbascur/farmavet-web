@@ -895,20 +895,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       
-      // En desktop, los botones siempre están habilitados porque es infinito
-      // Solo deshabilitar si realmente no hay más elementos que mostrar
-      const maxIndex = Math.max(0, totalItems - itemsPerView);
-      // En carrusel infinito, los botones siempre están habilitados
-      // Solo deshabilitar si hay muy pocos elementos
-      if (totalItems <= itemsPerView) {
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        console.log(`Carousel ${carouselIndex} (desktop): Very few items (${totalItems} <= ${itemsPerView}), disabling both buttons`);
-      } else {
-        prevBtn.disabled = false;
-        nextBtn.disabled = false;
-        console.log(`Carousel ${carouselIndex} (desktop): Enabling both buttons (${totalItems} items, ${itemsPerView} per view)`);
-      }
+      // En desktop, los botones NUNCA están deshabilitados porque es infinito
+      // El carrusel infinito siempre permite avanzar/retroceder
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+      console.log(`Carousel ${carouselIndex} (desktop): Infinite carousel - both buttons enabled (${totalItems} items, ${itemsPerView} per view)`);
     }
     
     // Función para actualizar visibilidad en móvil (mostrar grupo de 3)
@@ -1012,11 +1003,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function nextSlide() {
-      if (isTransitioning) return;
+      if (isTransitioning) {
+        console.log(`Carousel ${carouselIndex}: Already transitioning, ignoring nextSlide`);
+        return;
+      }
       
-      // Verificar si el botón está deshabilitado antes de proceder
-      if (nextBtn && nextBtn.disabled) return;
+      // NO verificar disabled aquí - permitir que funcione siempre en desktop
+      // Solo verificar en móvil donde realmente hay límites
+      if (window.innerWidth <= 768 && nextBtn && nextBtn.disabled) {
+        console.log(`Carousel ${carouselIndex}: Next button disabled on mobile, ignoring`);
+        return;
+      }
       
+      console.log(`Carousel ${carouselIndex}: Executing nextSlide, currentIndex=${currentIndex}`);
       isTransitioning = true;
       stopAutoplay(); // Stop autoplay when manually navigating
       
