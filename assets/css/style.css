@@ -1401,6 +1401,10 @@ a.logo-card:focus {
 #acreditaciones .infinite-carousel .carousel-wrapper {
   display: flex !important;
   align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 #acreditaciones .infinite-carousel .carousel-track-infinite {
