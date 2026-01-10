@@ -586,27 +586,12 @@
                 </article>
                 {% endfor %}
               {% else %}
-                <!-- Noticias por defecto si no hay en BD -->
-                <article class="news-card">
-                  <img
-                    src="{{ url_for('assets', filename='images/noticias/reel-antimicrobianos.svg') }}"
-                    alt="Publicación científica sobre monitoreo LC-MS/MS"
-                  />
-                  <div class="news-body">
-                    <span class="news-meta">FEB 2025 · {{ _('Publicación científica') }}</span>
-                    <h3 class="news-title">{{ _('Monitoreo multirresiduo LC-MS/MS en salmónidos') }}</h3>
-                    <p>
-                      {{ _('Investigación liderada por FARMAVET publicada en Journal of Veterinary Pharmacology con nuevos límites de cuantificación para matrices hidrobiológicas.') }}</p>
-                    <a
-                      class="news-link"
-                      href="https://www.linkedin.com/posts/farmavetuchile_colaboraciaejn-innovaciaejn-farmavet-activity-7387424725578444801-ZB4b?utm_source=share&utm_medium=member_desktop&rcm=ACoAAAwD2zoB0ICMYG9QGRWT4-O0mxwvT3BCMpg"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {{ _('Ver publicación') }}
-                    </a>
-                  </div>
-                </article>
+                <!-- Mensaje cuando no hay noticias disponibles -->
+                <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted); grid-column: 1 / -1;">
+                  <i class="bi bi-newspaper" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                  <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay noticias y eventos disponibles en este momento.') }}</p>
+                  <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevas noticias y eventos.') }}</p>
+                </div>
               {% endif %}
             </div>
             <div class="carousel-buttons">
