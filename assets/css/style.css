@@ -2446,6 +2446,12 @@ a.logo-card:focus {
     flex: 0 0 calc((100% - (2 * 1.5rem)) / 3);
     width: calc((100% - (2 * 1.5rem)) / 3);
   }
+  /* Mantener 4 tarjetas en acreditaciones incluso en pantallas medianas */
+  #acreditaciones .infinite-carousel .card {
+    flex: 0 0 calc((100% - (3 * 1.5rem)) / 4) !important;
+    max-width: calc((100% - (3 * 1.5rem)) / 4) !important;
+    width: calc((100% - (3 * 1.5rem)) / 4) !important;
+  }
   .infinite-carousel .org-member-card,
   .org-leadership-grid .org-member-card,
   .org-members-grid .org-member-card,
