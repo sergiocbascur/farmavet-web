@@ -1429,11 +1429,12 @@ a.logo-card:focus {
   margin-top: 0 !important;
 }
 
-/* Asegurar que el párrafo de descripción no crezca demasiado */
+/* Asegurar que el párrafo de descripción crezca para empujar botones al final */
 .infinite-carousel .card > p:not(:first-of-type) {
-  flex-grow: 0 !important;
+  flex-grow: 1 !important;
   flex-shrink: 1 !important;
   margin-bottom: 0 !important;
+  min-height: 0 !important;
 }
 
 .card:hover {

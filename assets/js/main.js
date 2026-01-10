@@ -877,7 +877,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Función para actualizar estado de botones
     function updateButtons() {
-      if (!prevBtn || !nextBtn) return;
+      if (!prevBtn || !nextBtn) {
+        console.warn(`Carousel ${carouselIndex}: Buttons not found in updateButtons`);
+        return;
+      }
       
       const itemsPerView = getItemsPerView();
       
@@ -888,6 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
         prevBtn.disabled = currentIndex <= 0;
         // En móvil, permitir avanzar hasta el último grupo completo
         nextBtn.disabled = currentIndex >= maxIndex;
+        console.log(`Carousel ${carouselIndex} (mobile): currentIndex=${currentIndex}, maxIndex=${maxIndex}, nextBtn.disabled=${nextBtn.disabled}`);
         return;
       }
       
@@ -899,9 +903,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (totalItems <= itemsPerView) {
         prevBtn.disabled = true;
         nextBtn.disabled = true;
+        console.log(`Carousel ${carouselIndex} (desktop): Very few items (${totalItems} <= ${itemsPerView}), disabling both buttons`);
       } else {
         prevBtn.disabled = false;
         nextBtn.disabled = false;
+        console.log(`Carousel ${carouselIndex} (desktop): Enabling both buttons (${totalItems} items, ${itemsPerView} per view)`);
       }
     }
     
@@ -1262,15 +1268,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Event listeners
     if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
+      console.log(`Carousel ${carouselIndex}: Adding next button listener`);
+      nextBtn.addEventListener("click", (e) => {
+        console.log(`Carousel ${carouselIndex}: Next button clicked, disabled:`, nextBtn.disabled);
+        e.preventDefault();
+        e.stopPropagation();
         nextSlide();
       });
+    } else {
+      console.warn(`Carousel ${carouselIndex}: Next button not found!`);
     }
 
     if (prevBtn) {
-      prevBtn.addEventListener("click", () => {
+      console.log(`Carousel ${carouselIndex}: Adding prev button listener`);
+      prevBtn.addEventListener("click", (e) => {
+        console.log(`Carousel ${carouselIndex}: Prev button clicked, disabled:`, prevBtn.disabled);
+        e.preventDefault();
+        e.stopPropagation();
         prevSlide();
       });
+    } else {
+      console.warn(`Carousel ${carouselIndex}: Prev button not found!`);
     }
 
     // Pause on hover
