@@ -884,15 +884,25 @@ document.addEventListener("DOMContentLoaded", () => {
       // En móvil, usar lógica diferente
       if (window.innerWidth <= 768) {
         const mobileItemsPerView = 3;
-        const maxIndex = totalItems - mobileItemsPerView;
+        const maxIndex = Math.max(0, totalItems - mobileItemsPerView);
         prevBtn.disabled = currentIndex <= 0;
+        // En móvil, permitir avanzar hasta el último grupo completo
         nextBtn.disabled = currentIndex >= maxIndex;
         return;
       }
       
+      // En desktop, los botones siempre están habilitados porque es infinito
+      // Solo deshabilitar si realmente no hay más elementos que mostrar
       const maxIndex = Math.max(0, totalItems - itemsPerView);
-      prevBtn.disabled = currentIndex <= 0;
-      nextBtn.disabled = currentIndex >= maxIndex;
+      // En carrusel infinito, los botones siempre están habilitados
+      // Solo deshabilitar si hay muy pocos elementos
+      if (totalItems <= itemsPerView) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+      } else {
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+      }
     }
     
     // Función para actualizar visibilidad en móvil (mostrar grupo de 3)
@@ -998,6 +1008,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function nextSlide() {
       if (isTransitioning) return;
       
+      // Verificar si el botón está deshabilitado antes de proceder
+      if (nextBtn && nextBtn.disabled) return;
+      
       isTransitioning = true;
       stopAutoplay(); // Stop autoplay when manually navigating
       
@@ -1005,8 +1018,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.innerWidth <= 768) {
         const itemsPerView = 3;
         const maxIndex = Math.max(0, totalItems - itemsPerView);
-        currentIndex = Math.min(currentIndex + itemsPerView, maxIndex);
+        const newIndex = Math.min(currentIndex + itemsPerView, maxIndex);
+        if (newIndex === currentIndex) {
+          // No hay más elementos para avanzar
+          isTransitioning = false;
+          return;
+        }
+        currentIndex = newIndex;
         updateTransform();
+        updateButtons(); // Actualizar estado de botones después de mover
         setTimeout(() => {
           isTransitioning = false;
         }, 300);
@@ -1015,6 +1035,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       currentIndex++;
       updateTransform();
+      updateButtons(); // Actualizar estado de botones después de mover
 
       // Calculate positions
       // Start position: just after beginning clones (where original items start)
@@ -1038,6 +1059,7 @@ document.addEventListener("DOMContentLoaded", () => {
           track.style.transition = "none";
           currentIndex = startPosition + (offsetIntoClones % totalItems);
           updateTransform(true);
+          updateButtons(); // Actualizar estado de botones después del reset
           isTransitioning = false;
           
           // Restore transition after reset
@@ -1061,14 +1083,24 @@ document.addEventListener("DOMContentLoaded", () => {
     function prevSlide() {
       if (isTransitioning) return;
       
+      // Verificar si el botón está deshabilitado antes de proceder
+      if (prevBtn && prevBtn.disabled) return;
+      
       isTransitioning = true;
       stopAutoplay(); // Stop autoplay when manually navigating
 
       // En móvil, retroceder de 3 en 3
       if (window.innerWidth <= 768) {
         const itemsPerView = 3;
-        currentIndex = Math.max(currentIndex - itemsPerView, 0);
+        const newIndex = Math.max(currentIndex - itemsPerView, 0);
+        if (newIndex === currentIndex) {
+          // No hay más elementos para retroceder
+          isTransitioning = false;
+          return;
+        }
+        currentIndex = newIndex;
         updateTransform();
+        updateButtons(); // Actualizar estado de botones después de mover
         setTimeout(() => {
           isTransitioning = false;
         }, 300);
@@ -1084,6 +1116,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const resetThreshold = startPosition - Math.floor(totalClonedAtStart * 0.5);
 
       currentIndex--;
+      updateTransform();
+      updateButtons(); // Actualizar estado de botones después de mover
       
       // When going backwards and reaching before the start clones, jump to end seamlessly
       if (currentIndex < resetThreshold) {
@@ -1094,12 +1128,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const equivalentPos = endOriginal - (offsetBack % totalItems);
         currentIndex = equivalentPos > startPosition ? equivalentPos : endOriginal - 1;
         updateTransform();
+        updateButtons(); // Actualizar estado de botones después del reset
         
         clearTimeout(resetTimeout);
         resetTimeout = setTimeout(() => {
           // Ensure we're at the correct position
           track.style.transition = "none";
           updateTransform(true);
+          updateButtons(); // Actualizar estado de botones después del reset
           isTransitioning = false;
           
           // Restore transition after reset
@@ -1111,7 +1147,6 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }, 50);
       } else {
-        updateTransform();
         setTimeout(() => {
           isTransitioning = false;
           if (autoplayEnabled) {
