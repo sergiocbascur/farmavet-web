@@ -1458,6 +1458,11 @@ a.logo-card:focus {
 }
 
 /* Específico para carrusel de acreditaciones - ancho y altura correctos */
+#acreditaciones .infinite-carousel {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 #acreditaciones .infinite-carousel .card {
   display: flex !important;
   flex-direction: column !important;
@@ -1466,6 +1471,7 @@ a.logo-card:focus {
   min-width: 0 !important;
   max-width: calc((100% - (3 * 1.5rem)) / 4) !important;
   width: calc((100% - (3 * 1.5rem)) / 4) !important;
+  box-sizing: border-box !important;
 }
 
 /* Asegurar que el contenedor de botones esté siempre al final en acreditaciones */
