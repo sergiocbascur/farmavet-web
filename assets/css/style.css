@@ -2515,6 +2515,12 @@ a.logo-card:focus {
     flex: 0 0 calc((100% - (1 * 1.5rem)) / 2);
     width: calc((100% - (1 * 1.5rem)) / 2);
   }
+  /* Mantener 4 tarjetas en acreditaciones incluso en pantallas pequeñas */
+  #acreditaciones .infinite-carousel .card {
+    flex: 0 0 calc((100% - (3 * 1.5rem)) / 4) !important;
+    max-width: calc((100% - (3 * 1.5rem)) / 4) !important;
+    width: calc((100% - (3 * 1.5rem)) / 4) !important;
+  }
   .infinite-carousel .org-member-card {
     flex: 0 0 calc((100% - (1 * 1.5rem)) / 2);
     max-width: calc((100% - (1 * 1.5rem)) / 2);
