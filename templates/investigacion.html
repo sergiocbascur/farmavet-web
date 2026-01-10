@@ -694,51 +694,12 @@
               {% endfor %}
             </div>
           {% else %}
-            <!-- Publicaciones por defecto si no hay en BD -->
-              <article class="news-item">
-                <h3 class="pillar-title">
-                  {{ _('LC-MS/MS multirresiduo para monitoreo de tetraciclinas en salmónidos') }}
-                </h3>
-                <div class="news-meta">Journal of Veterinary Pharmacology · 2025</div>
-                <p>
-                  {{ _('Estudio que valida una metodología multirresiduo con límites de cuantificación acordes a normativas europeas y FDA.') }}
-                </p>
-                <div class="news-tags">
-                  <span class="chip">LC-MS/MS</span>
-                  <span class="chip">{{ _('Inocuidad') }}</span>
-                  <span class="chip">{{ _('Salmonicultura') }}</span>
-                </div>
-                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
-              </article>
-              <article class="news-item">
-                <h3 class="pillar-title">
-                  {{ _('Modelamiento farmacocinético de benzimidazoles en trucha arcoíris') }}
-                </h3>
-                <div class="news-meta">Aquaculture Research · 2024</div>
-                <p>
-                  {{ _('Investigación colaborativa con centros internacionales para optimizar períodos de resguardo en producción acuícola.') }}
-                </p>
-                <div class="news-tags">
-                  <span class="chip">{{ _('Farmacocinética') }}</span>
-                  <span class="chip">{{ _('Benzimidazoles') }}</span>
-                </div>
-                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
-              </article>
-              <article class="news-item">
-                <h3 class="pillar-title">
-                  {{ _('Resistencia antimicrobiana en producción avícola chilena') }}
-                </h3>
-                <div class="news-meta">Frontiers in Veterinary Science · 2024</div>
-                <p>
-                  {{ _('Evaluación de patrones RAM y propuestas de lineamientos para uso responsable de antimicrobianos.') }}
-                </p>
-                <div class="news-tags">
-                  <span class="chip">RAM</span>
-                  <span class="chip">{{ _('Avicultura') }}</span>
-                  <span class="chip">Stewardship</span>
-                </div>
-                <a class="cta-inline" href="#">{{ _('Ver publicación') }}</a>
-              </article>
+            <!-- Mensaje cuando no hay publicaciones disponibles -->
+            <div class="empty-state" style="text-align: center; padding: 3rem 2rem; color: var(--color-muted);">
+              <i class="bi bi-journal-text" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">{{ _('No hay publicaciones científicas disponibles en este momento.') }}</p>
+              <p style="margin-top: 0.5rem; font-size: 0.95rem;">{{ _('Próximamente se publicarán nuevas publicaciones científicas.') }}</p>
+            </div>
             {% endif %}
           </div>
         </div>
