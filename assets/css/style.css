@@ -1397,6 +1397,18 @@ a.logo-card:focus {
   box-sizing: border-box !important;
 }
 
+/* Forzar altura uniforme usando el wrapper del carrusel */
+.infinite-carousel .carousel-wrapper {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.infinite-carousel .carousel-track-infinite {
+  display: flex !important;
+  align-items: stretch !important;
+  align-content: stretch !important;
+}
+
 /* Todos los elementos dentro de la card deben tener flex-shrink excepto el contenedor de botones */
 .infinite-carousel .card > * {
   flex-shrink: 1;
@@ -2045,6 +2057,14 @@ a.logo-card:focus {
   align-items: stretch !important; /* Asegurar que todas las cards tengan la misma altura */
   transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
+}
+
+/* Forzar que todas las cards en el track tengan la misma altura usando align-items */
+.carousel-track-infinite > .card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-self: stretch !important;
+  height: 100% !important;
 }
 
 .infinite-carousel .list-card,

@@ -538,122 +538,112 @@
     <script src="{{ url_for('assets', filename='js/chatbot.js') }}" defer></script>
     
     <script>
-    // Script para igualar alturas de cards en carrusel de acreditaciones
+    // Script mejorado para igualar alturas de cards en carrusel de acreditaciones
     (function() {
+      let isRunning = false;
+      
       function equalizeCardHeights() {
+        if (isRunning) return;
+        isRunning = true;
+        
         const acreditacionesCarousel = document.querySelector('#acreditaciones .infinite-carousel');
-        if (!acreditacionesCarousel) return;
+        if (!acreditacionesCarousel) {
+          isRunning = false;
+          return;
+        }
         
-        // Solo trabajar con cards originales (no clones)
         const track = acreditacionesCarousel.querySelector('.carousel-track-infinite');
-        if (!track) return;
+        if (!track) {
+          isRunning = false;
+          return;
+        }
         
-        const originalCards = Array.from(track.querySelectorAll('.card[data-carousel-original="true"]'));
-        if (originalCards.length === 0) {
-          // Si no hay atributo data-carousel-original, usar todas las cards visibles
-          const allCards = Array.from(track.querySelectorAll('.card'));
-          const visibleCards = allCards.filter(card => {
-            const rect = card.getBoundingClientRect();
-            return rect.width > 0 && rect.height > 0;
-          });
-          
-          if (visibleCards.length === 0) return;
-          
-          // Reset heights
-          visibleCards.forEach(card => {
-            card.style.height = '';
-            card.style.minHeight = '';
-          });
-          
-          // Force reflow
+        // Obtener todas las cards visibles en el viewport
+        const allCards = Array.from(track.querySelectorAll('.card'));
+        if (allCards.length === 0) {
+          isRunning = false;
+          return;
+        }
+        
+        // Filtrar solo las cards visibles (que tienen ancho y alto > 0)
+        const visibleCards = allCards.filter(card => {
+          const rect = card.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && window.getComputedStyle(card).display !== 'none';
+        });
+        
+        if (visibleCards.length === 0) {
+          isRunning = false;
+          return;
+        }
+        
+        // Remover alturas fijas primero
+        visibleCards.forEach(card => {
+          card.style.height = '';
+          card.style.minHeight = '';
+        });
+        
+        // Forzar reflow
+        if (visibleCards.length > 0) {
           visibleCards[0].offsetHeight;
-          
-          // Find max height among visible cards
+        }
+        
+        // Esperar un frame para que el navegador recalcule
+        requestAnimationFrame(() => {
+          // Calcular altura máxima
           let maxHeight = 0;
           visibleCards.forEach(card => {
-            const height = card.offsetHeight;
+            const height = card.getBoundingClientRect().height || card.offsetHeight;
             if (height > maxHeight) {
               maxHeight = height;
             }
           });
           
-          // Apply max height to all visible cards
-          if (maxHeight > 0) {
-            visibleCards.forEach(card => {
+          // Aplicar altura máxima a todas las cards (visibles y no visibles)
+          if (maxHeight > 50) { // Solo aplicar si la altura es razonable
+            allCards.forEach(card => {
               card.style.height = maxHeight + 'px';
               card.style.minHeight = maxHeight + 'px';
             });
+            console.log('Alturas igualadas a:', maxHeight + 'px');
           }
-          return;
-        }
-        
-        // Reset heights
-        originalCards.forEach(card => {
-          card.style.height = '';
-          card.style.minHeight = '';
-        });
-        
-        // Force reflow
-        if (originalCards.length > 0) {
-          originalCards[0].offsetHeight;
-        }
-        
-        // Find max height
-        let maxHeight = 0;
-        originalCards.forEach(card => {
-          const height = card.offsetHeight;
-          if (height > maxHeight) {
-            maxHeight = height;
-          }
-        });
-        
-        // Apply max height to all original cards
-        if (maxHeight > 0) {
-          originalCards.forEach(card => {
-            card.style.height = maxHeight + 'px';
-            card.style.minHeight = maxHeight + 'px';
-          });
           
-          // También aplicar a clones si existen
-          const allCards = track.querySelectorAll('.card');
-          allCards.forEach(card => {
-            if (!card.hasAttribute('data-carousel-original')) {
-              card.style.height = maxHeight + 'px';
-              card.style.minHeight = maxHeight + 'px';
-            }
-          });
-        }
+          isRunning = false;
+        });
+      }
+      
+      // Función para ejecutar múltiples veces con delays
+      function runEqualization() {
+        equalizeCardHeights();
+        setTimeout(equalizeCardHeights, 100);
+        setTimeout(equalizeCardHeights, 300);
+        setTimeout(equalizeCardHeights, 600);
+        setTimeout(equalizeCardHeights, 1000);
       }
       
       // Ejecutar cuando el DOM esté listo
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-          setTimeout(equalizeCardHeights, 300);
-          setTimeout(equalizeCardHeights, 800);
-          setTimeout(equalizeCardHeights, 1500);
-        });
+        document.addEventListener('DOMContentLoaded', runEqualization);
       } else {
-        setTimeout(equalizeCardHeights, 300);
-        setTimeout(equalizeCardHeights, 800);
-        setTimeout(equalizeCardHeights, 1500);
+        runEqualization();
       }
       
       // Ejecutar después de que se carguen las imágenes
       window.addEventListener('load', function() {
-        setTimeout(equalizeCardHeights, 100);
-        setTimeout(equalizeCardHeights, 500);
+        setTimeout(runEqualization, 100);
       });
       
       // Equalize on window resize
       let resizeTimeout;
       window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(equalizeCardHeights, 250);
+        resizeTimeout = setTimeout(runEqualization, 250);
       });
       
       // Observar cambios en el track del carrusel
+      let observerTimeout;
       const observer = new MutationObserver(function() {
-        setTimeout(equalizeCardHeights, 200);
+        clearTimeout(observerTimeout);
+        observerTimeout = setTimeout(equalizeCardHeights, 100);
       });
       
       // Iniciar observación cuando el carrusel esté disponible
@@ -668,6 +658,22 @@
           });
         }
       }, 500);
+      
+      // También observar cambios en las cards individuales
+      setTimeout(function() {
+        const cards = document.querySelectorAll('#acreditaciones .card');
+        cards.forEach(card => {
+          const cardObserver = new MutationObserver(function() {
+            setTimeout(equalizeCardHeights, 50);
+          });
+          cardObserver.observe(card, {
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+            childList: true,
+            subtree: true
+          });
+        });
+      }, 1000);
     })();
     </script>
   </body>
