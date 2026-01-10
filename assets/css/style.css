@@ -2086,8 +2086,8 @@ a.logo-card:focus {
   will-change: transform;
 }
 
-/* Forzar que todas las cards en el track tengan la misma altura usando align-items */
-.carousel-track-infinite > .card {
+/* Solo aplicar a carrusel de acreditaciones */
+#acreditaciones .carousel-track-infinite > .card {
   display: flex !important;
   flex-direction: column !important;
   align-self: stretch !important;
