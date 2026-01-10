@@ -2109,6 +2109,10 @@ a.logo-card:focus {
 /* Solo aplicar align-self: stretch al carrusel de acreditaciones */
 #acreditaciones .infinite-carousel .card {
   align-self: stretch !important;
+  flex: 0 0 calc((100% - (3 * 1.5rem)) / 4) !important;
+  min-width: 0 !important;
+  max-width: calc((100% - (3 * 1.5rem)) / 4) !important;
+  width: calc((100% - (3 * 1.5rem)) / 4) !important;
 }
 
 .infinite-carousel .logo-card {
