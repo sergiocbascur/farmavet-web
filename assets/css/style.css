@@ -1457,18 +1457,27 @@ a.logo-card:focus {
   align-self: stretch !important;
 }
 
-/* Específico para carrusel de acreditaciones - altura mínima más alta */
+/* Específico para carrusel de acreditaciones - altura mínima dinámica */
 #acreditaciones .infinite-carousel .card {
-  min-height: 380px !important;
   display: flex !important;
   flex-direction: column !important;
+  align-self: stretch !important;
 }
 
-/* Asegurar que el contenedor de botones esté siempre al final */
+/* Asegurar que el contenedor de botones esté siempre al final en acreditaciones */
 #acreditaciones .infinite-carousel .card > div:last-child {
   margin-top: auto !important;
   padding-top: 1.5rem !important;
   flex-shrink: 0 !important;
+}
+
+/* Asegurar que el párrafo de descripción crezca en acreditaciones */
+#acreditaciones .infinite-carousel .card > p.certificado-descripcion,
+#acreditaciones .infinite-carousel .card > p[style*="flex-grow"] {
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  min-height: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* Asegurar que el contenedor con botones verdes se alinee */
@@ -2088,7 +2097,6 @@ a.logo-card:focus {
   max-width: calc((100% - (3 * 1.5rem)) / 4);
   scroll-snap-align: start;
   align-self: stretch !important; /* Forzar que todas tengan la misma altura */
-  min-height: 350px !important; /* Altura mínima para asegurar espacio suficiente */
 }
 
 .infinite-carousel .logo-card {
