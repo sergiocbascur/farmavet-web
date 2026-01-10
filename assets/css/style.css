@@ -1397,13 +1397,13 @@ a.logo-card:focus {
   box-sizing: border-box !important;
 }
 
-/* Forzar altura uniforme usando el wrapper del carrusel */
-.infinite-carousel .carousel-wrapper {
+/* Solo aplicar estilos específicos al carrusel de acreditaciones */
+#acreditaciones .infinite-carousel .carousel-wrapper {
   display: flex !important;
   align-items: stretch !important;
 }
 
-.infinite-carousel .carousel-track-infinite {
+#acreditaciones .infinite-carousel .carousel-track-infinite {
   display: flex !important;
   align-items: stretch !important;
   align-content: stretch !important;
@@ -1445,12 +1445,12 @@ a.logo-card:focus {
   flex-grow: 0 !important;
 }
 
-/* Asegurar que todas las cards tengan la misma altura */
-.infinite-carousel .carousel-track-infinite {
+/* Solo aplicar estilos específicos al carrusel de acreditaciones */
+#acreditaciones .infinite-carousel .carousel-track-infinite {
   align-items: stretch !important;
 }
 
-.infinite-carousel .card {
+#acreditaciones .infinite-carousel .card {
   display: flex !important;
   flex-direction: column !important;
   height: 100% !important;
