@@ -536,6 +536,59 @@
     <div class="toast" role="status" aria-live="polite" data-toast></div>
     <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
     <script src="{{ url_for('assets', filename='js/chatbot.js') }}" defer></script>
+    
+    <script>
+    // Script para igualar alturas de cards en carrusel de acreditaciones
+    document.addEventListener('DOMContentLoaded', function() {
+      const acreditacionesCarousel = document.querySelector('#acreditaciones .infinite-carousel');
+      if (!acreditacionesCarousel) return;
+      
+      function equalizeCardHeights() {
+        const cards = acreditacionesCarousel.querySelectorAll('.card');
+        if (cards.length === 0) return;
+        
+        // Reset heights
+        cards.forEach(card => {
+          card.style.height = 'auto';
+        });
+        
+        // Find max height
+        let maxHeight = 0;
+        cards.forEach(card => {
+          const height = card.offsetHeight;
+          if (height > maxHeight) {
+            maxHeight = height;
+          }
+        });
+        
+        // Apply max height to all cards
+        if (maxHeight > 0) {
+          cards.forEach(card => {
+            card.style.height = maxHeight + 'px';
+          });
+        }
+      }
+      
+      // Equalize on load
+      setTimeout(equalizeCardHeights, 100);
+      
+      // Equalize on window resize
+      let resizeTimeout;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(equalizeCardHeights, 250);
+      });
+      
+      // Equalize when carousel moves (for cloned items)
+      const track = acreditacionesCarousel.querySelector('.carousel-track-infinite');
+      if (track) {
+        const observer = new MutationObserver(function() {
+          setTimeout(equalizeCardHeights, 100);
+        });
+        observer.observe(track, { childList: true, subtree: true });
+      }
+    });
+    </script>
   </body>
 </html>
 
