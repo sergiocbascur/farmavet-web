@@ -3751,6 +3751,11 @@ div[data-hero-slide].card .cta-link-red:focus,
 .metodologias-table th:nth-child(8),
 .metodologias-table th:nth-child(9) {
   text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 120px;
 }
 
 .metodologias-table td:nth-child(7),
