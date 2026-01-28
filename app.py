@@ -2659,14 +2659,16 @@ def api_chatbot_search():
             # Agrupar por nombre + matriz + técnica + categoría (igual que en admin)
             metodologias_agrupadas = {}
             for m in metodologias_raw:
-                nombre = m.get('nombre') or ''
-                matriz = m.get('matriz') or ''
-                tecnica = m.get('tecnica') or ''
-                categoria = m.get('categoria') or 'otros'
+                # sqlite3.Row se accede como diccionario, no con .get()
+                nombre = m['nombre'] if 'nombre' in m.keys() else ''
+                matriz = m['matriz'] if 'matriz' in m.keys() else ''
+                tecnica = m['tecnica'] if 'tecnica' in m.keys() else ''
+                categoria = m['categoria'] if 'categoria' in m.keys() else 'otros'
+                acreditada = bool(m['acreditada']) if 'acreditada' in m.keys() else False
                 group_key = (nombre, matriz, tecnica, categoria)
                 if group_key not in metodologias_agrupadas:
                     metodologias_agrupadas[group_key] = {
-                        'acreditada': m.get('acreditada', False)
+                        'acreditada': acreditada
                     }
             
             # Contar metodologías únicas totales
