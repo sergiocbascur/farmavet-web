@@ -2506,7 +2506,6 @@ def api_chatbot_context():
                 'direccion': 'Av. Santa Rosa 11735, La Pintana, Santiago, Chile',
                 'telefono': '+56 2 2978 XXXX',
                 'email': 'farmavet@uchile.cl',
-                'email_programas': 'postitulo@veterinaria.uchile.cl',
                 'horario': 'Lunes a viernes, 09:00 a 17:30 hrs',
                 'horario_atencion': 'Atención presencial con agendamiento previo'
             },
@@ -2971,7 +2970,6 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
 
 6. PREGUNTAS SOBRE CONTACTO:
    - Email general: farmavet@uchile.cl
-   - Email programas académicos: postitulo@veterinaria.uchile.cl
    - Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile
    - Horario: L-V 09:00-17:30 hrs
 

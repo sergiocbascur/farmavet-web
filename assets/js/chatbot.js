@@ -1305,7 +1305,6 @@ class MetodologiasChatbot {
         if (isContactQuery) {
             message = `
                 <p>Sí, puedes contactarnos al email <strong>farmavet@uchile.cl</strong>.</p>
-                <p>Si tu consulta es sobre programas académicos, también tenemos el email <strong>postitulo@veterinaria.uchile.cl</strong>.</p>
             `;
         } else if (isLocationQuery) {
             message = `
@@ -1326,7 +1325,6 @@ class MetodologiasChatbot {
                 <ul>
                     <li><strong>Dirección:</strong> Av. Santa Rosa 11735, La Pintana, Santiago, Chile</li>
                     <li><strong>Email:</strong> farmavet@uchile.cl</li>
-                    <li><strong>Email programas académicos:</strong> postitulo@veterinaria.uchile.cl</li>
                     <li><strong>Horario:</strong> Lunes a viernes, 09:00 a 17:30 hrs</li>
                     <li><strong>Atención:</strong> Presencial con agendamiento previo</li>
                 </ul>
@@ -1658,7 +1656,6 @@ class MetodologiasChatbot {
                 <li><strong>Dirección:</strong> Av. Santa Rosa 11735, La Pintana, Santiago, Chile</li>
                 <li><strong>Teléfono:</strong> +56 2 2978 XXXX</li>
                 <li><strong>Email:</strong> farmavet@uchile.cl</li>
-                <li><strong>Email programas:</strong> postitulo@veterinaria.uchile.cl</li>
                 <li><strong>Horario:</strong> Lunes a viernes, 09:00 a 17:30 hrs</li>
                 <li><strong>Atención:</strong> Presencial con agendamiento previo</li>
             </ul>
