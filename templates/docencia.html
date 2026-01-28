@@ -300,7 +300,7 @@
                   {% if get_translated_field(programa, 'auspicio') or programa.auspicio %}<strong>{{ _('Auspicio') }}:</strong> {{ get_translated_field(programa, 'auspicio') or programa.auspicio }}{% endif %}
                 </p>
                 {% endif %}
-                <a class="cta-inline" href="mailto:{{ programa.email_contacto or 'farmavet@uchile.cl' }}">
+                <a class="cta-inline" href="mailto:farmavet@uchile.cl">
                   {{ get_translated_field(programa, 'texto_boton') or programa.texto_boton or _('Postular') }}
                 </a>
               </article>
@@ -395,7 +395,7 @@
           <ul class="footer-links">
             <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
             <li>{{ _('Teléfono') }}: +56 2 2978 XXXX</li>
-            <li>{{ _('Email') }}: docencia@farmavet.cl</li>
+            <li>{{ _('Email') }}: farmavet@uchile.cl</li>
           </ul>
         </div>
         <div>
