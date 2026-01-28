@@ -3098,6 +3098,15 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
             
             app.logger.info(f'Chatbot DeepSeek: Buscando - {query[:100]}...')
             
+            # Log del contexto enviado (solo para debugging, truncado)
+            if "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" in system_message:
+                import re
+                match = re.search(r'Total de metodologías activas en FARMAVET: (\d+)', system_message)
+                if match:
+                    app.logger.info(f'Chatbot DeepSeek: Contexto incluye {match.group(1)} metodologías activas')
+                else:
+                    app.logger.warning('Chatbot DeepSeek: No se encontró número de metodologías en el contexto')
+            
             try:
                 response = requests.post(deepseek_api_url, headers=headers, json=payload, timeout=20)
                 
@@ -3127,7 +3136,11 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                         answer = '\n'.join(cleaned_lines).strip()
                         
                         app.logger.info(f'Chatbot DeepSeek: Respuesta recibida ({len(answer)} caracteres)')
-                        app.logger.info(f'Chatbot DeepSeek: Modelo usado - deepseek-chat, Tokens máximos: 500, Temperature: 0.7')
+                        app.logger.info(f'Chatbot DeepSeek: Modelo usado - deepseek-chat, Tokens máximos: 500, Temperature: 0.3')
+                        
+                        # Verificar si la respuesta contiene números inventados
+                        if re.search(r'\b(25|24|30|50|100|164)\b.*metodolog', answer, re.IGNORECASE):
+                            app.logger.warning(f'Chatbot DeepSeek: ⚠️ Posible número inventado en respuesta: {answer[:200]}')
                         
                         return jsonify({
                             'answer': answer,
