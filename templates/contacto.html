@@ -291,7 +291,16 @@
                 <label for="contacto-mensaje">{{ _('Mensaje') }}</label>
                 <textarea id="contacto-mensaje" name="mensaje" rows="4" required></textarea>
               </div>
+              <!-- reCAPTCHA v2 (solo se muestra si está configurado) -->
+              {% if recaptcha_site_key %}
+              <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+                <div id="recaptcha-error" class="error-message" style="display: none; color: #D22730; margin-top: 0.5rem; font-size: 0.875rem;">{{ _('Por favor completa la verificación reCAPTCHA') }}</div>
+              </div>
+              <button class="cta-button" type="submit" id="submit-btn" disabled>{{ _('Enviar consulta') }}</button>
+              {% else %}
               <button class="cta-button" type="submit">{{ _('Enviar consulta') }}</button>
+              {% endif %}
             </form>
           </article>
           <aside class="contact-card">
@@ -607,6 +616,27 @@
         });
       });
     </script>
+    
+    <!-- reCAPTCHA v2 (solo se carga si está configurado) -->
+    {% if recaptcha_site_key %}
+    <script src="https://www.google.com/recaptcha/api.js?hl={{ locale|default('es') }}" async defer></script>
+    
+    <script>
+      // Callback cuando reCAPTCHA se completa exitosamente
+      function onRecaptchaSuccess(token) {
+        document.getElementById('submit-btn').disabled = false;
+        const errorDiv = document.getElementById('recaptcha-error');
+        if (errorDiv) errorDiv.style.display = 'none';
+      }
+      
+      // Callback cuando reCAPTCHA expira
+      function onRecaptchaExpired() {
+        document.getElementById('submit-btn').disabled = true;
+        const errorDiv = document.getElementById('recaptcha-error');
+        if (errorDiv) errorDiv.style.display = 'block';
+      }
+    </script>
+    {% endif %}
     
     <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
     <!-- Chatbot desactivado -->

@@ -12,6 +12,17 @@ Environment="FLASK_ENV=production"
 # NOTA: Descomenta y configura SECRET_KEY en producción
 # Generar con: python -c "import secrets; print(secrets.token_urlsafe(50))"
 
+# Variables de entorno para APIs de IA del chatbot (desactivado actualmente)
+# Obtén tu API key en: https://platform.deepseek.com/api_keys
+# Environment="DEEPSEEK_API_KEY=tu_api_key_aqui"
+# Environment="OLLAMA_API_URL=http://127.0.0.1:11434"  # Opcional: si tienes Ollama local
+# Environment="PERPLEXITY_API_KEY=tu_api_key_aqui"  # Opcional: como último recurso
+
+# Variables de entorno para reCAPTCHA (protección contra spam en formulario de contacto)
+# Obtén tus claves en: https://www.google.com/recaptcha/admin/create
+# Environment="RECAPTCHA_SITE_KEY=tu_site_key_aqui"  # Clave pública (visible en el frontend)
+# Environment="RECAPTCHA_SECRET_KEY=tu_secret_key_aqui"  # Clave secreta (solo en el servidor)
+
 # Comando para iniciar Gunicorn en puerto 5001 (diferente a farmavet-bodega)
 ExecStart=/home/web/farmavet-web/venv/bin/gunicorn \
           --config /home/web/farmavet-web/gunicorn_config.py \

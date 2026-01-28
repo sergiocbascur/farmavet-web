@@ -122,10 +122,13 @@ def get_translated_field(record, field_name, default=None):
 # Hacer la función disponible en templates
 @app.context_processor
 def inject_helpers():
+    # Obtener clave pública de reCAPTCHA (si está configurada)
+    recaptcha_site_key = os.environ.get('RECAPTCHA_SITE_KEY', '').strip()
     return dict(
         get_translated_field=get_translated_field, 
         _=_, 
-        csrf_token=generate_csrf_token()
+        csrf_token=generate_csrf_token(),
+        recaptcha_site_key=recaptcha_site_key
     )
 
 # Crear directorios necesarios
@@ -5450,16 +5453,56 @@ def contacto_enviar():
     institucion = request.form.get('institucion', '').strip()
     tipo_consulta = request.form.get('tipo', '').strip()
     mensaje = request.form.get('mensaje', '').strip()
+    recaptcha_response = request.form.get('g-recaptcha-response', '').strip()
     
-    # Validaciones
+    # Validaciones básicas
     if not nombre or not email or not tipo_consulta or not mensaje:
-        flash('Por favor completa todos los campos requeridos', 'error')
+        error_msg = 'Por favor completa todos los campos requeridos'
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': error_msg}), 400
+        flash(error_msg, 'error')
         return redirect('/contacto.html#contacto-form')
     
     # Validar formato de email
     if '@' not in email or '.' not in email.split('@')[1]:
-        flash('Por favor ingresa un email válido', 'error')
+        error_msg = 'Por favor ingresa un email válido'
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': error_msg}), 400
+        flash(error_msg, 'error')
         return redirect('/contacto.html#contacto-form')
+    
+    # Validar reCAPTCHA (si está configurado)
+    recaptcha_secret_key = os.environ.get('RECAPTCHA_SECRET_KEY', '').strip()
+    if recaptcha_secret_key:
+        if not recaptcha_response:
+            error_msg = 'Por favor completa la verificación reCAPTCHA'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'message': error_msg}), 400
+            flash(error_msg, 'error')
+            return redirect('/contacto.html#contacto-form')
+        
+        # Verificar reCAPTCHA con Google
+        try:
+            verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+            verify_data = {
+                'secret': recaptcha_secret_key,
+                'response': recaptcha_response,
+                'remoteip': request.remote_addr
+            }
+            verify_response = requests.post(verify_url, data=verify_data, timeout=10)
+            verify_result = verify_response.json()
+            
+            if not verify_result.get('success', False):
+                app.logger.warning(f'Validación reCAPTCHA fallida: {verify_result.get("error-codes", [])}')
+                error_msg = 'La verificación reCAPTCHA falló. Por favor intenta nuevamente.'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'success': False, 'message': error_msg}), 400
+                flash(error_msg, 'error')
+                return redirect('/contacto.html#contacto-form')
+        except Exception as e:
+            app.logger.error(f'Error al verificar reCAPTCHA: {str(e)}')
+            # En caso de error de conexión, permitir el envío pero loguear
+            # (mejor permitir un envío legítimo que bloquear por error técnico)
     
     # Enviar correo
     exito, mensaje_resultado = enviar_correo_contacto(nombre, email, telefono, tipo_consulta, mensaje, institucion)
