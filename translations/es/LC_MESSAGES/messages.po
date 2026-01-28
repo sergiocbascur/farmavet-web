@@ -290,3 +290,30 @@ msgstr "Error de conexión"
 
 msgid "No se pudo conectar al servidor. Por favor intenta nuevamente."
 msgstr "No se pudo conectar al servidor. Por favor intenta nuevamente."
+
+msgid "Preguntas Frecuentes"
+msgstr "Preguntas Frecuentes"
+
+msgid "Resolvemos tus dudas sobre nuestros servicios"
+msgstr "Resolvemos tus dudas sobre nuestros servicios"
+
+msgid "Encuentra respuestas rápidas a las preguntas más comunes sobre nuestros servicios analíticos, procesos, tiempos, costos y metodologías. Si no encuentras lo que buscas, contáctanos directamente."
+msgstr "Encuentra respuestas rápidas a las preguntas más comunes sobre nuestros servicios analíticos, procesos, tiempos, costos y metodologías. Si no encuentras lo que buscas, contáctanos directamente."
+
+msgid "Preguntas frecuentes"
+msgstr "Preguntas frecuentes"
+
+msgid "No hay preguntas frecuentes disponibles en este momento."
+msgstr "No hay preguntas frecuentes disponibles en este momento."
+
+msgid "Contactar directamente"
+msgstr "Contactar directamente"
+
+msgid "¿No encuentras tu respuesta?"
+msgstr "¿No encuentras tu respuesta?"
+
+msgid "Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte."
+msgstr "Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte."
+
+msgid "Contactar a FARMAVET"
+msgstr "Contactar a FARMAVET"
