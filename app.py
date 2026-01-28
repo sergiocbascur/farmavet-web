@@ -2738,19 +2738,33 @@ def api_chatbot_search():
             try:
                 conn = get_db()
                 
-                # Obtener conteo total de metodologías ÚNICAS (agrupadas por nombre + matriz + técnica)
+                # Obtener conteo total de metodologías ÚNICAS (agrupadas por nombre + matriz + técnica + categoría)
                 # Esto cuenta metodologías reales, no registros individuales de analitos
-                metodologias_unicas = conn.execute('''
-                    SELECT DISTINCT nombre, matriz, tecnica, categoria, acreditada
+                # Usar el mismo criterio de agrupación que en admin_metodologias
+                metodologias_raw = conn.execute('''
+                    SELECT nombre, matriz, tecnica, categoria, acreditada
                     FROM metodologias 
                     WHERE activo = 1
                 ''').fetchall()
                 
+                # Agrupar por nombre + matriz + técnica + categoría (igual que en admin)
+                metodologias_agrupadas = {}
+                for m in metodologias_raw:
+                    nombre = m.get('nombre') or ''
+                    matriz = m.get('matriz') or ''
+                    tecnica = m.get('tecnica') or ''
+                    categoria = m.get('categoria') or 'otros'
+                    group_key = (nombre, matriz, tecnica, categoria)
+                    if group_key not in metodologias_agrupadas:
+                        metodologias_agrupadas[group_key] = {
+                            'acreditada': m.get('acreditada', False)
+                        }
+                
                 # Contar metodologías únicas totales
-                total_count = len(metodologias_unicas)
+                total_count = len(metodologias_agrupadas)
                 
                 # Contar metodologías acreditadas únicas
-                metodologias_acreditadas_unicas = [m for m in metodologias_unicas if m.get('acreditada', False)]
+                metodologias_acreditadas_unicas = [g for g in metodologias_agrupadas.values() if g.get('acreditada', False)]
                 total_acreditadas_count = len(metodologias_acreditadas_unicas)
                 
                 # Agregar información sobre el total de metodologías al contexto
