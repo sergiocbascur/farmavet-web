@@ -2768,7 +2768,8 @@ def api_chatbot_search():
                 total_acreditadas_count = len(metodologias_acreditadas_unicas)
                 
                 # Agregar información sobre el total de metodologías al contexto
-                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS:\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}\n\nNOTA: Una metodología se define por la combinación única de nombre + matriz + técnica. Si una metodología se aplica a múltiples analitos o tiene diferentes límites, sigue siendo UNA metodología."
+                # IMPORTANTE: Este número se calcula dinámicamente en cada consulta, siempre está actualizado
+                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL):\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}\n\nNOTA IMPORTANTE: Estos números se calculan dinámicamente cada vez que se consulta y siempre reflejan el estado actual de la base de datos. Una metodología se define por la combinación única de nombre + matriz + técnica + categoría. Si una metodología se aplica a múltiples analitos o tiene diferentes límites, sigue siendo UNA metodología."
                 
                 # Obtener TODAS las metodologías agrupadas por nombre (para incluir context completo)
                 # Esto permite que Perplexity busque inteligentemente incluso cuando la búsqueda local no encuentra resultados
@@ -2937,10 +2938,12 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Ejemplo: "organoclorados en harina no?" → Si existe, responde "Sí, tenemos metodología para organoclorados en harina mediante GC-ECD."
 
 5. PREGUNTAS SOBRE CANTIDAD DE METODOLOGÍAS:
-   - Si preguntan "cuántas metodologías tienen?", "cuántas metodologías acreditadas?", etc.
-   - Busca en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS"
-   - Usa EXACTAMENTE los números que aparecen ahí (total de metodologías activas y total de acreditadas)
-   - PROHIBIDO inventar números como 25, 30, 50, etc. Si no encuentras la información en el contexto, di que no tienes ese dato específico
+   - Si preguntan "cuántas metodologías tienen?", "cuántas metodologías acreditadas?", "cuántas metodologías tienen en total?", etc.
+   - Busca OBLIGATORIAMENTE en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)"
+   - Usa EXACTAMENTE los números que aparecen ahí - estos números se calculan dinámicamente y siempre están actualizados
+   - PROHIBIDO inventar números como 25, 30, 50, 100, 164, etc.
+   - PROHIBIDO usar números de respuestas anteriores o de tu conocimiento general
+   - Si no encuentras la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" en el contexto, di: "No tengo acceso al número actualizado de metodologías en este momento. Te recomiendo contactarnos al email farmavet@uchile.cl para información actualizada."
 
 6. PREGUNTAS SOBRE CONTACTO:
    - Email general: farmavet@uchile.cl
@@ -3001,9 +3004,10 @@ CRÍTICO - DISTINGUIR TIPOS DE PREGUNTAS:
    → Busca en FAQ, servicios principales, o responde honestamente si no hay información
    → NO confundas con metodologías analíticas
 
-3. PREGUNTAS SOBRE CANTIDAD: "cuántas metodologías?", "cuántas acreditadas?"
-   → Busca en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" y usa EXACTAMENTE esos números
-   → PROHIBIDO inventar números
+3. PREGUNTAS SOBRE CANTIDAD: "cuántas metodologías?", "cuántas acreditadas?", "cuántas tienen en total?"
+   → Busca OBLIGATORIAMENTE en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)" y usa EXACTAMENTE esos números
+   → Estos números se calculan dinámicamente y siempre están actualizados
+   → PROHIBIDO inventar números - usa SOLO los números del contexto
 
 4. PREGUNTAS SOBRE CONTACTO: "correo?", "teléfono?", "dirección?", "horario?"
    → Usa la información de CONTACTO FARMAVET
@@ -3032,8 +3036,9 @@ PRINCIPIO FUNDAMENTAL: Si NO está en el contexto proporcionado = NO existe y NO
 - ⚠️ Para confirmar una metodología, debe estar EXPLÍCITAMENTE en "METODOLOGÍAS RELEVANTES ENCONTRADAS" o "METODOLOGÍAS DISPONIBLES" con sus detalles completos (analitos, matrices, técnicas)
 - ⚠️ Si la pregunta es sobre algo que NO está en el contexto, responde honestamente: "No encontré información sobre [tema específico] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
 - ⚠️ NO uses frases como "generalmente", "típicamente", "suele ser" - SOLO usa información específica del contexto proporcionado
-- ⚠️ PROHIBIDO inventar números o cantidades - Si preguntan "cuántas metodologías tienen?", usa SOLO el número que aparece en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" del contexto. NO inventes números como 25, 30, 50, etc.
-- ⚠️ Para preguntas sobre cantidad total de metodologías, busca en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" y usa EXACTAMENTE esos números
+- ⚠️ PROHIBIDO inventar números o cantidades - Si preguntan "cuántas metodologías tienen?", usa SOLO el número que aparece en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)" del contexto. NO inventes números como 25, 30, 50, 100, 164, etc.
+- ⚠️ Los números en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" se calculan dinámicamente en cada consulta y siempre reflejan el estado actual - usa EXACTAMENTE esos números
+- ⚠️ Para preguntas sobre cantidad total de metodologías, busca OBLIGATORIAMENTE en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)" y usa EXACTAMENTE esos números
 - Razona sobre el contexto completo antes de responder, incluyendo lo que se mencionó anteriormente en la conversación
 - Si hay información contradictoria o ambigua en el contexto, prioriza la más específica y reciente
 - Responde de forma natural y conversacional, pero siempre basándote SOLO en el contexto proporcionado.
