@@ -2738,6 +2738,16 @@ def api_chatbot_search():
             try:
                 conn = get_db()
                 
+                # Obtener conteo total de metodologías (para preguntas sobre cantidad)
+                total_metodologias = conn.execute('SELECT COUNT(*) as total FROM metodologias WHERE activo = 1').fetchone()
+                total_acreditadas = conn.execute('SELECT COUNT(*) as total FROM metodologias WHERE activo = 1 AND acreditada = 1').fetchone()
+                
+                total_count = total_metodologias['total'] if total_metodologias else 0
+                total_acreditadas_count = total_acreditadas['total'] if total_acreditadas else 0
+                
+                # Agregar información sobre el total de metodologías al contexto
+                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS:\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}"
+                
                 # Obtener TODAS las metodologías agrupadas por nombre (para incluir context completo)
                 # Esto permite que Perplexity busque inteligentemente incluso cuando la búsqueda local no encuentra resultados
                 metodologias = conn.execute('''
@@ -2783,7 +2793,8 @@ def api_chatbot_search():
                         met_list.append(metodo_str)
                     
                     if met_list:
-                        local_context += f"\n\nMETODOLOGÍAS DISPONIBLES EN FARMAVET (lista completa):\n- " + "\n- ".join(met_list)
+                        local_context += f"\n\nMETODOLOGÍAS DISPONIBLES EN FARMAVET (muestra de hasta 50 metodologías de un total de {total_count}):\n- " + "\n- ".join(met_list)
+                        local_context += f"\n\nNOTA: La lista anterior muestra hasta 50 metodologías como ejemplo. El total de metodologías activas en FARMAVET es {total_count}, de las cuales {total_acreditadas_count} están acreditadas ISO 17025."
                 
                 # Obtener servicios principales
                 try:
@@ -2903,13 +2914,19 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Si preguntan "no hacen X en Y?", busca metodologías que coincidan y responde directamente
    - Ejemplo: "organoclorados en harina no?" → Si existe, responde "Sí, tenemos metodología para organoclorados en harina mediante GC-ECD."
 
-5. PREGUNTAS SOBRE CONTACTO:
+5. PREGUNTAS SOBRE CANTIDAD DE METODOLOGÍAS:
+   - Si preguntan "cuántas metodologías tienen?", "cuántas metodologías acreditadas?", etc.
+   - Busca en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS"
+   - Usa EXACTAMENTE los números que aparecen ahí (total de metodologías activas y total de acreditadas)
+   - PROHIBIDO inventar números como 25, 30, 50, etc. Si no encuentras la información en el contexto, di que no tienes ese dato específico
+
+6. PREGUNTAS SOBRE CONTACTO:
    - Email general: farmavet@uchile.cl
    - Email programas académicos: postitulo@veterinaria.uchile.cl
    - Dirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile
    - Horario: L-V 09:00-17:30 hrs
 
-6. PREGUNTAS SOBRE SERVICIOS Y OPERACIONES DEL LABORATORIO:
+7. PREGUNTAS SOBRE SERVICIOS Y OPERACIONES DEL LABORATORIO:
    - Estas preguntas NO son sobre metodologías analíticas, sino sobre capacidades del laboratorio
    - Ejemplos de este tipo de preguntas:
      * "pueden generar informes en inglés?" / "informes en inglés?" / "reportes en inglés?"
@@ -2920,11 +2937,11 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Para estas preguntas: Si la información NO está disponible en el contexto proporcionado, responde honestamente: "No tengo esa información disponible. Te recomiendo contactarnos al email farmavet@uchile.cl o usar el formulario de contacto en nuestra página web para consultas sobre [servicio específico]."
    - NO inventes respuestas ni menciones metodologías analíticas cuando la pregunta es sobre servicios
 
-7. PREGUNTAS SOBRE SERVICIOS GENERALES:
+8. PREGUNTAS SOBRE SERVICIOS GENERALES:
    - Si preguntan sobre servicios generales, menciona los servicios principales del contexto (si están disponibles en tarjetas_destacadas)
    - Si preguntan sobre algo específico que no está en el contexto, busca primero en FAQ, luego responde honestamente si no hay información
 
-8. INTERPRETACIÓN DE PREGUNTAS AMBIGUAS:
+9. INTERPRETACIÓN DE PREGUNTAS AMBIGUAS:
    - Si una pregunta es ambigua pero hay contexto previo, usa ese contexto
    - Ejemplo: Si preguntaron "organoclorados?" y luego "en que matrices?", interpreta "matrices" como las matrices donde se analizan organoclorados (músculo, aceite, harina), NO como técnicas analíticas
    - Si la pregunta puede ser sobre metodologías O servicios, prioriza el contexto de la conversación anterior
@@ -2962,15 +2979,19 @@ CRÍTICO - DISTINGUIR TIPOS DE PREGUNTAS:
    → Busca en FAQ, servicios principales, o responde honestamente si no hay información
    → NO confundas con metodologías analíticas
 
-3. PREGUNTAS SOBRE CONTACTO: "correo?", "teléfono?", "dirección?", "horario?"
+3. PREGUNTAS SOBRE CANTIDAD: "cuántas metodologías?", "cuántas acreditadas?"
+   → Busca en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" y usa EXACTAMENTE esos números
+   → PROHIBIDO inventar números
+
+4. PREGUNTAS SOBRE CONTACTO: "correo?", "teléfono?", "dirección?", "horario?"
    → Usa la información de CONTACTO FARMAVET
 
-4. PREGUNTAS AMBIGUAS:
+5. PREGUNTAS AMBIGUAS:
    - Si preguntan "pueden X?" sin contexto claro, determina si es sobre metodologías o servicios
    - Si es sobre "informes", "reportes", "traducción", "idioma", "formato", es sobre SERVICIOS, NO metodologías
    - Si es sobre "analizan X?", "hacen análisis de Y?", es sobre METODOLOGÍAS
 
-5. PREGUNTAS DE SEGUIMIENTO (crítico):
+6. PREGUNTAS DE SEGUIMIENTO (crítico):
    - Si hay METODOLOGÍAS RELEVANTES ENCONTRADAS en el contexto, usa esa información como contexto previo
    - Las preguntas cortas como "en que matrices?", "no hacen en X?", "que limites tiene?" se refieren al tema mencionado anteriormente
    - Ejemplo: Si el contexto muestra "organoclorados musculo", "organoclorados aceite" y luego preguntan "no hacen en harina?", busca "organoclorados harina" en el contexto completo
@@ -2989,6 +3010,8 @@ PRINCIPIO FUNDAMENTAL: Si NO está en el contexto proporcionado = NO existe y NO
 - ⚠️ Para confirmar una metodología, debe estar EXPLÍCITAMENTE en "METODOLOGÍAS RELEVANTES ENCONTRADAS" o "METODOLOGÍAS DISPONIBLES" con sus detalles completos (analitos, matrices, técnicas)
 - ⚠️ Si la pregunta es sobre algo que NO está en el contexto, responde honestamente: "No encontré información sobre [tema específico] en nuestra base de datos. Te recomiendo contactarnos al email farmavet@uchile.cl para más información."
 - ⚠️ NO uses frases como "generalmente", "típicamente", "suele ser" - SOLO usa información específica del contexto proporcionado
+- ⚠️ PROHIBIDO inventar números o cantidades - Si preguntan "cuántas metodologías tienen?", usa SOLO el número que aparece en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" del contexto. NO inventes números como 25, 30, 50, etc.
+- ⚠️ Para preguntas sobre cantidad total de metodologías, busca en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" y usa EXACTAMENTE esos números
 - Razona sobre el contexto completo antes de responder, incluyendo lo que se mencionó anteriormente en la conversación
 - Si hay información contradictoria o ambigua en el contexto, prioriza la más específica y reciente
 - Responde de forma natural y conversacional, pero siempre basándote SOLO en el contexto proporcionado.
