@@ -1756,3 +1756,24 @@ msgstr "Microbiology"
 msgid "Otros Análisis"
 msgstr "Other Analyses"
 
+msgid "Preguntas Frecuentes"
+msgstr "Frequently Asked Questions"
+
+msgid "Resolvemos tus dudas sobre nuestros servicios"
+msgstr "We answer your questions about our services"
+
+msgid "Encuentra respuestas rápidas a las preguntas más comunes sobre nuestros servicios analíticos, procesos, tiempos, costos y metodologías. Si no encuentras lo que buscas, contáctanos directamente."
+msgstr "Find quick answers to the most common questions about our analytical services, processes, times, costs and methodologies. If you don't find what you're looking for, contact us directly."
+
+msgid "No hay preguntas frecuentes disponibles en este momento."
+msgstr "No frequently asked questions are available at this time."
+
+msgid "Contactar directamente"
+msgstr "Contact directly"
+
+msgid "¿No encuentras tu respuesta?"
+msgstr "Can't find your answer?"
+
+msgid "Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte."
+msgstr "If you have a specific question that is not on this list, do not hesitate to contact us. We are here to help you."
+
