@@ -2646,6 +2646,43 @@ def api_chatbot_search():
         # OPTIMIZACIÓN: Reducir contexto para ahorrar tokens
         local_context = ""
         
+        # SIEMPRE obtener el conteo total de metodologías (independientemente de si hay local_results)
+        # Esto es crítico para preguntas sobre cantidad
+        try:
+            conn = get_db()
+            metodologias_raw = conn.execute('''
+                SELECT nombre, matriz, tecnica, categoria, acreditada
+                FROM metodologias 
+                WHERE activo = 1
+            ''').fetchall()
+            
+            # Agrupar por nombre + matriz + técnica + categoría (igual que en admin)
+            metodologias_agrupadas = {}
+            for m in metodologias_raw:
+                nombre = m.get('nombre') or ''
+                matriz = m.get('matriz') or ''
+                tecnica = m.get('tecnica') or ''
+                categoria = m.get('categoria') or 'otros'
+                group_key = (nombre, matriz, tecnica, categoria)
+                if group_key not in metodologias_agrupadas:
+                    metodologias_agrupadas[group_key] = {
+                        'acreditada': m.get('acreditada', False)
+                    }
+            
+            # Contar metodologías únicas totales
+            total_count = len(metodologias_agrupadas)
+            
+            # Contar metodologías acreditadas únicas
+            metodologias_acreditadas_unicas = [g for g in metodologias_agrupadas.values() if g.get('acreditada', False)]
+            total_acreditadas_count = len(metodologias_acreditadas_unicas)
+            
+            # Agregar información sobre el total de metodologías al contexto (SIEMPRE)
+            local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL):\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}\n\nNOTA IMPORTANTE: Estos números se calculan dinámicamente cada vez que se consulta y siempre reflejan el estado actual de la base de datos. Una metodología se define por la combinación única de nombre + matriz + técnica + categoría."
+            
+            conn.close()
+        except Exception as e:
+            app.logger.warning(f'Error al obtener conteo de metodologías: {str(e)}')
+        
         # Información de contacto (solo para consultas generales o cuando no hay resultados locales)
         if not local_results or is_general_query:
             local_context += "\n\nCONTACTO FARMAVET:\nDirección: Av. Santa Rosa 11735, La Pintana, Santiago, Chile\nEmail: farmavet@uchile.cl\nHorario: L-V 09:00-17:30 hrs"
@@ -2737,39 +2774,6 @@ def api_chatbot_search():
         if include_local and not local_results:
             try:
                 conn = get_db()
-                
-                # Obtener conteo total de metodologías ÚNICAS (agrupadas por nombre + matriz + técnica + categoría)
-                # Esto cuenta metodologías reales, no registros individuales de analitos
-                # Usar el mismo criterio de agrupación que en admin_metodologias
-                metodologias_raw = conn.execute('''
-                    SELECT nombre, matriz, tecnica, categoria, acreditada
-                    FROM metodologias 
-                    WHERE activo = 1
-                ''').fetchall()
-                
-                # Agrupar por nombre + matriz + técnica + categoría (igual que en admin)
-                metodologias_agrupadas = {}
-                for m in metodologias_raw:
-                    nombre = m.get('nombre') or ''
-                    matriz = m.get('matriz') or ''
-                    tecnica = m.get('tecnica') or ''
-                    categoria = m.get('categoria') or 'otros'
-                    group_key = (nombre, matriz, tecnica, categoria)
-                    if group_key not in metodologias_agrupadas:
-                        metodologias_agrupadas[group_key] = {
-                            'acreditada': m.get('acreditada', False)
-                        }
-                
-                # Contar metodologías únicas totales
-                total_count = len(metodologias_agrupadas)
-                
-                # Contar metodologías acreditadas únicas
-                metodologias_acreditadas_unicas = [g for g in metodologias_agrupadas.values() if g.get('acreditada', False)]
-                total_acreditadas_count = len(metodologias_acreditadas_unicas)
-                
-                # Agregar información sobre el total de metodologías al contexto
-                # IMPORTANTE: Este número se calcula dinámicamente en cada consulta, siempre está actualizado
-                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL):\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}\n\nNOTA IMPORTANTE: Estos números se calculan dinámicamente cada vez que se consulta y siempre reflejan el estado actual de la base de datos. Una metodología se define por la combinación única de nombre + matriz + técnica + categoría. Si una metodología se aplica a múltiples analitos o tiene diferentes límites, sigue siendo UNA metodología."
                 
                 # Obtener TODAS las metodologías agrupadas por nombre (para incluir context completo)
                 # Esto permite que Perplexity busque inteligentemente incluso cuando la búsqueda local no encuentra resultados
