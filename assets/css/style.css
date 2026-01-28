@@ -3774,6 +3774,8 @@ div[data-hero-slide].card .cta-link-red:focus,
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
+  min-width: 48px;
+  text-align: center;
 }
 
 .metodologias-badge-success {
