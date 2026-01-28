@@ -2738,15 +2738,23 @@ def api_chatbot_search():
             try:
                 conn = get_db()
                 
-                # Obtener conteo total de metodologías (para preguntas sobre cantidad)
-                total_metodologias = conn.execute('SELECT COUNT(*) as total FROM metodologias WHERE activo = 1').fetchone()
-                total_acreditadas = conn.execute('SELECT COUNT(*) as total FROM metodologias WHERE activo = 1 AND acreditada = 1').fetchone()
+                # Obtener conteo total de metodologías ÚNICAS (agrupadas por nombre + matriz + técnica)
+                # Esto cuenta metodologías reales, no registros individuales de analitos
+                metodologias_unicas = conn.execute('''
+                    SELECT DISTINCT nombre, matriz, tecnica, categoria, acreditada
+                    FROM metodologias 
+                    WHERE activo = 1
+                ''').fetchall()
                 
-                total_count = total_metodologias['total'] if total_metodologias else 0
-                total_acreditadas_count = total_acreditadas['total'] if total_acreditadas else 0
+                # Contar metodologías únicas totales
+                total_count = len(metodologias_unicas)
+                
+                # Contar metodologías acreditadas únicas
+                metodologias_acreditadas_unicas = [m for m in metodologias_unicas if m.get('acreditada', False)]
+                total_acreditadas_count = len(metodologias_acreditadas_unicas)
                 
                 # Agregar información sobre el total de metodologías al contexto
-                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS:\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}"
+                local_context += f"\n\nINFORMACIÓN GENERAL SOBRE METODOLOGÍAS:\n- Total de metodologías activas en FARMAVET: {total_count}\n- Total de metodologías acreditadas ISO 17025: {total_acreditadas_count}\n\nNOTA: Una metodología se define por la combinación única de nombre + matriz + técnica. Si una metodología se aplica a múltiples analitos o tiene diferentes límites, sigue siendo UNA metodología."
                 
                 # Obtener TODAS las metodologías agrupadas por nombre (para incluir context completo)
                 # Esto permite que Perplexity busque inteligentemente incluso cuando la búsqueda local no encuentra resultados
