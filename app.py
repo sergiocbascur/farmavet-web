@@ -2868,12 +2868,24 @@ def api_chatbot_search():
                 app.logger.warning(f'Error al obtener contexto local: {str(e)}')
         
         # Construir el prompt contextual mejorado con mejor manejo de contexto y razonamiento
+        # Extraer el número de metodologías del contexto local para destacarlo
+        metodologias_info = ""
+        if "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" in local_context:
+            import re
+            match = re.search(r'Total de metodologías activas en FARMAVET: (\d+)', local_context)
+            if match:
+                num_metodologias = match.group(1)
+                num_acreditadas_match = re.search(r'Total de metodologías acreditadas ISO 17025: (\d+)', local_context)
+                num_acreditadas = num_acreditadas_match.group(1) if num_acreditadas_match else "N/A"
+                metodologias_info = f"\n\n🔢 NÚMERO EXACTO DE METODOLOGÍAS (USA ESTE NÚMERO, NO INVENTES):\n- Total metodologías activas: {num_metodologias}\n- Total acreditadas: {num_acreditadas}\n\n⚠️ CRÍTICO: Si preguntan sobre cantidad de metodologías, usa EXACTAMENTE estos números: {num_metodologias} metodologías activas, {num_acreditadas} acreditadas. PROHIBIDO usar otros números como 25, 30, 50, etc.\n"
+        
         context = f"""Eres FARMA, el asistente virtual inteligente del Laboratorio FARMAVET de la Universidad de Chile.
 
-⚠️ RESTRICCIONES CRÍTICAS - LEE ESTO PRIMERO:
+{metodologias_info}⚠️ RESTRICCIONES CRÍTICAS - LEE ESTO PRIMERO:
 - PROHIBIDO buscar información en internet o usar capacidades de búsqueda web
 - PROHIBIDO usar conocimiento general de tu entrenamiento sobre metodologías analíticas
 - PROHIBIDO inventar, inferir o asumir información que NO está explícitamente en el contexto proporcionado
+- PROHIBIDO inventar números - Si preguntan "cuántas metodologías?", busca el número EXACTO en "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" del contexto
 - SOLO puedes usar la información que se te proporciona a continuación en "CONTEXTO DISPONIBLE DE FARMAVET"
 - Si la información NO está en el contexto proporcionado, debes decir que no la tienes disponible
 
@@ -2937,13 +2949,16 @@ IMPORTANTE: Distingue entre preguntas sobre METODOLOGÍAS ANALÍTICAS y pregunta
    - Si preguntan "no hacen X en Y?", busca metodologías que coincidan y responde directamente
    - Ejemplo: "organoclorados en harina no?" → Si existe, responde "Sí, tenemos metodología para organoclorados en harina mediante GC-ECD."
 
-5. PREGUNTAS SOBRE CANTIDAD DE METODOLOGÍAS:
-   - Si preguntan "cuántas metodologías tienen?", "cuántas metodologías acreditadas?", "cuántas metodologías tienen en total?", etc.
-   - Busca OBLIGATORIAMENTE en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)"
-   - Usa EXACTAMENTE los números que aparecen ahí - estos números se calculan dinámicamente y siempre están actualizados
-   - PROHIBIDO inventar números como 25, 30, 50, 100, 164, etc.
-   - PROHIBIDO usar números de respuestas anteriores o de tu conocimiento general
+5. PREGUNTAS SOBRE CANTIDAD DE METODOLOGÍAS (CRÍTICO - LEE CON ATENCIÓN):
+   - Si preguntan "cuántas metodologías tienen?", "cuántas metodologías acreditadas?", "cuántas metodologías tienen en total?", "cuántas metodologías disponibles?", etc.
+   - PASO 1: Busca OBLIGATORIAMENTE en el contexto la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS (ACTUALIZADA EN TIEMPO REAL)"
+   - PASO 2: Extrae EXACTAMENTE los números que aparecen ahí (ej: "Total de metodologías activas en FARMAVET: X")
+   - PASO 3: Usa EXACTAMENTE esos números en tu respuesta - NO los modifiques, NO los redondees, NO uses aproximaciones
+   - ⚠️ PROHIBIDO ABSOLUTO inventar números como 25, 24, 30, 50, 100, 164, etc.
+   - ⚠️ PROHIBIDO usar números de tu conocimiento general o entrenamiento
+   - ⚠️ PROHIBIDO decir "aproximadamente" o "alrededor de" - usa el número EXACTO del contexto
    - Si no encuentras la sección "INFORMACIÓN GENERAL SOBRE METODOLOGÍAS" en el contexto, di: "No tengo acceso al número actualizado de metodologías en este momento. Te recomiendo contactarnos al email farmavet@uchile.cl para información actualizada."
+   - EJEMPLO CORRECTO: Si el contexto dice "Total de metodologías activas: 45", responde "Tenemos 45 metodologías activas" (NO digas 25, 30, 50, etc.)
 
 6. PREGUNTAS SOBRE CONTACTO:
    - Email general: farmavet@uchile.cl
@@ -3076,7 +3091,7 @@ Ahora, razona sobre el contexto completo y la siguiente pregunta, y responde de 
                         "content": query
                     }
                 ],
-                "temperature": 0.7,  # Aumentado para respuestas más naturales y conversacionales
+                "temperature": 0.3,  # Reducido para respuestas más precisas y menos creativas (evitar invenciones)
                 "max_tokens": 500,  # Aumentado para respuestas más completas y detalladas
                 # Nota: deepseek-chat NO tiene capacidad de búsqueda web, solo deepseek-reasoner la tiene
             }
