@@ -2504,7 +2504,7 @@ def api_chatbot_context():
         context_info = {
             'contacto': {
                 'direccion': 'Av. Santa Rosa 11735, La Pintana, Santiago, Chile',
-                'telefono': '+56 2 2978 XXXX',
+                'telefono': '+56 2 2978 0358 / +56 2 2978 5580',
                 'email': 'farmavet@uchile.cl',
                 'horario': 'Lunes a viernes, 09:00 a 17:30 hrs',
                 'horario_atencion': 'Atención presencial con agendamiento previo'

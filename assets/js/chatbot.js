@@ -1654,7 +1654,7 @@ class MetodologiasChatbot {
             <p>Información de contacto de FARMAVET:</p>
             <ul class="chatbot-examples">
                 <li><strong>Dirección:</strong> Av. Santa Rosa 11735, La Pintana, Santiago, Chile</li>
-                <li><strong>Teléfono:</strong> +56 2 2978 XXXX</li>
+                <li><strong>Teléfono:</strong> +56 2 2978 0358 / +56 2 2978 5580</li>
                 <li><strong>Email:</strong> farmavet@uchile.cl</li>
                 <li><strong>Horario:</strong> Lunes a viernes, 09:00 a 17:30 hrs</li>
                 <li><strong>Atención:</strong> Presencial con agendamiento previo</li>
