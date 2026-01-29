@@ -87,7 +87,7 @@ msgstr "Trayectoria en cifras"
 msgid "30+ años de experiencia"
 msgstr "30+ años de experiencia"
 
-msgid "70+ metodologías acreditadas"
+msgid "50+ metodologías acreditadas"
 msgstr "50+ metodologías acreditadas"
 
 msgid "Red de alianzas público-privadas"
@@ -102,7 +102,7 @@ msgstr "Acompañamos a la industria y a la autoridad sanitaria con un enfoque in
 msgid "Servicio de Análisis"
 msgstr "Servicio de Análisis"
 
-msgid "Más de 70 metodologías analíticas acreditadas, cobertura nacional e infraestructura de última generación en cromatografía y espectrometría de masas."
+msgid "Más de 50 metodologías analíticas acreditadas, cobertura nacional e infraestructura de última generación en cromatografía y espectrometría de masas."
 msgstr "Más de 50 metodologías analíticas acreditadas, cobertura nacional e infraestructura de última generación en cromatografía y espectrometría de masas."
 
 msgid "Ver metodologías"
