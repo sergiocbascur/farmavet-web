@@ -88,7 +88,7 @@ msgid "30+ años de experiencia"
 msgstr "30+ years of experience"
 
 msgid "70+ metodologías acreditadas"
-msgstr "70+ accredited methodologies"
+msgstr "50+ accredited methodologies"
 
 msgid "Red de alianzas público-privadas"
 msgstr "Public-private partnership network"
@@ -103,7 +103,7 @@ msgid "Servicio de Análisis"
 msgstr "Analysis Services"
 
 msgid "Más de 70 metodologías analíticas acreditadas, cobertura nacional e infraestructura de última generación en cromatografía y espectrometría de masas."
-msgstr "Over 70 accredited analytical methodologies, national coverage, and state-of-the-art infrastructure in chromatography and mass spectrometry."
+msgstr "Over 50 accredited analytical methodologies, national coverage, and state-of-the-art infrastructure in chromatography and mass spectrometry."
 
 msgid "Ver metodologías"
 msgstr "View methodologies"
@@ -321,7 +321,7 @@ msgid "Servicios analíticos acreditados"
 msgstr "Accredited analytical services"
 
 msgid "Más de 70 metodologías para asegurar la inocuidad alimentaria"
-msgstr "Over 70 methodologies to ensure food safety"
+msgstr "Over 50 methodologies to ensure food safety"
 
 msgid "Contamos con infraestructura de última generación (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) y un equipo multidisciplinario certificado bajo ISO 17025 para garantizar resultados confiables y trazables."
 msgstr "We have state-of-the-art infrastructure (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) and a multidisciplinary team certified under ISO 17025 to ensure reliable and traceable results."
@@ -1697,7 +1697,7 @@ msgid "Acreditación ISO 17025 desde 2004"
 msgstr "ISO 17025 Accreditation since 2004"
 
 msgid "+70 metodologías acreditadas"
-msgstr "+70 accredited methodologies"
+msgstr "+50 accredited methodologies"
 
 msgid "ISO 17025"
 msgstr "ISO 17025"
@@ -1715,13 +1715,13 @@ msgid "Realizamos análisis de residuos químicos, antibióticos, micotoxinas y 
 msgstr "We perform analysis of chemical residues, antibiotics, mycotoxins, and microbiological contaminants in meat, milk, fish, eggs, and processed products, using ISO 17025 accredited methodologies. We have state-of-the-art infrastructure (UPLC-MS/MS, HRGC-HRMS, LC-MS/MS, GC-MS, HPLC-DAD/FL) and a certified multidisciplinary team to guarantee reliable and traceable results."
 
 msgid "Ofrecemos más de 70 metodologías analíticas acreditadas para el control de residuos de medicamentos veterinarios, antibióticos, micotoxinas, contaminantes químicos y microbiológicos en matrices hidrobiológicas (salmón, trucha, mariscos), pecuarias (carne, leche, huevos) y productos derivados."
-msgstr "We offer more than 70 accredited analytical methodologies for the control of residues of veterinary drugs, antibiotics, mycotoxins, chemical and microbiological contaminants in hydrobiological matrices (salmon, trout, shellfish), livestock matrices (meat, milk, eggs), and derived products."
+msgstr "We offer more than 50 accredited analytical methodologies for the control of residues of veterinary drugs, antibiotics, mycotoxins, chemical and microbiological contaminants in hydrobiological matrices (salmon, trout, shellfish), livestock matrices (meat, milk, eggs), and derived products."
 
 msgid "Metodologías Analíticas Acreditadas"
 msgstr "Accredited Analytical Methodologies"
 
 msgid "Busca entre más de 70 metodologías acreditadas ISO 17025. Ingresa el nombre de la metodología, analito o matriz que necesitas analizar."
-msgstr "Search among more than 70 ISO 17025 accredited methodologies. Enter the name of the methodology, analyte, or matrix you need to analyze."
+msgstr "Search among more than 50 ISO 17025 accredited methodologies. Enter the name of the methodology, analyte, or matrix you need to analyze."
 
 msgid "Buscar metodología, analito, matriz o técnica..."
 msgstr "Search methodology, analyte, matrix or technique..."
@@ -1776,4 +1776,3 @@ msgstr "Can't find your answer?"
 
 msgid "Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte."
 msgstr "If you have a specific question that is not on this list, do not hesitate to contact us. We are here to help you."
-
