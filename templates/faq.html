@@ -28,6 +28,29 @@
     <meta name="twitter:title" content="Preguntas Frecuentes | FARMAVET" />
     <meta name="twitter:description" content="Preguntas frecuentes sobre servicios analíticos, procesos, tiempos, costos y metodologías del Laboratorio FARMAVET." />
     <meta name="twitter:image" content="https://www.laboratoriofarmavet.cl/assets/images/hero-servicio-analisis.jpg" />
+    {% if faqs_por_categoria %}
+    <!-- Schema.org FAQPage para Google y asistentes IA -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {% for categoria, faqs_cat in faqs_por_categoria.items() %}
+        {% for faq in faqs_cat %}
+        {
+          "@type": "Question",
+          "name": {{ (get_translated_field(faq, 'pregunta') or faq.pregunta)|tojson }},
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": {{ (get_translated_field(faq, 'respuesta') or faq.respuesta)|tojson }}
+          }
+        }{% if not (loop.parent.loop.last and loop.last) %},{% endif %}
+        {% endfor %}
+        {% endfor %}
+      ]
+    }
+    </script>
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

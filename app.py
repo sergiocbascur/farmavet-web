@@ -5767,6 +5767,7 @@ def sitemap():
     pages = [
         {'loc': '/', 'changefreq': 'weekly', 'priority': '1.0'},
         {'loc': '/quienes-somos.html', 'changefreq': 'monthly', 'priority': '0.9'},
+        {'loc': '/equipo.html', 'changefreq': 'monthly', 'priority': '0.8'},
         {'loc': '/servicios.html', 'changefreq': 'weekly', 'priority': '1.0'},
         {'loc': '/investigacion.html', 'changefreq': 'weekly', 'priority': '0.9'},
         {'loc': '/docencia.html', 'changefreq': 'monthly', 'priority': '0.8'},
