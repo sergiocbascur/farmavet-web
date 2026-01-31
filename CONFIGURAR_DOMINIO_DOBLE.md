@@ -3,7 +3,7 @@
 ## Objetivo
 Hacer que la web sea accesible desde:
 - `test.farmavet-bodega.cl` (ya configurado)
-- `sitio.laboratoriofarmavet.cl` (nuevo)
+- `laboratoriofarmavet.cl` (nuevo)
 
 ## Pasos para aplicar en el VPS
 
@@ -50,25 +50,25 @@ sudo systemctl reload nginx
 
 ### 6. Configurar DNS para el nuevo dominio
 
-Asegúrate de que el dominio `sitio.laboratoriofarmavet.cl` apunte a la IP de tu VPS:
+Asegúrate de que el dominio `laboratoriofarmavet.cl` apunte a la IP de tu VPS:
 
 **Registro DNS necesario:**
 - Tipo: `A`
-- Nombre: `sitio.laboratoriofarmavet.cl`
+- Nombre: `laboratoriofarmavet.cl`
 - Valor: `IP_DEL_VPS`
 
 ### 7. Obtener certificado SSL para el nuevo dominio (si usas HTTPS)
 
 **Opción A: Certificado separado**
 ```bash
-sudo certbot certonly --nginx -d sitio.laboratoriofarmavet.cl
+sudo certbot certonly --nginx -d laboratoriofarmavet.cl
 ```
 
 Luego edita `/etc/nginx/sites-available/farmavet-web` y agrega las rutas del certificado para el segundo dominio.
 
 **Opción B: Certificado multi-dominio (recomendado)**
 ```bash
-sudo certbot certonly --nginx -d test.farmavet-bodega.cl -d sitio.laboratoriofarmavet.cl
+sudo certbot certonly --nginx -d test.farmavet-bodega.cl -d laboratoriofarmavet.cl
 ```
 
 Esto creará un certificado que funciona para ambos dominios. Luego actualiza las rutas en el archivo de configuración:
@@ -81,11 +81,11 @@ ssl_certificate_key /etc/letsencrypt/live/test.farmavet-bodega.cl/privkey.pem;
 
 Prueba acceder a ambos dominios:
 - http://test.farmavet-bodega.cl
-- http://sitio.laboratoriofarmavet.cl
+- http://laboratoriofarmavet.cl
 
 Si configuraste SSL:
 - https://test.farmavet-bodega.cl
-- https://sitio.laboratoriofarmavet.cl
+- https://laboratoriofarmavet.cl
 
 ## Notas importantes
 
