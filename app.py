@@ -81,10 +81,32 @@ def rich_content_filter(value):
     if '<' in s and '>' in s:
         try:
             import bleach
+            from bleach.css_sanitizer import CSSSanitizer
             from markupsafe import Markup
             allowed_tags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'img', 'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'blockquote', 'span', 'div']
-            allowed_attrs = {'a': ['href', 'title', 'target', 'rel'], 'img': ['src', 'alt', 'title', 'width', 'height', 'style']}
-            return Markup(bleach.clean(s, tags=allowed_tags, attributes=allowed_attrs, strip=False))
+            _ALIGN_CLASSES = frozenset({'text-justify', 'text-left', 'text-center', 'text-right', 'text-start', 'text-end'})
+
+            def _allow_style_or_align_class(tag, name, value):
+                if name == 'style':
+                    return True  # css_sanitizer lo filtra
+                if name == 'class':
+                    classes = [c.strip() for c in (value or '').split() if c.strip()]
+                    return all(c in _ALIGN_CLASSES for c in classes)
+                return False
+
+            allowed_attrs = {
+                'a': ['href', 'title', 'target', 'rel'],
+                'img': ['src', 'alt', 'title', 'width', 'height', 'style'],
+                'p': _allow_style_or_align_class,
+                'span': _allow_style_or_align_class,
+                'div': _allow_style_or_align_class
+            }
+            # Permitir text-align (justify, center, etc.) y otros estilos seguros
+            css_sanitizer = CSSSanitizer(allowed_css_properties=[
+                'text-align', 'text-indent', 'margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
+                'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right'
+            ])
+            return Markup(bleach.clean(s, tags=allowed_tags, attributes=allowed_attrs, css_sanitizer=css_sanitizer, strip=False))
         except Exception:
             return nl2br_filter(s)
     return nl2br_filter(s)
