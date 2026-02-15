@@ -21,6 +21,7 @@ from email.mime.multipart import MIMEMultipart
 import logging
 import requests
 import re
+import unicodedata
 
 # Configuración de logging
 logging.basicConfig(
@@ -58,6 +59,18 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'es'
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Santiago'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 babel = Babel()
+
+def _slugify(text):
+    """Genera slug URL-friendly desde texto (soporta español)"""
+    if not text or not str(text).strip():
+        return ''
+    text = unicodedata.normalize('NFD', str(text))
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    text = text.lower().strip()
+    text = re.sub(r'[^a-z0-9\s-]', '', text)
+    text = re.sub(r'[\s_]+', '-', text)
+    text = re.sub(r'-+', '-', text).strip('-')
+    return text[:120] if text else ''
 
 # Filtro para convertir saltos de línea en <br> (contenido de noticias)
 @app.template_filter('nl2br')
@@ -310,6 +323,24 @@ def init_db():
     try:
         conn.execute('ALTER TABLE noticias ADD COLUMN categoria_en TEXT')
     except:
+        pass
+    try:
+        conn.execute('ALTER TABLE noticias ADD COLUMN slug TEXT')
+    except:
+        pass
+    # Generar slugs para noticias existentes que no tienen
+    try:
+        sin_slug = conn.execute('SELECT id, titulo FROM noticias WHERE slug IS NULL OR slug = ""').fetchall()
+        slugs_usados = {r['slug'] for r in conn.execute('SELECT slug FROM noticias WHERE slug IS NOT NULL AND slug != ""').fetchall()}
+        for row in sin_slug:
+            base = _slugify(row['titulo'])
+            if not base:
+                continue
+            slug = base if base not in slugs_usados else f'{base}-{row["id"]}'
+            slugs_usados.add(slug)
+            conn.execute('UPDATE noticias SET slug = ? WHERE id = ?', (slug, row['id']))
+        conn.commit()
+    except Exception:
         pass
     
     # Campos de traducción para testimonios
@@ -4317,12 +4348,20 @@ def uploaded_file(filename):
 # NOTICIA COMPLETA (página pública)
 # ============================================
 
-@app.route('/noticia/<int:noticia_id>')
-@app.route('/noticia/<int:noticia_id>.html')
-def noticia_completa(noticia_id):
-    """Muestra el contenido completo de una noticia en una página con formato de la web"""
+@app.route('/noticia/<slug_or_id>')
+@app.route('/noticia/<slug_or_id>.html')
+def noticia_completa(slug_or_id):
+    """Muestra el contenido completo de una noticia. Acepta slug (ej: farmavet-mantiene-operaciones) o id numérico."""
+    slug_or_id = slug_or_id.replace('.html', '') if isinstance(slug_or_id, str) else str(slug_or_id)
     conn = get_db()
-    noticia = conn.execute('SELECT * FROM noticias WHERE id = ? AND activa = 1', (noticia_id,)).fetchone()
+    if slug_or_id.isdigit():
+        noticia = conn.execute('SELECT * FROM noticias WHERE id = ? AND activa = 1', (int(slug_or_id),)).fetchone()
+        # Redirigir a URL con slug si existe (SEO)
+        if noticia and noticia.get('slug'):
+            conn.close()
+            return redirect(url_for('noticia_completa', slug_or_id=noticia['slug']), code=301)
+    else:
+        noticia = conn.execute('SELECT * FROM noticias WHERE slug = ? AND activa = 1', (slug_or_id,)).fetchone()
     conn.close()
     if not noticia:
         abort(404)
@@ -4357,11 +4396,14 @@ def admin_noticia_nuevo():
             imagen_x = float(request.form.get('imagen_x', 0.0) or 0.0)
             imagen_y = float(request.form.get('imagen_y', 0.0) or 0.0)
             
+            titulo = request.form.get('titulo', '').strip()
+            slug_raw = request.form.get('slug', '').strip()
+            slug = _slugify(slug_raw) if slug_raw else _slugify(titulo)
             conn.execute('''
-                INSERT INTO noticias (titulo, resumen, contenido, imagen, imagen_zoom, imagen_x, imagen_y, categoria, fecha, enlace_externo, orden, destacada, activa, titulo_en, resumen_en, contenido_en, categoria_en)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO noticias (titulo, resumen, contenido, imagen, imagen_zoom, imagen_x, imagen_y, categoria, fecha, enlace_externo, orden, destacada, activa, titulo_en, resumen_en, contenido_en, categoria_en, slug)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                request.form.get('titulo', '').strip(),
+                titulo,
                 request.form.get('resumen', '').strip(),
                 request.form.get('contenido', '').strip(),
                 request.form.get('imagen', '').strip(),
@@ -4377,7 +4419,8 @@ def admin_noticia_nuevo():
                 request.form.get('titulo_en', '').strip() or None,
                 request.form.get('resumen_en', '').strip() or None,
                 request.form.get('contenido_en', '').strip() or None,
-                request.form.get('categoria_en', '').strip() or None
+                request.form.get('categoria_en', '').strip() or None,
+                slug or None
             ))
             conn.commit()
             conn.close()
@@ -4400,14 +4443,17 @@ def admin_noticia_editar(noticia_id):
         imagen_x = float(request.form.get('imagen_x', 0.0) or 0.0)
         imagen_y = float(request.form.get('imagen_y', 0.0) or 0.0)
         
+        titulo = request.form.get('titulo', '')
+        slug_raw = request.form.get('slug', '').strip()
+        slug = _slugify(slug_raw) if slug_raw else _slugify(titulo)
         conn.execute('''
             UPDATE noticias 
             SET titulo=?, resumen=?, contenido=?, imagen=?, imagen_zoom=?, imagen_x=?, imagen_y=?, categoria=?, 
                 fecha=?, enlace_externo=?, orden=?, destacada=?, activa=?, 
-                titulo_en=?, resumen_en=?, contenido_en=?, categoria_en=?, updated_at=CURRENT_TIMESTAMP
+                titulo_en=?, resumen_en=?, contenido_en=?, categoria_en=?, slug=?, updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         ''', (
-            request.form.get('titulo'),
+            titulo,
             request.form.get('resumen'),
             request.form.get('contenido'),
             request.form.get('imagen'),
@@ -4424,6 +4470,7 @@ def admin_noticia_editar(noticia_id):
             request.form.get('resumen_en', '').strip() or None,
             request.form.get('contenido_en', '').strip() or None,
             request.form.get('categoria_en', '').strip() or None,
+            slug or None,
             noticia_id
         ))
         conn.commit()
@@ -5849,11 +5896,12 @@ def sitemap():
     try:
         conn = get_db()
         noticias_con_contenido = conn.execute(
-            'SELECT id FROM noticias WHERE activa = 1 AND (contenido IS NOT NULL AND contenido != "" OR contenido_en IS NOT NULL AND contenido_en != "")'
+            'SELECT id, slug FROM noticias WHERE activa = 1 AND (contenido IS NOT NULL AND contenido != "" OR contenido_en IS NOT NULL AND contenido_en != "")'
         ).fetchall()
         conn.close()
         for n in noticias_con_contenido:
-            pages.append({'loc': f'/noticia/{n["id"]}', 'changefreq': 'monthly', 'priority': '0.6'})
+            loc = f'/noticia/{n["slug"]}' if n.get('slug') else f'/noticia/{n["id"]}'
+            pages.append({'loc': loc, 'changefreq': 'monthly', 'priority': '0.6'})
     except Exception:
         pass
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'

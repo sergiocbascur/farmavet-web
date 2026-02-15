@@ -233,7 +233,7 @@
                     {% if get_translated_field(noticia, 'contenido') or noticia.contenido %}
                     <a
                       class="news-link"
-                      href="{{ url_for('noticia_completa', noticia_id=noticia.id) }}"
+                      href="{{ url_for('noticia_completa', slug_or_id=noticia.slug or noticia.id) }}"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

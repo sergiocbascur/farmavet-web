@@ -32,6 +32,21 @@
                            oninput="updatePreview()">
                 </div>
                 
+                <div class="col-12">
+                    <label for="slug" class="form-label">URL amigable (slug) <span class="text-muted">(opcional)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text">/noticia/</span>
+                        <input type="text" class="form-control" id="slug" name="slug" 
+                               value="{{ noticia.slug if noticia and noticia.slug else '' }}" 
+                               placeholder="farmavet-mantiene-operaciones-tras-incendio">
+                        <span class="input-group-text">.html</span>
+                        <button type="button" class="btn btn-outline-secondary" onclick="generateSlug()" title="Generar desde título">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Define la URL de la noticia. Si está vacío, se genera automáticamente desde el título.</small>
+                </div>
+                
                 <div class="col-md-6">
                     <label for="categoria" class="form-label">Categoría</label>
                     <select class="form-select" id="categoria" name="categoria" onchange="updatePreview()">
@@ -296,6 +311,20 @@
             return $(el).summernote('code') || '';
         }
         return el.value || '';
+    }
+    
+    function generateSlug() {
+        const titulo = document.getElementById('titulo').value || '';
+        if (!titulo.trim()) return;
+        const slug = titulo
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/[\s_]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .substring(0, 120);
+        document.getElementById('slug').value = slug;
     }
     
     function updatePreview() {
