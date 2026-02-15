@@ -4317,8 +4317,8 @@ def upload_file():
 def uploaded_file(filename):
     """Sirve archivos subidos desde static/uploads"""
     try:
-        # Construir la ruta completa del archivo usando ruta absoluta
-        upload_folder = os.path.abspath(app.config['UPLOAD_FOLDER'])
+        # Usar app.root_path para que funcione independiente del WorkingDirectory del servicio
+        upload_folder = os.path.abspath(os.path.join(app.root_path, app.config['UPLOAD_FOLDER']))
         file_path = os.path.join(upload_folder, filename)
         
         # Normalizar la ruta para evitar problemas con ../
@@ -4331,8 +4331,8 @@ def uploaded_file(filename):
         
         # Verificar que el archivo existe
         if not os.path.exists(file_path):
-            # Intentar con ruta relativa también
-            rel_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            # Intentar con ruta desde app.root_path
+            rel_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
             if os.path.exists(rel_path):
                 file_path = os.path.abspath(rel_path)
             else:
