@@ -97,7 +97,10 @@ def rich_content_filter(value):
             from bleach.css_sanitizer import CSSSanitizer
             from markupsafe import Markup
             allowed_tags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'img', 'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'blockquote', 'span', 'div']
-            _ALIGN_CLASSES = frozenset({'text-justify', 'text-left', 'text-center', 'text-right', 'text-start', 'text-end'})
+            _ALIGN_CLASSES = frozenset({
+                'text-justify', 'text-left', 'text-center', 'text-right', 'text-start', 'text-end',
+                'float-left', 'float-right', 'float-none', 'pull-left', 'pull-right'  # para imágenes
+            })
 
             def _allow_style_or_align_class(tag, name, value):
                 if name == 'style':
@@ -107,17 +110,26 @@ def rich_content_filter(value):
                     return all(c in _ALIGN_CLASSES for c in classes)
                 return False
 
+            def _allow_img_attrs(tag, name, value):
+                if name in ('src', 'alt', 'title', 'width', 'height', 'style'):
+                    return True
+                if name == 'class':
+                    classes = [c.strip() for c in (value or '').split() if c.strip()]
+                    return all(c in _ALIGN_CLASSES for c in classes)
+                return False
+
             allowed_attrs = {
                 'a': ['href', 'title', 'target', 'rel'],
-                'img': ['src', 'alt', 'title', 'width', 'height', 'style'],
+                'img': _allow_img_attrs,
                 'p': _allow_style_or_align_class,
                 'span': _allow_style_or_align_class,
                 'div': _allow_style_or_align_class
             }
-            # Permitir text-align (justify, center, etc.) y otros estilos seguros
+            # Permitir text-align, float (para imágenes con texto alrededor), márgenes, etc.
             css_sanitizer = CSSSanitizer(allowed_css_properties=[
                 'text-align', 'text-indent', 'margin', 'margin-top', 'margin-bottom', 'margin-left', 'margin-right',
-                'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right'
+                'padding', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right',
+                'float', 'clear', 'width', 'height', 'max-width'
             ])
             return Markup(bleach.clean(s, tags=allowed_tags, attributes=allowed_attrs, css_sanitizer=css_sanitizer, strip=False))
         except Exception:
