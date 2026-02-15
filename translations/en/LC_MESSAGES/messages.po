@@ -1782,3 +1782,6 @@ msgstr "Can't find your answer?"
 
 msgid "Si tienes una pregunta específica que no está en esta lista, no dudes en contactarnos. Estamos aquí para ayudarte."
 msgstr "If you have a specific question that is not on this list, do not hesitate to contact us. We are here to help you."
+
+msgid "Por"
+msgstr "By"

@@ -323,3 +323,6 @@ msgstr "Si tienes una pregunta específica que no está en esta lista, no dudes 
 
 msgid "Contactar a FARMAVET"
 msgstr "Contactar a FARMAVET"
+
+msgid "Por"
+msgstr "Por"

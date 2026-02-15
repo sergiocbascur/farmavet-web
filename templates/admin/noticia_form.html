@@ -69,6 +69,14 @@
                            oninput="updatePreview()">
                 </div>
                 
+                <div class="col-md-6">
+                    <label for="autor" class="form-label">Autor</label>
+                    <input type="text" class="form-control" id="autor" name="autor" 
+                           value="{{ noticia.autor if noticia and noticia.autor else '' }}" 
+                           placeholder="Ej: María González, Equipo FARMAVET">
+                    <small class="text-muted">Créditos al autor o reportero</small>
+                </div>
+                
                 <div class="col-12">
                     <label for="resumen" class="form-label">Resumen</label>
                     <textarea class="form-control" id="resumen" name="resumen" rows="3" oninput="updatePreview()">{{ noticia.resumen if noticia else '' }}</textarea>
@@ -115,6 +123,13 @@
                     <input type="text" class="form-control" id="categoria_en" name="categoria_en" 
                            value="{{ noticia.categoria_en if noticia and noticia.categoria_en else '' }}" 
                            placeholder="Category in English (e.g., Research, Services, Education)">
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="autor_en" class="form-label">Autor (English) <span class="text-muted">(opcional)</span></label>
+                    <input type="text" class="form-control" id="autor_en" name="autor_en" 
+                           value="{{ noticia.autor_en if noticia and noticia.autor_en else '' }}" 
+                           placeholder="Author in English">
                 </div>
                 
                 <div class="col-12">

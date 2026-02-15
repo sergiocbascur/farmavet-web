@@ -340,6 +340,14 @@ def init_db():
         conn.execute('ALTER TABLE noticias ADD COLUMN slug TEXT')
     except:
         pass
+    try:
+        conn.execute('ALTER TABLE noticias ADD COLUMN autor TEXT')
+    except:
+        pass
+    try:
+        conn.execute('ALTER TABLE noticias ADD COLUMN autor_en TEXT')
+    except:
+        pass
     # Generar slugs para noticias existentes que no tienen
     try:
         sin_slug = conn.execute('SELECT id, titulo FROM noticias WHERE slug IS NULL OR slug = ""').fetchall()
@@ -4412,8 +4420,8 @@ def admin_noticia_nuevo():
             slug_raw = request.form.get('slug', '').strip()
             slug = _slugify(slug_raw) if slug_raw else _slugify(titulo)
             conn.execute('''
-                INSERT INTO noticias (titulo, resumen, contenido, imagen, imagen_zoom, imagen_x, imagen_y, categoria, fecha, enlace_externo, orden, destacada, activa, titulo_en, resumen_en, contenido_en, categoria_en, slug)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO noticias (titulo, resumen, contenido, imagen, imagen_zoom, imagen_x, imagen_y, categoria, fecha, autor, enlace_externo, orden, destacada, activa, titulo_en, resumen_en, contenido_en, categoria_en, autor_en, slug)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                 titulo,
                 request.form.get('resumen', '').strip(),
@@ -4424,6 +4432,7 @@ def admin_noticia_nuevo():
                 imagen_y,
                 request.form.get('categoria', '').strip(),
                 request.form.get('fecha', '').strip(),
+                request.form.get('autor', '').strip() or None,
                 request.form.get('enlace_externo', '').strip(),
                 int(request.form.get('orden', 0) or 0),
                 destacada,
@@ -4432,6 +4441,7 @@ def admin_noticia_nuevo():
                 request.form.get('resumen_en', '').strip() or None,
                 request.form.get('contenido_en', '').strip() or None,
                 request.form.get('categoria_en', '').strip() or None,
+                request.form.get('autor_en', '').strip() or None,
                 slug or None
             ))
             conn.commit()
@@ -4461,8 +4471,8 @@ def admin_noticia_editar(noticia_id):
         conn.execute('''
             UPDATE noticias 
             SET titulo=?, resumen=?, contenido=?, imagen=?, imagen_zoom=?, imagen_x=?, imagen_y=?, categoria=?, 
-                fecha=?, enlace_externo=?, orden=?, destacada=?, activa=?, 
-                titulo_en=?, resumen_en=?, contenido_en=?, categoria_en=?, slug=?, updated_at=CURRENT_TIMESTAMP
+                fecha=?, autor=?, enlace_externo=?, orden=?, destacada=?, activa=?, 
+                titulo_en=?, resumen_en=?, contenido_en=?, categoria_en=?, autor_en=?, slug=?, updated_at=CURRENT_TIMESTAMP
             WHERE id=?
         ''', (
             titulo,
@@ -4474,6 +4484,7 @@ def admin_noticia_editar(noticia_id):
             imagen_y,
             request.form.get('categoria'),
             request.form.get('fecha'),
+            request.form.get('autor', '').strip() or None,
             request.form.get('enlace_externo'),
             int(request.form.get('orden', 0)),
             1 if request.form.get('destacada') == 'on' else 0,
@@ -4482,6 +4493,7 @@ def admin_noticia_editar(noticia_id):
             request.form.get('resumen_en', '').strip() or None,
             request.form.get('contenido_en', '').strip() or None,
             request.form.get('categoria_en', '').strip() or None,
+            request.form.get('autor_en', '').strip() or None,
             slug or None,
             noticia_id
         ))

@@ -127,7 +127,7 @@
             <img src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}" alt="{{ get_translated_field(noticia, 'titulo') }}" class="noticia-imagen" style="margin-bottom: 1.5rem;" />
             {% endif %}
             <p class="noticia-meta">
-              {% if noticia.fecha %}{{ noticia.fecha }}{% endif %}{% if noticia.fecha and get_translated_field(noticia, 'categoria') %} · {% endif %}{% if get_translated_field(noticia, 'categoria') %}{{ get_translated_field(noticia, 'categoria')|title }}{% endif %}
+              {% if noticia.fecha %}{{ noticia.fecha }}{% endif %}{% if noticia.fecha and (get_translated_field(noticia, 'categoria') or get_translated_field(noticia, 'autor')) %} · {% endif %}{% if get_translated_field(noticia, 'categoria') %}{{ get_translated_field(noticia, 'categoria')|title }}{% endif %}{% if get_translated_field(noticia, 'categoria') and get_translated_field(noticia, 'autor') %} · {% endif %}{% if get_translated_field(noticia, 'autor') %}{{ _('Por') }} {{ get_translated_field(noticia, 'autor') }}{% endif %}
             </p>
             <h1 class="noticia-titulo">{{ get_translated_field(noticia, 'titulo') }}</h1>
             <div class="noticia-contenido">
