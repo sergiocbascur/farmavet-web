@@ -68,6 +68,27 @@ def nl2br_filter(value):
     from markupsafe import Markup, escape
     return Markup(escape(str(value)).replace('\n', '<br>\n'))
 
+# Filtro para contenido rico (HTML sanitizado o texto plano con nl2br)
+@app.template_filter('rich_content')
+def rich_content_filter(value):
+    """Renderiza contenido: si tiene HTML, lo sanitiza; si no, aplica nl2br"""
+    if not value:
+        return ''
+    s = str(value).strip()
+    if not s:
+        return ''
+    # Si contiene etiquetas HTML, sanitizar
+    if '<' in s and '>' in s:
+        try:
+            import bleach
+            from markupsafe import Markup
+            allowed_tags = ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'img', 'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'blockquote', 'span', 'div']
+            allowed_attrs = {'a': ['href', 'title', 'target', 'rel'], 'img': ['src', 'alt', 'title', 'width', 'height', 'style']}
+            return Markup(bleach.clean(s, tags=allowed_tags, attributes=allowed_attrs, strip=False))
+        except Exception:
+            return nl2br_filter(s)
+    return nl2br_filter(s)
+
 # Filtro personalizado para Jinja2: parsear JSON
 @app.template_filter('from_json')
 def from_json_filter(value):

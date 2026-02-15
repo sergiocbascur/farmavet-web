@@ -2,6 +2,10 @@
 
 {% block title %}{% if noticia %}Editar{% else %}Nueva{% endif %} Noticia{% endblock %}
 
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="mb-0">
@@ -58,8 +62,8 @@
                 
                 <div class="col-12">
                     <label for="contenido" class="form-label">Contenido completo (opcional)</label>
-                    <textarea class="form-control" id="contenido" name="contenido" rows="4" oninput="updatePreview()">{{ noticia.contenido if noticia else '' }}</textarea>
-                    <small class="text-muted">Si completas este campo, aparecerá el enlace "Leer noticia completa" en las tarjetas de noticias, abriendo el texto completo en una nueva pestaña.</small>
+                    <textarea class="form-control" id="contenido" name="contenido" rows="8">{{ noticia.contenido if noticia else '' }}</textarea>
+                    <small class="text-muted">Editor tipo Word: negritas, listas, imágenes, enlaces. Si completas este campo, aparecerá "Leer noticia completa" en las tarjetas.</small>
                 </div>
                 
                 <!-- Sección de Traducción al Inglés -->
@@ -87,7 +91,7 @@
                 
                 <div class="col-12">
                     <label for="contenido_en" class="form-label">Contenido completo (English) <span class="text-muted">(opcional)</span></label>
-                    <textarea class="form-control" id="contenido_en" name="contenido_en" rows="4" 
+                    <textarea class="form-control" id="contenido_en" name="contenido_en" rows="8" 
                               placeholder="Full content in English">{{ noticia.contenido_en if noticia and noticia.contenido_en else '' }}</textarea>
                 </div>
                 
@@ -227,6 +231,9 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/lang/summernote-es-ES.min.js"></script>
 <script>
     let imageScale = 1;
     let imageX = 0;
@@ -282,9 +289,18 @@
         });
     }
     
+    function getContenidoValue() {
+        const el = document.getElementById('contenido');
+        if (!el) return '';
+        if (typeof $ !== 'undefined' && $(el).data('summernote')) {
+            return $(el).summernote('code') || '';
+        }
+        return el.value || '';
+    }
+    
     function updatePreview() {
         const titulo = document.getElementById('titulo').value || 'Título de la noticia';
-        const resumen = document.getElementById('resumen').value || document.getElementById('contenido').value || 'Resumen o contenido de la noticia aparecerá aquí...';
+        const resumen = document.getElementById('resumen').value || getContenidoValue().replace(/<[^>]*>/g, '') || 'Resumen o contenido de la noticia aparecerá aquí...';
         const fecha = document.getElementById('fecha').value || '';
         const categoria = document.getElementById('categoria').value || '';
         const imagen = document.getElementById('imagen').value || '';
@@ -529,8 +545,52 @@
         }
     }
     
+    // Inicializar Summernote (editor tipo Word)
+    function initSummernote() {
+        const uploadUrl = '{{ url_for("upload_file") }}';
+        function doImageUpload(files, targetEditor) {
+            for (let i = 0; i < files.length; i++) {
+                const formData = new FormData();
+                formData.append('file', files[i]);
+                formData.append('folder', 'noticias');
+                fetch(uploadUrl, { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.url) $(targetEditor).summernote('insertImage', data.url);
+                        else alert('Error al subir: ' + (data.error || 'Error desconocido'));
+                    })
+                    .catch(() => alert('Error al subir la imagen'));
+            }
+        }
+        const opts = {
+            height: 280,
+            lang: 'es-ES',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'codeview']]
+            ],
+            callbacks: {
+                onImageUpload: function(files) { doImageUpload(files, '#contenido'); },
+                onChange: function() { updatePreview(); }
+            }
+        };
+        $('#contenido').summernote(opts);
+        $('#contenido_en').summernote({
+            height: 280,
+            lang: 'es-ES',
+            toolbar: opts.toolbar,
+            callbacks: {
+                onImageUpload: function(files) { doImageUpload(files, '#contenido_en'); }
+            }
+        });
+    }
+    
     // Inicializar preview al cargar
     document.addEventListener('DOMContentLoaded', function() {
+        initSummernote();
         // Cargar valores guardados si existen
         const zoomField = document.getElementById('imagen_zoom');
         const xField = document.getElementById('imagen_x');
