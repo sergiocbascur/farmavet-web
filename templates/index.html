@@ -519,7 +519,16 @@
                     </span>
                     <h3 class="news-title">{{ get_translated_field(noticia, 'titulo', noticia.titulo) }}</h3>
                     <p>{{ get_translated_field(noticia, 'resumen', noticia.resumen) or get_translated_field(noticia, 'contenido', noticia.contenido) or '' }}</p>
-                    {% if noticia.enlace_externo %}
+                    {% if get_translated_field(noticia, 'contenido') or noticia.contenido %}
+                    <a
+                      class="news-link"
+                      href="{{ url_for('noticia_completa', noticia_id=noticia.id) }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ _('Leer noticia completa') }}
+                    </a>
+                    {% elif noticia.enlace_externo %}
                     <a
                       class="news-link"
                       href="{{ noticia.enlace_externo }}"
@@ -528,7 +537,7 @@
                     >
                       {{ _('Ver más') }}
                     </a>
-                    {% elif noticia.categoria == 'docencia' or 'educacion' in noticia.categoria|lower %}
+                    {% elif noticia.categoria == 'docencia' or 'educacion' in (noticia.categoria or '')|lower %}
                     <a
                       class="news-link"
                       href="{{ url_for('page', page='docencia') }}#educacion-continua"

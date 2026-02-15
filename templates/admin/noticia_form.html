@@ -57,9 +57,9 @@
                 </div>
                 
                 <div class="col-12">
-                    <label for="contenido" class="form-label">Contenido completo (opcional - para uso futuro)</label>
+                    <label for="contenido" class="form-label">Contenido completo (opcional)</label>
                     <textarea class="form-control" id="contenido" name="contenido" rows="4" oninput="updatePreview()">{{ noticia.contenido if noticia else '' }}</textarea>
-                    <small class="text-muted">Este campo no se muestra actualmente en el sitio. Se usa como fallback si no hay resumen.</small>
+                    <small class="text-muted">Si completas este campo, aparecerá el enlace "Leer noticia completa" en las tarjetas de noticias, abriendo el texto completo en una nueva pestaña.</small>
                 </div>
                 
                 <!-- Sección de Traducción al Inglés -->

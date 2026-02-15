@@ -153,6 +153,12 @@ msgstr "Mantente al día con los reconocimientos, publicaciones y actividades en
 msgid "Ver más"
 msgstr "Ver más"
 
+msgid "Leer noticia completa"
+msgstr "Leer noticia completa"
+
+msgid "Volver a noticias"
+msgstr "Volver a noticias"
+
 msgid "Ver programas"
 msgstr "Ver programas"
 

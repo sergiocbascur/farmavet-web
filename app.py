@@ -3,7 +3,7 @@ Backend Flask para panel de administración de FARMAVET Web
 Permite editar contenido sin tocar código HTML
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, send_file, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory, send_file, jsonify, abort
 from flask_babel import Babel, gettext as _, get_locale, lazy_gettext as _l
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -58,6 +58,15 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'es'
 app.config['BABEL_DEFAULT_TIMEZONE'] = 'America/Santiago'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 babel = Babel()
+
+# Filtro para convertir saltos de línea en <br> (contenido de noticias)
+@app.template_filter('nl2br')
+def nl2br_filter(value):
+    """Convierte \\n en <br> preservando el escape HTML para seguridad"""
+    if not value:
+        return ''
+    from markupsafe import Markup, escape
+    return Markup(escape(str(value)).replace('\n', '<br>\n'))
 
 # Filtro personalizado para Jinja2: parsear JSON
 @app.template_filter('from_json')
@@ -4262,6 +4271,23 @@ def uploaded_file(filename):
         return f"Error al servir archivo: {str(e)}<br><pre>{traceback.format_exc()}</pre>", 500
 
 # ============================================
+# NOTICIA COMPLETA (página pública)
+# ============================================
+
+@app.route('/noticia/<int:noticia_id>')
+@app.route('/noticia/<int:noticia_id>.html')
+def noticia_completa(noticia_id):
+    """Muestra el contenido completo de una noticia en una página con formato de la web"""
+    conn = get_db()
+    noticia = conn.execute('SELECT * FROM noticias WHERE id = ? AND activa = 1', (noticia_id,)).fetchone()
+    conn.close()
+    if not noticia:
+        abort(404)
+    lang = get_language()
+    locale = get_locale()
+    return render_template('noticia_completa.html', noticia=noticia, lang=lang, locale=locale)
+
+# ============================================
 # GESTIÓN DE NOTICIAS
 # ============================================
 
@@ -5776,7 +5802,17 @@ def sitemap():
         {'loc': '/faq.html', 'changefreq': 'monthly', 'priority': '0.8'},
         {'loc': '/contacto.html', 'changefreq': 'monthly', 'priority': '0.9'},
     ]
-    
+    # Añadir noticias con contenido completo
+    try:
+        conn = get_db()
+        noticias_con_contenido = conn.execute(
+            'SELECT id FROM noticias WHERE activa = 1 AND (contenido IS NOT NULL AND contenido != "" OR contenido_en IS NOT NULL AND contenido_en != "")'
+        ).fetchall()
+        conn.close()
+        for n in noticias_con_contenido:
+            pages.append({'loc': f'/noticia/{n["id"]}', 'changefreq': 'monthly', 'priority': '0.6'})
+    except Exception:
+        pass
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     

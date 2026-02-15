@@ -153,6 +153,12 @@ msgstr "Stay up to date with recognitions, publications, and activities in which
 msgid "Ver más"
 msgstr "Read more"
 
+msgid "Leer noticia completa"
+msgstr "Read full article"
+
+msgid "Volver a noticias"
+msgstr "Back to news"
+
 msgid "Ver programas"
 msgstr "View programs"
 

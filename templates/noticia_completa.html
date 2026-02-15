@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="{{ locale|default('es') }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover" />
+    <title>{{ get_translated_field(noticia, 'titulo') }} | FARMAVET - {{ _('Universidad de Chile') }}</title>
+    <meta
+      name="description"
+      content="{{ (get_translated_field(noticia, 'resumen') or get_translated_field(noticia, 'contenido') or '')[:160] }}"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="{{ request.url }}" />
+    {% if noticia.imagen %}
+    <meta property="og:image" content="{{ noticia.imagen if noticia.imagen.startswith('http') else request.url_root.rstrip('/') + noticia.imagen }}" />
+    {% endif %}
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ get_translated_field(noticia, 'titulo') }} | FARMAVET" />
+    <meta property="og:description" content="{{ (get_translated_field(noticia, 'resumen') or get_translated_field(noticia, 'contenido') or '')[:200] }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Open+Sans:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('assets', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" type="image/png" href="{{ url_for('logos', filename='LOGO FARMAVET.png') }}" />
+    <style>
+      .noticia-article { max-width: 720px; margin: 0 auto; }
+      .noticia-article .noticia-imagen { width: 100%; max-height: 400px; object-fit: contain; background: #f5f5f5; border-radius: 12px; }
+      .noticia-article .noticia-meta { font-size: 0.9rem; color: var(--color-muted); margin-bottom: 0.5rem; }
+      .noticia-article .noticia-titulo { font-family: var(--font-heading); font-size: 1.75rem; font-weight: 700; color: var(--color-primary); margin-bottom: 1rem; line-height: 1.3; }
+      .noticia-article .noticia-contenido { font-size: 1.05rem; line-height: 1.75; color: #333; }
+      .noticia-article .noticia-contenido p { margin-bottom: 1rem; }
+      .noticia-article .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--color-primary); font-weight: 600; margin-bottom: 1.5rem; text-decoration: none; }
+      .noticia-article .back-link:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body data-page="noticias">
+    <header class="site-header" aria-label="Cabecera principal">
+      <div class="header-actions">
+        <a href="{{ url_for('set_language', lang='en' if (lang|default('es')) == 'es' else 'es') }}" class="lang-switcher" aria-label="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}" title="{{ 'Español' if (lang|default('es')) == 'en' else 'English' }}">
+          <span class="lang-switcher-text">{{ 'ES' if (lang|default('es')) == 'en' else 'EN' }}</span>
+        </a>
+        <a href="{{ url_for('public_login') }}" class="login-switcher" aria-label="{{ _('Iniciar sesión') }}" title="{{ _('Iniciar sesión') }}">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </div>
+      <div class="container nav-container">
+        <nav class="main-nav" aria-label="Navegación principal">
+          <button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="nav-links" aria-label="{{ _('Menú') }}">
+            <span></span>
+          </button>
+          <a class="logo-group" href="{{ url_for('index') }}" aria-label="FARMAVET - {{ _('Universidad de Chile') }}">
+            <img src="{{ url_for('static', filename='logos/LOGO_FARMAVET_sf.png') }}" alt="Logotipo FARMAVET {{ _('Universidad de Chile') }}" />
+            <span class="sr-only">FARMAVET - {{ _('Universidad de Chile') }}</span>
+          </a>
+          <ul class="nav-links" id="nav-links" data-nav-links>
+            <li><a href="{{ url_for('index') }}" data-nav-link>{{ _('Inicio') }}</a></li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>{{ _('Quiénes Somos') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='quienes-somos') }}" data-nav-link>FARMAVET</a></li>
+                <li><a href="{{ url_for('page', page='equipo') }}" data-nav-link>{{ _('Equipo') }}</a></li>
+              </ul>
+            </li>
+            <li class="nav-item has-dropdown" aria-expanded="false">
+              <a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Servicios') }}</a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('page', page='servicios') }}" data-nav-link>{{ _('Análisis') }}</a></li>
+                <li><a href="{{ url_for('page', page='investigacion') }}" data-nav-link>{{ _('Investigación') }}</a></li>
+                <li><a href="{{ url_for('page', page='docencia') }}" data-nav-link>{{ _('Formación') }}</a></li>
+              </ul>
+            </li>
+            <li><a href="{{ url_for('page', page='casa-omsa') }}" data-nav-link>CASA-OMSA</a></li>
+            <li><a href="{{ url_for('page', page='noticias') }}" data-nav-link>{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='faq') }}" data-nav-link>{{ _('FAQ') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-inline" data-nav-link>{{ _('Contacto') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}" class="cta-button" data-nav-link>{{ _('Solicitar Análisis') }}</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="section light">
+        <div class="container">
+          <article class="noticia-article">
+            <a href="{{ url_for('page', page='noticias') }}" class="back-link">
+              <i class="bi bi-arrow-left"></i> {{ _('Volver a noticias') }}
+            </a>
+            {% if noticia.imagen %}
+            <div style="margin-bottom: 1.5rem; border-radius: 12px; overflow: hidden; background: #f5f5f5;">
+              <img
+                src="{{ noticia.imagen }}"
+                alt="{{ get_translated_field(noticia, 'titulo') }}"
+                class="noticia-imagen"
+                style="{% if noticia.imagen_zoom or noticia.imagen_x or noticia.imagen_y %} transform: scale({{ noticia.imagen_zoom or 1.0 }}) translate({{ noticia.imagen_x or 0.0 }}px, {{ noticia.imagen_y or 0.0 }}px); transform-origin: center center;{% endif %}"
+              />
+            </div>
+            {% else %}
+            <img src="{{ url_for('assets', filename='images/noticias/placeholder-noticia.svg') }}" alt="{{ get_translated_field(noticia, 'titulo') }}" class="noticia-imagen" style="margin-bottom: 1.5rem;" />
+            {% endif %}
+            <p class="noticia-meta">
+              {% if noticia.fecha %}{{ noticia.fecha }}{% endif %}{% if noticia.fecha and get_translated_field(noticia, 'categoria') %} · {% endif %}{% if get_translated_field(noticia, 'categoria') %}{{ get_translated_field(noticia, 'categoria')|title }}{% endif %}
+            </p>
+            <h1 class="noticia-titulo">{{ get_translated_field(noticia, 'titulo') }}</h1>
+            <div class="noticia-contenido">
+              {{ (get_translated_field(noticia, 'contenido') or noticia.contenido or get_translated_field(noticia, 'resumen') or noticia.resumen or '')|nl2br }}
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h3 class="footer-title">FARMAVET</h3>
+          <p>
+            {{ _('Laboratorio de Farmacología Veterinaria, Universidad de Chile. Comunicamos avances, logros y actividades que fortalecen la inocuidad alimentaria.') }}
+          </p>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Secciones') }}</h3>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('page', page='noticias') }}">{{ _('Noticias') }}</a></li>
+            <li><a href="{{ url_for('page', page='contacto') }}">{{ _('Contacto') }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Contacto') }}</h3>
+          <ul class="footer-links">
+            <li>{{ _('Av. Santa Rosa 11735, La Pintana, Santiago') }}</li>
+            <li>{{ _('Teléfono') }}: +56 2 2978 0358 / +56 2 2978 5580</li>
+            <li>{{ _('Email') }}: farmavet@uchile.cl</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer-title">{{ _('Acreditaciones') }}</h3>
+          <ul class="footer-links">
+            <li class="badge">ISO 17025 - INN</li>
+            <li class="badge">OMSA</li>
+            <li class="badge">SERNAPESCA</li>
+            <li class="badge">SAG</li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-meta">© 2025 FARMAVET - {{ _('Universidad de Chile') }}. {{ _('Todos los derechos reservados.') }} | Desarrollado por alecft | <a href="https://uchile.cl/informacion-general/politica-de-privacidad-de-la-informacion-y-datos-personales" target="_blank" rel="noopener noreferrer">{{ _('Política de Privacidad') }}</a></div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+    <script src="{{ url_for('assets', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
